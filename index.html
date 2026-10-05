@@ -291,7 +291,9 @@ function supaFetch(endpoint, method, body) {
   return fetch(SUPA_URL + '/rest/v1/' + endpoint, opts)
     .then(function(r) {
       if (!r.ok) throw new Error('HTTP ' + r.status);
-      var text = r.text();
+      return r.text();              // ← возвращаем Promise
+    })
+    .then(function(text) {          // ← ждём строку во втором then
       return text ? JSON.parse(text) : null;
     });
 }
