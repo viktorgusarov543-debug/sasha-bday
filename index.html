@@ -991,50 +991,70 @@ function doRegister(){
   if(formData.shash.length===0){document.getElementById('g-shash').classList.add('err');showToast('🍓 Выберите шашлык!');return;}
   if(!formData.night){document.getElementById('g-night').classList.add('err');showToast('🍓 Выберите ночевку!');return;}
 
-  if(editingUserId){
-    // Сохраняем старые данные ДО обновления
-    var oldUser=null;
-    for(var i=0;i<allUsers.length;i++){
-      if(allUsers[i].id===editingUserId){oldUser=allUsers[i];break;}
-    }
-    var oldTransport = oldUser ? oldUser.transport : null;
-    var oldFromPlace = oldUser ? oldUser.from_place : null;
+  // Сохраняем значения ДО любых изменений
+  var newTrans = formData.trans;
+  var newFrom = fromPlace;
+  var isEditing = !!editingUserId;
+  var editId = editingUserId;
 
-    var updateData={identifier:id,pwd:pwd,probability:formData.prob,transport:formData.trans,from_place:fromPlace,shashlik:formData.shash,help:formData.help,overnight:formData.night};
-    supaFetch('users?id=eq.'+editingUserId,'PATCH',updateData).then(function(){
+  // Для редактирования запоминаем старый транспорт
+  var oldTransport = null;
+  var oldFromPlace = null;
+  if(isEditing){
+    for(var i=0;i<allUsers.length;i++){
+      if(allUsers[i].id===editId){
+        oldTransport=allUsers[i].transport;
+        oldFromPlace=allUsers[i].from_place;
+        break;
+      }
+    }
+  }
+
+  if(isEditing){
+    var updateData={identifier:id,pwd:pwd,probability:formData.prob,transport:newTrans,from_place:newFrom,shashlik:formData.shash,help:formData.help,overnight:formData.night};
+    supaFetch('users?id=eq.'+editId,'PATCH',updateData).then(function(){
       console.log('✅ PATCH успешен');
+
+      // Обновляем allUsers
       for(var i=0;i<allUsers.length;i++){
-        if(allUsers[i].id===editingUserId){
+        if(allUsers[i].id===editId){
           allUsers[i].identifier=id;allUsers[i].pwd=pwd;allUsers[i].probability=formData.prob;
-          allUsers[i].transport=formData.trans;allUsers[i].from_place=fromPlace;
-          allUsers[i].shashlik=formData.shash;allUsers[i].help=formData.help;allUsers[i].overnight=formData.night;break;
+          allUsers[i].transport=newTrans;allUsers[i].from_place=newFrom;
+          allUsers[i].shashlik=formData.shash;allUsers[i].help=formData.help;allUsers[i].overnight=formData.night;
+          break;
         }
       }
-      if(currentUser&&currentUser.id===editingUserId){
-        Object.assign(currentUser,updateData);
+
+      // Обновляем currentUser
+      if(currentUser&&currentUser.id===editId){
+        currentUser.identifier=id;currentUser.pwd=pwd;currentUser.probability=formData.prob;
+        currentUser.transport=newTrans;currentUser.from_place=newFrom;
+        currentUser.shashlik=formData.shash;currentUser.help=formData.help;currentUser.overnight=formData.night;
         localStorage.setItem('sasha_cur',JSON.stringify(currentUser));
       }
+
       closeM('m-auth');updateHeader();showToast('✅ Анкета обновлена!');
       editingUserId=null;
       resetForm();
 
-      // Проверяем смену транспорта и создаём авто-новость
-      if(oldTransport !== formData.trans){
-        if(formData.trans === 'Доберусь сам'){
-          createDriverNews(currentUser, fromPlace);
-        } else if(formData.trans === 'Упаду на хвост'){
+      // Проверяем смену транспорта ПОСЛЕ обновления данных
+      console.log('Старый транспорт:', oldTransport, '→ Новый:', newTrans);
+      if(oldTransport !== newTrans){
+        if(newTrans === 'Доберусь сам'){
+          console.log('→ Создаём новость Доберусь сам');
+          createDriverNews(currentUser, newFrom);
+        } else if(newTrans === 'Упаду на хвост'){
+          console.log('→ Создаём новость Упаду на хвост');
           createAutoNews(currentUser);
         }
-      } else if(formData.trans === 'Доберусь сам' && oldFromPlace !== fromPlace){
-        // Если адрес изменился — тоже обновим новость
-        createDriverNews(currentUser, fromPlace);
+      } else if(newTrans === 'Доберусь сам' && oldFromPlace !== newFrom){
+        console.log('→ Адрес изменился, обновляем новость');
+        createDriverNews(currentUser, newFrom);
       }
     }).catch(function(e){console.error('❌ PATCH ошибка:',e);showToast('Ошибка: '+e.message);});
   }else{
     var newId='user_'+Date.now();
-    var newUserData={id:newId,identifier:id,pwd:pwd,probability:formData.prob,transport:formData.trans,from_place:fromPlace,shashlik:formData.shash,help:formData.help,overnight:formData.night,points:0};
-    var wasTailRider = formData.trans === 'Упаду на хвост';
-    var wasDriver = formData.trans === 'Доберусь сам';
+    var newUserData={id:newId,identifier:id,pwd:pwd,probability:formData.prob,transport:newTrans,from_place:newFrom,shashlik:formData.shash,help:formData.help,overnight:formData.night,points:0};
 
     supaFetch('users','POST',newUserData).then(function(data){
       console.log('✅ POST успешен');
@@ -1046,8 +1066,8 @@ function doRegister(){
       closeM('m-auth');
       updateHeader();
       showToast('🎉 Добро пожаловать, '+id+'!');
-      if(wasTailRider) createAutoNews(newUserData);
-      if(wasDriver) createDriverNews(newUserData, fromPlace);
+      if(newTrans==='Упаду на хвост') createAutoNews(newUserData);
+      if(newTrans==='Доберусь сам') createDriverNews(newUserData, newFrom);
       resetForm();
     }).catch(function(e){
       console.error('❌ POST ошибка:',e);
