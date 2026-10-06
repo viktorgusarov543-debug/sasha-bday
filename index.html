@@ -111,7 +111,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .news-item.auto{border-left:3px solid var(--ac2);background:rgba(255,107,170,.05)}
 .ni-date{font-size:.7rem;color:var(--ac);font-weight:600;text-transform:uppercase;margin-bottom:3px}
 .ni-title{font-weight:700;font-size:.9rem;color:#fff;margin-bottom:3px}
-.ni-text{font-size:.82rem;color:var(--td);line-height:1.5}
+.ni-text{font-size:.82rem;color:var(--td);line-height:1.5;white-space:pre-line}
 
 .aview,.rview{display:none}
 .aview.active,.rview.active{display:block}
@@ -929,13 +929,31 @@ function resetForm(){
 }
 
 // ===== АВТО-НОВОСТЬ С ОТПРАВКОЙ В ТЕЛЕГРАМ =====
+// ===== АВТО-НОВОСТЬ С ОТПРАВКОЙ В ТЕЛЕГРАМ =====
 function createAutoNews(user){
   if(!user) return;
   var today=new Date();
   var months=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
   var dateStr=today.getDate()+' '+months[today.getMonth()];
   var title='🎒 Упаду на хвост';
-  var text=user.identifier;
+
+  // Собираем список доступных водителей
+  var drivers=allUsers.filter(function(u){
+    if(u.id===user.id) return false; // исключаем самого регистрирующегося
+    return u.transport==='Доберусь сам' && u.from_place && u.from_place.trim();
+  });
+
+  var driversText='';
+  if(drivers.length>0){
+    driversText='\n\nЕсть кому подумать:\n';
+    for(var i=0;i<drivers.length;i++){
+      driversText+='🚗 '+drivers[i].identifier+' — '+drivers[i].from_place+'\n';
+    }
+  }else{
+    driversText='\n\nПока никто не указал адрес старта.';
+  }
+
+  var text=user.identifier+driversText;
 
   supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
     allNews.unshift({date:dateStr,title:title,text:text});
@@ -943,7 +961,7 @@ function createAutoNews(user){
     console.log('✅ Авто-новость создана');
 
     // Отправляем в телеграм
-    sendToTelegram('<b>🍓 Ягодный ноябрь</b>\n\n🎒 <b>'+user.identifier+'</b> хочет упасть на хвост! Кто едет из того же района — напишите в телеграме.');
+    sendToTelegram('<b>🍓 Ягодный ноябрь</b>\n\n🎒 <b>'+user.identifier+'</b> хочет упасть на хвост!\n'+driversText);
   }).catch(function(e){console.error('❌ Ошибка авто-новости:',e);});
 }
 
