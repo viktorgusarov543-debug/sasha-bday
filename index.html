@@ -12,7 +12,24 @@ html{scroll-behavior:smooth}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;line-height:1.6}
 
 .header{position:sticky;top:0;z-index:900;background:rgba(13,5,17,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,45,123,.2);padding:16px 20px}
-.h-title{text-align:center;font-size:1.5rem;font-weight:900;margin-bottom:12px;background:linear-gradient(135deg,#ff2d7b,#ff6baa,#c850c0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.h-title{text-align:center;font-size:1.5rem;font-weight:900;margin-bottom:10px;background:linear-gradient(135deg,#ff2d7b,#ff6baa,#c850c0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* ===== СЧЁТЧИК ДНЕЙ ===== */
+.h-countdown{
+  text-align:center;margin-bottom:12px;padding:8px 14px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,45,123,.15);
+  border-radius:14px;font-size:.9rem;color:var(--td);
+}
+.h-countdown .count-num{
+  font-size:1.8rem;font-weight:900;margin-right:6px;
+  background:linear-gradient(135deg,#ff2d7b,#ff6baa,#c850c0);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  display:inline-block;line-height:1;vertical-align:middle;
+}
+.h-countdown .count-word{color:var(--t);font-weight:500}
+.h-countdown.today{border-color:var(--ac);background:rgba(255,45,123,.08)}
+.h-countdown.today .count-num{font-size:1.5rem}
+
 .h-user{display:flex;justify-content:center;margin-bottom:10px}
 .h-chip{display:flex;align-items:center;gap:8px;padding:6px 16px;border-radius:30px;background:rgba(255,45,123,.1);border:1px solid rgba(255,45,123,.3);cursor:pointer;transition:all .3s;font-size:.85rem}
 .h-chip:hover{background:rgba(255,45,123,.2)}
@@ -26,7 +43,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
   100%{transform:scale(1);text-shadow:none}
 }
 .h-nav{display:flex;justify-content:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-.h-btn{padding:8px 18px;border-radius:30px;font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .3s;border:none;text-decoration:none;display:inline-block}
+.h-btn{padding:8px 18px;border-radius:30px;font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .3s;border:none;text-decoration:none}
 .h-btn-auth{background:transparent;border:1px solid var(--ac);color:var(--ac)}
 .h-btn-auth:hover{background:var(--ac);color:#fff}
 .h-btn-wish{background:linear-gradient(135deg,var(--ac3),#6c2bd9);color:#fff}
@@ -133,37 +150,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .bsubmit{width:100%;padding:15px;background:linear-gradient(135deg,#ff2d7b,#c850c0);color:#fff;border:none;border-radius:14px;font-family:inherit;font-size:1.05rem;font-weight:700;cursor:pointer;margin-top:10px;transition:all .3s}
 .bsubmit:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(255,45,123,.4)}
 
-/* ===== СПИСОК ВОДИТЕЛЕЙ ===== */
-.drivers-block{
-  margin-top:10px;padding:14px;
-  background:rgba(255,45,123,.05);
-  border:1px solid rgba(255,45,123,.2);
-  border-radius:var(--rs);
-  animation:driversIn .3s ease;
-}
-@keyframes driversIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
-.drivers-title{
-  font-size:.8rem;color:var(--ac2);font-weight:700;
-  margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;
-}
-.drivers-list{display:flex;flex-direction:column;gap:6px}
-.driver-card{
-  padding:10px 14px;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:10px;
-  transition:all .3s;
-}
-.driver-card:hover{background:rgba(255,45,123,.08);border-color:var(--ac2)}
-.driver-name{font-weight:600;color:#fff;font-size:.88rem;margin-bottom:3px}
-.driver-from{color:var(--td);font-size:.8rem}
-.driver-from b{color:var(--t);font-weight:500}
-.drivers-empty{
-  padding:12px;text-align:center;
-  color:var(--td);font-size:.82rem;
-  background:rgba(255,255,255,.03);border-radius:8px;
-}
-
 .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .profile-item{padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:var(--rs)}
 .profile-label{font-size:.72rem;color:var(--td);text-transform:uppercase;margin-bottom:3px}
@@ -201,10 +187,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 
 <header class="header" id="mainHeader">
   <div class="h-title">🍓 Ягодный ноябрь</div>
+
+  <!-- СЧЁТЧИК ДНЕЙ -->
+  <div class="h-countdown" id="countdown">Загрузка...</div>
+
   <div class="h-user" id="hUser"></div>
-  <div class="h-nav" id="hNav">
-    <a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>
-  </div>
+  <div class="h-nav" id="hNav"></div>
   <div class="h-info">
     <div class="h-row"><span class="ico">📅</span> <b>14 ноября</b>&nbsp;·&nbsp;<span class="ico">🕐</span> <b>15:00 СБ → 17:00 ВС</b></div>
     <div class="h-row"><span class="ico">👗</span> Дресс-код: <b>ягодный</b></div>
@@ -266,28 +254,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
           <button type="button" class="opt-btn" data-f="prob" data-v="Меня не будет">Меня не будет</button>
         </div>
       </div>
-      <div class="fg">
-        <label class="fl">Как добираешься</label>
+      <div class="fg"><label class="fl">Как добираешься</label>
         <div class="opt-grid" id="g-trans">
           <button type="button" class="opt-btn" data-f="trans" data-v="Доберусь сам">🚗 Доберусь сам</button>
           <button type="button" class="opt-btn" data-f="trans" data-v="Упаду на хвост">🎒 Упаду на хвост</button>
         </div>
       </div>
-
-      <!-- Поле "Откуда" (для "Доберусь сам") -->
       <div class="fg hidden" id="fg-from">
         <label class="fl">Откуда поедешь?</label>
         <input class="fi" type="text" id="f-from" placeholder="Город, район или адрес">
       </div>
-
-      <!-- Блок со списком водителей (для "Упаду на хвост") -->
-      <div class="fg hidden" id="fg-tailriders">
-        <div class="drivers-block">
-          <div class="drivers-title">🚗 Кто уже едет — можно списаться в телеграме:</div>
-          <div class="drivers-list" id="driversList"></div>
-        </div>
-      </div>
-
       <div class="fg"><label class="fl">Какой шашлык любишь (можно несколько)</label>
         <div class="opt-grid" id="g-shash">
           <button type="button" class="opt-btn" data-f="shash" data-v="Свинина">🥩 Свинина</button>
@@ -308,7 +284,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
   </div>
 </div>
 
-<div class="moverlay" id="m-profile"><div class="mbox"><button class="mclose" onclick="closeM('m-profile')">✕</button><div class="mtitle">👤 Моя анкета</div><div class="profile-grid" id="profileGrid"></div><button class="bback" style="margin-top:16px" onclick="closeM('m-profile');openAuth()">✏️ Редактировать</button></div></div>
+<div class="moverlay" id="m-profile">
+  <div class="mbox">
+    <button class="mclose" onclick="closeM('m-profile')">✕</button>
+    <div class="mtitle">👤 Моя анкета</div>
+    <div class="profile-grid" id="profileGrid"></div>
+    <button class="bback" style="margin-top:16px" onclick="openEditProfile()">✏️ Редактировать</button>
+  </div>
+</div>
 
 <div class="moverlay" id="m-wish">
   <div class="mbox">
@@ -332,7 +315,7 @@ var SUPA_URL = 'https://fkmdpikxyttwyfyoyivm.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrbWRwaWt4eXR0d3lmeW95aXZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExODY4NDksImV4cCI6MjEwNjc2Mjg0OX0.5knt9zOTk40cNnMN_F-Xgsyg52e0klya3FaDhDzceIQ';
 
 var TG_BOT_TOKEN = '8828283274:AAFKjiAA95Ye9J4nXFTQTHEtq2ZCVjKW4QE';
-var TG_CHAT_ID = '-1004293825262';
+var TG_CHAT_ID = ''; // Вставь сюда chat_id своей группы
 
 function supaFetch(endpoint, method, body) {
   var opts = {
@@ -355,6 +338,7 @@ function supaFetch(endpoint, method, body) {
     });
 }
 
+// ===== ЗВАНИЯ =====
 function getRank(p){
   if(p>=60) return 'Забродивший 🍷';
   if(p>=45) return 'Ягодка опять 🫐';
@@ -363,6 +347,44 @@ function getRank(p){
   return 'Незрелый 🌱';
 }
 
+// ===== СЧЁТЧИК ДНЕЙ =====
+function daysUntil(dateStr){
+  var target = new Date(dateStr + 'T15:00:00'); // 15:00 местного времени
+  var now = new Date();
+  // Сравниваем только даты (без времени)
+  var targetDay = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+  var nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  var diff = targetDay - nowDay;
+  return Math.round(diff / (1000 * 60 * 60 * 24));
+}
+
+function pluralize(n, one, few, many){
+  var abs = Math.abs(n) % 100;
+  var n1 = abs % 10;
+  if(abs > 10 && abs < 20) return many;
+  if(n1 > 1 && n1 < 5) return few;
+  if(n1 === 1) return one;
+  return many;
+}
+
+function updateCountdown(){
+  var days = daysUntil('2026-11-14');
+  var el = document.getElementById('countdown');
+  if(!el) return;
+  if(days > 0){
+    var word = pluralize(days, 'день', 'дня', 'дней');
+    el.innerHTML = 'До праздника <span class="count-num">'+days+'</span> <span class="count-word">'+word+'</span>';
+    el.classList.remove('today');
+  } else if(days === 0){
+    el.innerHTML = '<span class="count-num">🎉</span> <span class="count-word">Сегодня праздник!</span>';
+    el.classList.add('today');
+  } else {
+    el.innerHTML = '<span class="count-num">🍓</span> <span class="count-word">Праздник прошёл, но ягоды вечны</span>';
+    el.classList.add('today');
+  }
+}
+
+// ===== ВИШЛИСТ (БЕЗ ДАЧИ) =====
 var wishData=[
   {id:2,title:"Сумка для смартфона Guess",link:"https://www.rendez-vous.ru/catalog/bags/sumka-dlya-smartfona/guess_pw7585p6426_temno_bezhevyy-5160013/",special:false},
   {id:3,title:"Ноутбук (а главное - помощь в выборе)))",link:"",special:false},
@@ -409,44 +431,6 @@ function isNewsDuplicate(date,title,text){
     if(n.title===title && n.text===text && (!date || n.date===date)) return true;
   }
   return false;
-}
-
-// ===== СПИСОК ВОДИТЕЛЕЙ =====
-function renderDriversList(){
-  var list=document.getElementById('driversList');
-  if(!list) return;
-
-  // Фильтруем: transport='Доберусь сам' + есть from_place + не текущий пользователь/редактируемый
-  var drivers=allUsers.filter(function(u){
-    if(editingUserId && u.id===editingUserId) return false;
-    if(currentUser && u.id===currentUser.id) return false;
-    return u.transport==='Доберусь сам' && u.from_place && u.from_place.trim();
-  });
-
-  if(drivers.length===0){
-    list.innerHTML='<div class="drivers-empty">Пока никто не указал адрес старта.<br>Скорее всего списаться можно будет позже!</div>';
-    return;
-  }
-
-  var html='';
-  for(var i=0;i<drivers.length;i++){
-    var d=drivers[i];
-    html+='<div class="driver-card">';
-    html+='<div class="driver-name">🚗 '+escapeHtml(d.identifier)+'</div>';
-    html+='<div class="driver-from">📍 <b>'+escapeHtml(d.from_place)+'</b></div>';
-    html+='</div>';
-  }
-  list.innerHTML=html;
-}
-
-function escapeHtml(str){
-  if(!str) return '';
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#039;');
 }
 
 function showLevelUp(newRank){
@@ -511,12 +495,13 @@ function pulsePoints(){
 }
 
 function updateHeader(){
+  updateCountdown(); // обновляем счётчик при каждом изменении
   var userSlot=document.getElementById('hUser');
   var navSlot=document.getElementById('hNav');
   var unread=getUnread();
   if(currentUser){
     prevRank=getRank(currentUser.points||0);
-    userSlot.innerHTML='<div class="h-chip" onclick="openProfile()"><span class="h-chip-name">'+escapeHtml(currentUser.identifier)+'</span><span class="h-chip-rank">'+getRank(currentUser.points||0)+'</span><span class="h-chip-pts" id="pts-counter">🍓 '+(currentUser.points||0)+'</span></div>';
+    userSlot.innerHTML='<div class="h-chip" onclick="openProfile()"><span class="h-chip-name">'+currentUser.identifier+'</span><span class="h-chip-rank">'+getRank(currentUser.points||0)+'</span><span class="h-chip-pts" id="pts-counter">🍓 '+(currentUser.points||0)+'</span></div>';
     navSlot.innerHTML='<button class="h-btn h-btn-auth" onclick="logout()">Выйти</button><button class="h-btn h-btn-wish" onclick="openWish()">🎁 Wish-лист</button><a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
   }else{
     userSlot.innerHTML='';
@@ -534,15 +519,16 @@ function openNews(){
     var unread=i<allNews.length-seen;
     var isAuto=(allNews[i].title||'').indexOf('🎒 Упаду на хвост')===0;
     html+='<div class="news-item'+(unread?' unread':'')+(isAuto?' auto':'')+'">';
-    html+='<div class="ni-date">'+escapeHtml(allNews[i].date||'')+'</div>';
-    html+='<div class="ni-title">'+escapeHtml(allNews[i].title||'')+'</div>';
-    html+='<div class="ni-text">'+escapeHtml(allNews[i].text||'')+'</div></div>';
+    html+='<div class="ni-date">'+(allNews[i].date||'')+'</div>';
+    html+='<div class="ni-title">'+(allNews[i].title||'')+'</div>';
+    html+='<div class="ni-text">'+(allNews[i].text||'')+'</div></div>';
   }
   document.getElementById('newsList').innerHTML=html;
   localStorage.setItem('sasha_news_seen',String(allNews.length));
   updateHeader();openM('m-news');
 }
 
+// ===== ОТЧЁТ (БЕЗ ПОДАРКОВ) =====
 function generateReport(){
   var text='=== ОТЧЁТ ПО ГОСТЯМ ===\nВсего зарегистрировано: '+allUsers.length+'\n\n';
   text+='--- КТО ПРИЕДЕТ ---\n';
@@ -581,14 +567,7 @@ function generateReport(){
   for(var j=0;j<tailRiders.length;j++){
     text+='  • '+tailRiders[j].identifier+'\n';
   }
-  text+='\n--- ПОДАРКИ ---\n';
-  for(var i=0;i<allReserves.length;i++){
-    var gift=null;
-    for(var j=0;j<wishData.length;j++){if(wishData[j].id===allReserves[i].gift_id){gift=wishData[j];break;}}
-    var user=null;
-    for(var j=0;j<allUsers.length;j++){if(allUsers[j].id===allReserves[i].user_id){user=allUsers[j];break;}}
-    text+=(gift?gift.title:'?')+' → '+(user?user.identifier:'?')+'\n';
-  }
+  // Подарки НЕ показываются
   return text;
 }
 function showReport(){
@@ -603,14 +582,19 @@ function closeReport(){
   document.getElementById('reportPage').classList.remove('active');
 }
 
+// ===== МОДАЛКИ =====
 function openM(id){var el=document.getElementById(id);if(el){el.classList.add('active');document.body.style.overflow='hidden';}}
 function closeM(id){
   var el=document.getElementById(id);
   if(el){
     el.classList.remove('active');
-    if(!document.querySelector('.moverlay.active'))document.body.style.overflow='';
+    var anyOpen=document.querySelector('.moverlay.active');
+    if(!anyOpen){
+      document.body.style.overflow='';
+      // Сбрасываем форму только если закрываем m-auth и НЕ в режиме редактирования
+      if(id==='m-auth' && !editingUserId) resetForm();
+    }
   }
-  if(id==='m-auth') resetForm();
 }
 var ov=document.querySelectorAll('.moverlay');
 for(var i=0;i<ov.length;i++){ov[i].addEventListener('click',function(e){if(e.target===this)closeM(this.id);});}
@@ -631,23 +615,67 @@ function showReg(){
 function openWish(){if(!currentUser){showToast('Сначала авторизуйтесь!');return;}renderWish();openM('m-wish');}
 function openProfile(){if(!currentUser)return;renderProfile();openM('m-profile');}
 
+// ===== РЕДАКТИРОВАНИЕ ИЗ ПРОФИЛЯ (ИСПРАВЛЕНО!) =====
+function openEditProfile(){
+  if(!currentUser) return;
+
+  // Заполняем форму данными текущего пользователя
+  editingUserId = currentUser.id;
+  document.getElementById('f-id').value = currentUser.identifier;
+  document.getElementById('f-pwd').value = currentUser.pwd || '';
+  formData = {
+    prob: currentUser.probability,
+    trans: currentUser.transport,
+    from: currentUser.from_place || '',
+    shash: currentUser.shashlik || [],
+    help: currentUser.help || false,
+    night: currentUser.overnight
+  };
+  document.getElementById('f-from').value = formData.from;
+  document.getElementById('f-help').checked = formData.help;
+
+  // Сбрасываем все кнопки-опции и устанавливаем выбранные
+  var btns = document.querySelectorAll('.opt-btn');
+  for(var i=0;i<btns.length;i++){
+    var b=btns[i],f=b.getAttribute('data-f'),v=b.getAttribute('data-v');
+    b.classList.remove('selected');
+    if(f==='prob'&&v===formData.prob) b.classList.add('selected');
+    if(f==='trans'&&v===formData.trans) b.classList.add('selected');
+    if(f==='night'&&v===formData.night) b.classList.add('selected');
+    if(f==='shash'&&formData.shash.indexOf(v)!==-1) b.classList.add('selected');
+  }
+
+  // Показать/скрыть поле "откуда"
+  document.getElementById('fg-from').classList.toggle('hidden', formData.trans !== 'Доберусь сам');
+
+  // Переключаемся на экран регистрации с заполненными данными
+  document.getElementById('aview').classList.remove('active');
+  document.getElementById('rview').classList.add('active');
+  document.getElementById('regTitle').textContent = '✏️ Редактирование анкеты';
+
+  // Закрываем профиль и открываем модалку авторизации (с формой редактирования)
+  document.getElementById('m-profile').classList.remove('active');
+  document.getElementById('m-auth').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
 function renderProfile(){
   var grid=document.getElementById('profileGrid');
   var myReserve=getReserveByUser(currentUser.id);
   var myGift=null;
   if(myReserve){for(var i=0;i<wishData.length;i++){if(wishData[i].id===myReserve.gift_id){myGift=wishData[i];break;}}}
   var html='';
-  html+='<div class="profile-item"><div class="profile-label">Идентификатор</div><div class="profile-value">'+escapeHtml(currentUser.identifier)+'</div></div>';
+  html+='<div class="profile-item"><div class="profile-label">Идентификатор</div><div class="profile-value">'+currentUser.identifier+'</div></div>';
   html+='<div class="profile-item"><div class="profile-label">Звание</div><div class="profile-value accent">'+getRank(currentUser.points||0)+'</div></div>';
   html+='<div class="profile-item"><div class="profile-label">Ягод поймано</div><div class="profile-value accent">🍓 '+(currentUser.points||0)+'</div></div>';
-  html+='<div class="profile-item"><div class="profile-label">Подарок</div><div class="profile-value">'+(myGift?escapeHtml(myGift.title):'Не выбран')+'</div></div>';
-  html+='<div class="profile-item"><div class="profile-label">Приезд</div><div class="profile-value">'+escapeHtml(currentUser.probability)+'</div></div>';
-  html+='<div class="profile-item"><div class="profile-label">Транспорт</div><div class="profile-value">'+escapeHtml(currentUser.transport)+'</div></div>';
+  html+='<div class="profile-item"><div class="profile-label">Подарок</div><div class="profile-value">'+(myGift?myGift.title:'Не выбран')+'</div></div>';
+  html+='<div class="profile-item"><div class="profile-label">Приезд</div><div class="profile-value">'+currentUser.probability+'</div></div>';
+  html+='<div class="profile-item"><div class="profile-label">Транспорт</div><div class="profile-value">'+currentUser.transport+'</div></div>';
   if(currentUser.transport==='Доберусь сам' && currentUser.from_place){
-    html+='<div class="profile-item"><div class="profile-label">Откуда</div><div class="profile-value">'+escapeHtml(currentUser.from_place)+'</div></div>';
+    html+='<div class="profile-item"><div class="profile-label">Откуда</div><div class="profile-value">'+currentUser.from_place+'</div></div>';
   }
-  html+='<div class="profile-item"><div class="profile-label">Шашлык</div><div class="profile-value">'+(currentUser.shashlik||[]).map(escapeHtml).join(', ')+'</div></div>';
-  html+='<div class="profile-item"><div class="profile-label">Ночёвка</div><div class="profile-value">'+escapeHtml(currentUser.overnight)+'</div></div>';
+  html+='<div class="profile-item"><div class="profile-label">Шашлык</div><div class="profile-value">'+(currentUser.shashlik||[]).join(', ')+'</div></div>';
+  html+='<div class="profile-item"><div class="profile-label">Ночёвка</div><div class="profile-value">'+currentUser.overnight+'</div></div>';
   html+='<div class="profile-item profile-full"><div class="profile-label">Помощь в 15:00</div><div class="profile-value">'+(currentUser.help?'Да':'Нет')+'</div></div>';
   grid.innerHTML=html;
 }
@@ -658,7 +686,7 @@ function renderAuthList(){
   var html='';
   for(var i=0;i<allUsers.length;i++){
     var u=allUsers[i];
-    html+='<div class="auitem"><div class="auitem-top" onclick="togglePwd(\''+u.id+'\')"><div><div class="auname">'+escapeHtml(u.identifier)+'</div><div class="aupoints">'+getRank(u.points||0)+' · 🍓 '+(u.points||0)+'</div></div><button class="auedit" onclick="event.stopPropagation();editUser(\''+u.id+'\')">✏️</button></div><div class="au-pwd" id="pwd-'+u.id+'"><input type="password" id="pwdin-'+u.id+'" placeholder="Пароль"><button onclick="tryLogin(\''+u.id+'\')">Войти</button></div></div>';
+    html+='<div class="auitem"><div class="auitem-top" onclick="togglePwd(\''+u.id+'\')"><div><div class="auname">'+u.identifier+'</div><div class="aupoints">'+getRank(u.points||0)+' · 🍓 '+(u.points||0)+'</div></div><button class="auedit" onclick="event.stopPropagation();editUser(\''+u.id+'\')">✏️</button></div><div class="au-pwd" id="pwd-'+u.id+'"><input type="password" id="pwdin-'+u.id+'" placeholder="Пароль"><button onclick="tryLogin(\''+u.id+'\')">Войти</button></div></div>';
   }
   list.innerHTML=html;
 }
@@ -689,17 +717,9 @@ function editUser(id){
   editingUserId=id;
   document.getElementById('f-id').value=user.identifier;
   document.getElementById('f-pwd').value=user.pwd||'';
-  formData={
-    prob:user.probability,
-    trans:user.transport,
-    from:user.from_place||'',
-    shash:user.shashlik||[],
-    help:user.help||false,
-    night:user.overnight
-  };
+  formData={prob:user.probability,trans:user.transport,from:user.from_place||'',shash:user.shashlik||[],help:user.help||false,night:user.overnight};
   document.getElementById('f-from').value=formData.from;
   document.getElementById('f-help').checked=formData.help;
-
   var btns=document.querySelectorAll('.opt-btn');
   for(var i=0;i<btns.length;i++){
     var b=btns[i],f=b.getAttribute('data-f'),v=b.getAttribute('data-v');
@@ -709,22 +729,7 @@ function editUser(id){
     if(f==='night'&&v===formData.night)b.classList.add('selected');
     if(f==='shash'&&formData.shash.indexOf(v)!==-1)b.classList.add('selected');
   }
-
-  // Показ/скрытие полей
-  var fromField=document.getElementById('fg-from');
-  var tailridersField=document.getElementById('fg-tailriders');
-  if(formData.trans==='Доберусь сам'){
-    fromField.classList.remove('hidden');
-    tailridersField.classList.add('hidden');
-  }else if(formData.trans==='Упаду на хвост'){
-    fromField.classList.add('hidden');
-    tailridersField.classList.remove('hidden');
-    renderDriversList();
-  }else{
-    fromField.classList.add('hidden');
-    tailridersField.classList.add('hidden');
-  }
-
+  document.getElementById('fg-from').classList.toggle('hidden', formData.trans!=='Доберусь сам');
   document.getElementById('aview').classList.remove('active');
   document.getElementById('rview').classList.add('active');
   document.getElementById('regTitle').textContent='✏️ Редактирование анкеты';
@@ -744,22 +749,14 @@ document.addEventListener('click',function(e){
     for(var i=0;i<sib.length;i++)sib[i].classList.remove('selected');
     btn.classList.add('selected');
     formData[field]=value;
-
     if(field==='trans'){
       var fromField=document.getElementById('fg-from');
-      var tailridersField=document.getElementById('fg-tailriders');
       if(value==='Доберусь сам'){
         fromField.classList.remove('hidden');
-        tailridersField.classList.add('hidden');
-      }else if(value==='Упаду на хвост'){
+      }else{
         fromField.classList.add('hidden');
         formData.from='';
         document.getElementById('f-from').value='';
-        tailridersField.classList.remove('hidden');
-        renderDriversList();
-      }else{
-        fromField.classList.add('hidden');
-        tailridersField.classList.add('hidden');
       }
     }
   }
@@ -791,6 +788,7 @@ function doRegister(){
   if(editingUserId){
     var updateData={identifier:id,pwd:pwd,probability:formData.prob,transport:formData.trans,from_place:fromPlace,shashlik:formData.shash,help:formData.help,overnight:formData.night};
     supaFetch('users?id=eq.'+editingUserId,'PATCH',updateData).then(function(){
+      console.log('✅ PATCH успешен');
       for(var i=0;i<allUsers.length;i++){
         if(allUsers[i].id===editingUserId){
           allUsers[i].identifier=id;allUsers[i].pwd=pwd;allUsers[i].probability=formData.prob;
@@ -805,25 +803,26 @@ function doRegister(){
       closeM('m-auth');updateHeader();showToast('✅ Анкета обновлена!');
       editingUserId=null;
       resetForm();
-    }).catch(function(e){showToast('Ошибка: '+e.message);});
+    }).catch(function(e){console.error('❌ PATCH ошибка:',e);showToast('Ошибка: '+e.message);});
   }else{
     var newId='user_'+Date.now();
     var newUserData={id:newId,identifier:id,pwd:pwd,probability:formData.prob,transport:formData.trans,from_place:fromPlace,shashlik:formData.shash,help:formData.help,overnight:formData.night,points:0};
     supaFetch('users','POST',newUserData).then(function(data){
+      console.log('✅ POST успешен');
       try{
         allUsers.push(newUserData);
         currentUser=newUserData;
         localStorage.setItem('sasha_cur',JSON.stringify(newUserData));
-      }catch(err){console.error(err);}
+      }catch(err){console.error('❌ Ошибка локального сохранения:',err);}
       closeM('m-auth');
       updateHeader();
       showToast('🎉 Добро пожаловать, '+id+'!');
       resetForm();
-
-      if(formData.trans==='Упаду на хвост'){
-        createAutoNews(id);
-      }
-    }).catch(function(e){showToast('Ошибка: '+e.message);});
+      if(formData.trans==='Упаду на хвост') createAutoNews(newId);
+    }).catch(function(e){
+      console.error('❌ POST ошибка:',e);
+      showToast('Ошибка: '+e.message);
+    });
   }
 }
 
@@ -834,14 +833,13 @@ function resetForm(){
   document.getElementById('f-from').classList.remove('err');
   document.getElementById('f-help').checked=false;
   document.getElementById('fg-from').classList.add('hidden');
-  document.getElementById('fg-tailriders').classList.add('hidden');
   var btns=document.querySelectorAll('.opt-btn');
   for(var i=0;i<btns.length;i++)btns[i].classList.remove('selected');
   var errs=document.querySelectorAll('.err');
   for(var i=0;i<errs.length;i++)errs[i].classList.remove('err');
   formData={prob:null,trans:null,from:'',shash:[],help:false,night:null};
-  editingUserId=null;
   document.getElementById('regTitle').textContent='📝 Регистрация';
+  // editingUserId НЕ сбрасываем здесь — это делает showAuth()
 }
 
 function createAutoNews(userId){
@@ -853,11 +851,10 @@ function createAutoNews(userId){
   var dateStr=today.getDate()+' '+months[today.getMonth()];
   var title='🎒 Упаду на хвост';
   var text=user.identifier;
-
   supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
     allNews.unshift({date:dateStr,title:title,text:text});
     updateHeader();
-  }).catch(function(e){console.error(e);});
+  }).catch(function(e){console.error('❌ Ошибка авто-новости:',e);});
 }
 
 function renderWish(){
@@ -925,11 +922,8 @@ if(urlParams.get('admin')==='саша2026'){
 function addNews(){
   var d=document.getElementById('ad-d').value,t=document.getElementById('ad-t').value,x=document.getElementById('ad-x').value;
   if(!d||!t||!x){alert('Заполни все поля!');return;}
-  if(isNewsDuplicate(d,t,x)){
-    alert('⚠️ Такая новость уже есть!');
-    return;
-  }
-  supaFetch('news','POST',{date:d,title:t,text:x}).then(function(){
+  if(isNewsDuplicate(d,t,x)){alert('⚠️ Такая новость уже есть!');return;}
+  supaFetch('news','POST',{date:d,title:t,text:x}).then(function(data){
     allNews.unshift({date:d,title:t,text:x});
     document.getElementById('ad-d').value='';document.getElementById('ad-t').value='';document.getElementById('ad-x').value='';
     updateHeader();showToast('📰 Новость добавлена!');
@@ -937,13 +931,14 @@ function addNews(){
   }).catch(function(e){showToast('Ошибка: '+e.message);});
 }
 
+// ===== ИНИЦИАЛИЗАЦИЯ =====
 try{
   var savedCur=localStorage.getItem('sasha_cur');
   if(savedCur){currentUser=JSON.parse(savedCur);}
 }catch(e){}
 
 if(currentUser)prevRank=getRank(currentUser.points||0);
-updateHeader();
+updateHeader(); // включает updateCountdown()
 startBerries();
 
 if(urlParams.get('report')==='ягодный')showReport();
@@ -962,6 +957,9 @@ loadAllData(function(){
   }
   if(urlParams.get('report')==='ягодный')showReport();
 });
+
+// Обновляем счётчик каждый час (на случай если долго открыта страница)
+setInterval(updateCountdown, 3600000);
 </script>
 </body>
 </html>
