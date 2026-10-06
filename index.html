@@ -11,9 +11,9 @@
 html{scroll-behavior:smooth}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;line-height:1.6}
 
-.header{position:sticky;top:0;z-index:900;background:rgba(13,5,17,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,45,123,.2);padding:16px 20px}
+.header{position:sticky;top:0;z-index:900;background:rgba(13,5,17,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,45,123,.2);padding:36px 20px 16px}
 .h-title{text-align:center;font-size:1.5rem;font-weight:900;margin-bottom:10px;background:linear-gradient(135deg,#ff2d7b,#ff6baa,#c850c0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-
+ 
 .h-countdown{
   text-align:center;margin-bottom:12px;padding:8px 14px;
   background:rgba(255,255,255,.03);border:1px solid rgba(255,45,123,.15);
@@ -210,21 +210,69 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:linear-gradient(135deg,#1a0a22,#2d1b3d);border:1px solid var(--ac);color:#fff;padding:14px 28px;border-radius:14px;font-weight:600;font-size:.95rem;z-index:10002;box-shadow:0 10px 40px rgba(255,45,123,.4);transition:transform .4s ease;text-align:center;max-width:90%}
 .toast.show{transform:translateX(-50%) translateY(0)}
 @media(max-width:600px){.opt-grid{grid-template-columns:1fr}.profile-grid{grid-template-columns:1fr}.inv{padding:20px}}
+/* Углы шапки */
+.h-days{position:absolute;top:10px;left:16px;font-size:.7rem;color:var(--td);letter-spacing:.3px}
+.h-days b{color:var(--ac2);font-weight:700;font-size:.85rem}
+.h-corner{position:absolute;top:8px;right:16px}
+.h-corner-btn{padding:5px 14px;border-radius:20px;font-family:inherit;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .3s;background:transparent;border:1px solid var(--ac);color:var(--ac)}
+.h-corner-btn:hover{background:var(--ac);color:#fff}
+
+/* Две колонки */
+.h-main{display:flex;gap:20px;align-items:flex-start}
+.h-left{flex:2;min-width:0}
+.h-right{flex:1;min-width:170px;max-width:220px}
+
+/* Рейтинг */
+.h-rating-title{font-size:.72rem;color:var(--ac2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;text-align:center}
+.h-rating{display:flex;flex-direction:column;gap:5px}
+.rating-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;font-size:.78rem;transition:all .3s}
+.rating-item.me{background:rgba(255,45,123,.12);border-color:rgba(255,45,123,.4)}
+.rating-pos{flex-shrink:0;width:22px;text-align:center}
+.rating-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t);font-weight:500}
+.rating-pts{color:var(--ac2);font-weight:700;flex-shrink:0}
+.rating-empty{padding:12px;text-align:center;color:var(--td);font-size:.75rem;background:rgba(255,255,255,.03);border-radius:8px}
+
+/* Мобильные */
+@media(max-width:700px){
+  .h-main{flex-direction:column}
+  .h-right{max-width:100%;min-width:0;width:100%}
+  .h-rating{flex-direction:row;flex-wrap:wrap;gap:6px}
+  .rating-item{flex:1;min-width:140px}
+}
 </style>
 </head>
 <body>
 
 <header class="header" id="mainHeader">
-  <div class="h-title">🍓 Ягодный ноябрь</div>
-  <div class="h-countdown" id="countdown">Загрузка...</div>
-  <div class="h-user" id="hUser"></div>
-  <div class="h-nav" id="hNav"></div>
-  <div class="h-info">
-    <div class="h-row"><span class="ico">📅</span> <b>14 ноября</b>&nbsp;·&nbsp;<span class="ico">🕐</span> <b>15:00 СБ → 17:00 ВС</b></div>
-    <div class="h-row"><span class="ico">👗</span> Дресс-код: <b>ягодный</b></div>
-    <div class="h-row"><span class="ico">🍷</span> Напитки: <b>возьмите с собой</b></div>
-    <div class="h-row"><span class="ico">📍</span> <a class="map-link" onclick="openMap()">Бор.Матюшинский лес ↗</a></div>
-    <div class="h-row"><span class="ico">📰</span> <a onclick="openNews()">Новости<span class="h-badge" id="newsBadge">0</span></a></div>
+  <!-- Левый верхний угол: счётчик дней -->
+  <div class="h-days" id="hDays">...</div>
+
+  <!-- Правый верхний угол: Войти/Выйти -->
+  <div class="h-corner" id="hCorner">
+    <button class="h-corner-btn" onclick="openAuth()">Войти</button>
+  </div>
+
+  <!-- Основная часть: две колонки -->
+  <div class="h-main">
+    <!-- Левая колонка (большая): всё как было -->
+    <div class="h-left">
+      <div class="h-title">🍓 Ягодный ноябрь</div>
+      <div class="h-user" id="hUser"></div>
+      <div class="h-nav" id="hNav"></div>
+      <div class="h-info">
+        <div class="h-row"><span class="ico">📅</span> <b>14 ноября</b>&nbsp;·&nbsp;<span class="ico">🕐</span> <b>15:00 СБ → 17:00 ВС</b></div>
+        <div class="h-row"><span class="ico">👗</span> Дресс-код: <b>ягодный</b></div>
+        <div class="h-row"><span class="ico">🍷</span> Напитки: <b>возьмите с собой</b></div>
+        <div class="h-row"><span class="ico">📍</span> <a class="map-link" onclick="openMap()">Бор.Матюшинский лес ↗</a></div>
+        <div class="h-row"><span class="ico">📰</span> <a onclick="openNews()">Новости<span class="h-badge" id="newsBadge">0</span></a></div>
+      </div>
+    </div>
+
+    <!-- Правая колонка (меньшая): Топ-5 -->
+    <div class="h-right">
+      <div class="h-rating-title">🏆 Топ-5 по ягодам</div>
+      <div class="h-rating" id="hRating"></div>
+    </div>
   </div>
 </header>
 
@@ -251,6 +299,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
     <div class="levelup-emoji">🎆</div>
     <div class="levelup-title">НОВЫЙ УРОВЕНЬ!</div>
     <div class="levelup-rank" id="levelupRank"></div>
+    <div class="levelup-sub">Нажми куда угодно чтобы закрыть</div>
+  </div>
+</div>
+  
+<!-- Модалка подъёма в рейтинге -->
+<div class="levelup-overlay" id="rankupOverlay">
+  <div class="levelup-box">
+    <div class="levelup-emoji">📈</div>
+    <div class="levelup-title">ПОДЪЁМ В РЕЙТИНГЕ!</div>
+    <div class="levelup-rank" id="rankupText"></div>
     <div class="levelup-sub">Нажми куда угодно чтобы закрыть</div>
   </div>
 </div>
@@ -371,6 +429,7 @@ function supaFetch(endpoint, method, body) {
 }
 
 function getRank(p){
+  if(p>=100) return 'Ректификат 🍾';
   if(p>=60) return 'Забродивший 🍷';
   if(p>=45) return 'Ягодка опять 🫐';
   if(p>=30) return 'Спелый 🍓';
@@ -399,18 +458,15 @@ function pluralize(n, one, few, many){
 
 function updateCountdown(){
   var days = daysUntil('2026-11-14');
-  var el = document.getElementById('countdown');
+  var el = document.getElementById('hDays');
   if(!el) return;
   if(days > 0){
     var word = pluralize(days, 'день', 'дня', 'дней');
-    el.innerHTML = 'До праздника <span class="count-num">'+days+'</span> <span class="count-word">'+word+'</span>';
-    el.classList.remove('today');
+    el.innerHTML = 'До праздника <b>'+days+'</b> '+word;
   } else if(days === 0){
-    el.innerHTML = '<span class="count-num">🎉</span> <span class="count-word">Сегодня праздник!</span>';
-    el.classList.add('today');
+    el.innerHTML = '<b>🎉 Сегодня!</b>';
   } else {
-    el.innerHTML = '<span class="count-num">🍓</span> <span class="count-word">Праздник прошёл, но ягоды вечны</span>';
-    el.classList.add('today');
+    el.innerHTML = '<b>🍓</b> Праздник прошёл';
   }
 }
 
@@ -534,9 +590,21 @@ function popBerry(b){
   if(currentUser){
     currentUser.points=(currentUser.points||0)+1;
     supaFetch('users?id=eq.'+currentUser.id,'PATCH',{points:currentUser.points}).catch(function(e){console.error(e);});
+
+    // Обновляем points в общем списке пользователей
+    for(var k=0;k<allUsers.length;k++){
+      if(allUsers[k].id===currentUser.id){
+        allUsers[k].points=currentUser.points;
+        break;
+      }
+    }
+
     var newRank=getRank(currentUser.points);
     if(prevRank&&prevRank!==newRank)showLevelUp(newRank);
     prevRank=newRank;
+
+    renderRating();
+    checkRatingChange();
     pulsePoints();
     updateHeader();
   }
@@ -555,20 +623,113 @@ function updateHeader(){
   updateCountdown();
   var userSlot=document.getElementById('hUser');
   var navSlot=document.getElementById('hNav');
+  var cornerSlot=document.getElementById('hCorner');
   var unread=getUnread();
+
   if(currentUser){
     prevRank=getRank(currentUser.points||0);
     userSlot.innerHTML='<div class="h-chip" onclick="openProfile()"><span class="h-chip-name">'+currentUser.identifier+'</span><span class="h-chip-rank">'+getRank(currentUser.points||0)+'</span><span class="h-chip-pts" id="pts-counter">🍓 '+(currentUser.points||0)+'</span></div>';
-    navSlot.innerHTML='<button class="h-btn h-btn-auth" onclick="logout()">Выйти</button><button class="h-btn h-btn-wish" onclick="openWish()">🎁 Wish-лист</button><a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
+    navSlot.innerHTML='<button class="h-btn h-btn-wish" onclick="openWish()">🎁 Wish-лист</button><a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
+    cornerSlot.innerHTML='<button class="h-corner-btn" onclick="logout()">Выйти</button>';
   }else{
     userSlot.innerHTML='';
-    navSlot.innerHTML='<button class="h-btn h-btn-auth" onclick="openAuth()">Войти</button><button class="h-btn h-btn-wish" disabled>🎁 Wish-лист</button><a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
+    navSlot.innerHTML='<button class="h-btn h-btn-wish" disabled>🎁 Wish-лист</button><a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
+    cornerSlot.innerHTML='<button class="h-corner-btn" onclick="openAuth()">Войти</button>';
   }
   var badge=document.getElementById('newsBadge');
   badge.textContent=unread;
   badge.className='h-badge'+(unread===0?' zero':'');
+
+  renderRating();
 }
 
+// ===== РЕЙТИНГ ТОП-5 =====
+var prevPositions = {}; // для отслеживания изменений позиций
+
+function renderRating(){
+  var el = document.getElementById('hRating');
+  if(!el) return;
+
+  var sorted = allUsers.slice().sort(function(a,b){
+    return (b.points||0) - (a.points||0);
+  });
+  var top5 = sorted.slice(0,5);
+
+  if(top5.length===0){
+    el.innerHTML='<div class="rating-empty">Пока никто не ловил ягоды 🫐</div>';
+    return;
+  }
+
+  var medals = ['🥇','🥈','🥉','4.','5.'];
+  var html='';
+  for(var i=0;i<top5.length;i++){
+    var u=top5[i];
+    var isMe = currentUser && u.id===currentUser.id;
+    html+='<div class="rating-item'+(isMe?' me':'')+'">';
+    html+='<span class="rating-pos">'+medals[i]+'</span>';
+    html+='<span class="rating-name">'+u.identifier+'</span>';
+    html+='<span class="rating-pts">🍓 '+(u.points||0)+'</span>';
+    html+='</div>';
+  }
+  el.innerHTML=html;
+}
+
+function checkRatingChange(){
+  var sorted = allUsers.slice().sort(function(a,b){
+    return (b.points||0) - (a.points||0);
+  });
+  var top5 = sorted.slice(0,5);
+
+  var newPositions = {};
+  for(var i=0;i<top5.length;i++){
+    newPositions[top5[i].id] = i+1;
+  }
+
+  if(currentUser){
+    var oldPos = prevPositions[currentUser.id];
+    var newPos = newPositions[currentUser.id];
+
+    // Если был в топе и поднялся выше
+    if(oldPos && newPos && newPos < oldPos){
+      showRankUpModal(oldPos, newPos);
+    }
+    // Если впервые попал в топ-5
+    if(!oldPos && newPos){
+      showRankUpModal(null, newPos);
+    }
+  }
+
+  prevPositions = newPositions;
+}
+
+function showRankUpModal(oldPos, newPos){
+  var overlay = document.getElementById('rankupOverlay');
+  var text = document.getElementById('rankupText');
+  if(!overlay || !text) return;
+
+  if(oldPos){
+    text.textContent = 'Ты поднялся с '+oldPos+' на '+newPos+' место! 🎉';
+  }else{
+    text.textContent = 'Ты впервые в топ-5! Место: '+newPos+' 🎉';
+  }
+
+  overlay.classList.add('active');
+
+  // Фейерверк
+  for(var i=0;i<25;i++){
+    var p=document.createElement('div');p.className='fw-particle';
+    p.style.left='50%';p.style.top='50%';
+    p.style.background='hsl('+(Math.random()*360)+',90%,60%)';
+    var angle=Math.random()*Math.PI*2,dist=80+Math.random()*180;
+    p.style.setProperty('--fx',Math.cos(angle)*dist+'px');
+    p.style.setProperty('--fy',Math.sin(angle)*dist+'px');
+    document.body.appendChild(p);
+    setTimeout(function(el){return function(){el.remove();};}(p),1200);
+  }
+
+  overlay.onclick=function(){overlay.classList.remove('active');};
+}
+  
 function openNews(){
   var seen=parseInt(localStorage.getItem('sasha_news_seen')||'0');
   var html='';
@@ -1061,8 +1222,15 @@ loadAllData(function(){
         break;
       }
     }
-    updateHeader();
   }
+  // Инициализируем позиции рейтинга после загрузки данных
+  var sorted = allUsers.slice().sort(function(a,b){return (b.points||0)-(a.points||0);});
+  var top5 = sorted.slice(0,5);
+  prevPositions = {};
+  for(var i=0;i<top5.length;i++){
+    prevPositions[top5[i].id] = i+1;
+  }
+  updateHeader();
   if(urlParams.get('report')==='ягодный')showReport();
 });
 
