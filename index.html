@@ -14,7 +14,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .header{position:sticky;top:0;z-index:900;background:rgba(13,5,17,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,45,123,.2);padding:16px 20px}
 .h-title{text-align:center;font-size:1.5rem;font-weight:900;margin-bottom:10px;background:linear-gradient(135deg,#ff2d7b,#ff6baa,#c850c0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
-/* ===== СЧЁТЧИК ДНЕЙ ===== */
 .h-countdown{
   text-align:center;margin-bottom:12px;padding:8px 14px;
   background:rgba(255,255,255,.03);border:1px solid rgba(255,45,123,.15);
@@ -28,7 +27,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 }
 .h-countdown .count-word{color:var(--t);font-weight:500}
 .h-countdown.today{border-color:var(--ac);background:rgba(255,45,123,.08)}
-.h-countdown.today .count-num{font-size:1.5rem}
 
 .h-user{display:flex;justify-content:center;margin-bottom:10px}
 .h-chip{display:flex;align-items:center;gap:8px;padding:6px 16px;border-radius:30px;background:rgba(255,45,123,.1);border:1px solid rgba(255,45,123,.3);cursor:pointer;transition:all .3s;font-size:.85rem}
@@ -150,6 +148,37 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .bsubmit{width:100%;padding:15px;background:linear-gradient(135deg,#ff2d7b,#c850c0);color:#fff;border:none;border-radius:14px;font-family:inherit;font-size:1.05rem;font-weight:700;cursor:pointer;margin-top:10px;transition:all .3s}
 .bsubmit:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(255,45,123,.4)}
 
+/* ===== СПИСОК ВОДИТЕЛЕЙ ===== */
+.drivers-block{
+  margin-top:10px;padding:14px;
+  background:rgba(255,45,123,.05);
+  border:1px solid rgba(255,45,123,.2);
+  border-radius:var(--rs);
+  animation:driversIn .3s ease;
+}
+@keyframes driversIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.drivers-title{
+  font-size:.8rem;color:var(--ac2);font-weight:700;
+  margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;
+}
+.drivers-list{display:flex;flex-direction:column;gap:6px}
+.driver-card{
+  padding:10px 14px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;
+  transition:all .3s;
+}
+.driver-card:hover{background:rgba(255,45,123,.08);border-color:var(--ac2)}
+.driver-name{font-weight:600;color:#fff;font-size:.88rem;margin-bottom:3px}
+.driver-from{color:var(--td);font-size:.8rem}
+.driver-from b{color:var(--t);font-weight:500}
+.drivers-empty{
+  padding:12px;text-align:center;
+  color:var(--td);font-size:.82rem;
+  background:rgba(255,255,255,.03);border-radius:8px;
+}
+
 .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .profile-item{padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:var(--rs)}
 .profile-label{font-size:.72rem;color:var(--td);text-transform:uppercase;margin-bottom:3px}
@@ -187,10 +216,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 
 <header class="header" id="mainHeader">
   <div class="h-title">🍓 Ягодный ноябрь</div>
-
-  <!-- СЧЁТЧИК ДНЕЙ -->
   <div class="h-countdown" id="countdown">Загрузка...</div>
-
   <div class="h-user" id="hUser"></div>
   <div class="h-nav" id="hNav"></div>
   <div class="h-info">
@@ -264,6 +290,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
         <label class="fl">Откуда поедешь?</label>
         <input class="fi" type="text" id="f-from" placeholder="Город, район или адрес">
       </div>
+      <div class="fg hidden" id="fg-tailriders">
+        <div class="drivers-block">
+          <div class="drivers-title">🚗 Кто уже едет — можно списаться в телеграме:</div>
+          <div class="drivers-list" id="driversList"></div>
+        </div>
+      </div>
       <div class="fg"><label class="fl">Какой шашлык любишь (можно несколько)</label>
         <div class="opt-grid" id="g-shash">
           <button type="button" class="opt-btn" data-f="shash" data-v="Свинина">🥩 Свинина</button>
@@ -315,7 +347,7 @@ var SUPA_URL = 'https://fkmdpikxyttwyfyoyivm.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrbWRwaWt4eXR0d3lmeW95aXZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExODY4NDksImV4cCI6MjEwNjc2Mjg0OX0.5knt9zOTk40cNnMN_F-Xgsyg52e0klya3FaDhDzceIQ';
 
 var TG_BOT_TOKEN = '8828283274:AAFKjiAA95Ye9J4nXFTQTHEtq2ZCVjKW4QE';
-var TG_CHAT_ID = ''; // Вставь сюда chat_id своей группы
+var TG_CHAT_ID = '-1004293825262';
 
 function supaFetch(endpoint, method, body) {
   var opts = {
@@ -338,7 +370,6 @@ function supaFetch(endpoint, method, body) {
     });
 }
 
-// ===== ЗВАНИЯ =====
 function getRank(p){
   if(p>=60) return 'Забродивший 🍷';
   if(p>=45) return 'Ягодка опять 🫐';
@@ -349,9 +380,8 @@ function getRank(p){
 
 // ===== СЧЁТЧИК ДНЕЙ =====
 function daysUntil(dateStr){
-  var target = new Date(dateStr + 'T15:00:00'); // 15:00 местного времени
+  var target = new Date(dateStr + 'T15:00:00');
   var now = new Date();
-  // Сравниваем только даты (без времени)
   var targetDay = new Date(target.getFullYear(), target.getMonth(), target.getDate());
   var nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   var diff = targetDay - nowDay;
@@ -384,7 +414,7 @@ function updateCountdown(){
   }
 }
 
-// ===== ВИШЛИСТ (БЕЗ ДАЧИ) =====
+// ===== ВИШЛИСТ =====
 var wishData=[
   {id:2,title:"Сумка для смартфона Guess",link:"https://www.rendez-vous.ru/catalog/bags/sumka-dlya-smartfona/guess_pw7585p6426_temno_bezhevyy-5160013/",special:false},
   {id:3,title:"Ноутбук (а главное - помощь в выборе)))",link:"",special:false},
@@ -431,6 +461,33 @@ function isNewsDuplicate(date,title,text){
     if(n.title===title && n.text===text && (!date || n.date===date)) return true;
   }
   return false;
+}
+
+// ===== СПИСОК ВОДИТЕЛЕЙ =====
+function renderDriversList(){
+  var list=document.getElementById('driversList');
+  if(!list) return;
+
+  var drivers=allUsers.filter(function(u){
+    if(editingUserId && u.id===editingUserId) return false;
+    if(currentUser && u.id===currentUser.id) return false;
+    return u.transport==='Доберусь сам' && u.from_place && u.from_place.trim();
+  });
+
+  if(drivers.length===0){
+    list.innerHTML='<div class="drivers-empty">Пока никто не указал адрес старта.<br>Списаться можно будет позже в телеграме!</div>';
+    return;
+  }
+
+  var html='';
+  for(var i=0;i<drivers.length;i++){
+    var d=drivers[i];
+    html+='<div class="driver-card">';
+    html+='<div class="driver-name">🚗 '+d.identifier+'</div>';
+    html+='<div class="driver-from">📍 <b>'+d.from_place+'</b></div>';
+    html+='</div>';
+  }
+  list.innerHTML=html;
 }
 
 function showLevelUp(newRank){
@@ -495,7 +552,7 @@ function pulsePoints(){
 }
 
 function updateHeader(){
-  updateCountdown(); // обновляем счётчик при каждом изменении
+  updateCountdown();
   var userSlot=document.getElementById('hUser');
   var navSlot=document.getElementById('hNav');
   var unread=getUnread();
@@ -567,7 +624,6 @@ function generateReport(){
   for(var j=0;j<tailRiders.length;j++){
     text+='  • '+tailRiders[j].identifier+'\n';
   }
-  // Подарки НЕ показываются
   return text;
 }
 function showReport(){
@@ -591,7 +647,6 @@ function closeM(id){
     var anyOpen=document.querySelector('.moverlay.active');
     if(!anyOpen){
       document.body.style.overflow='';
-      // Сбрасываем форму только если закрываем m-auth и НЕ в режиме редактирования
       if(id==='m-auth' && !editingUserId) resetForm();
     }
   }
@@ -615,11 +670,10 @@ function showReg(){
 function openWish(){if(!currentUser){showToast('Сначала авторизуйтесь!');return;}renderWish();openM('m-wish');}
 function openProfile(){if(!currentUser)return;renderProfile();openM('m-profile');}
 
-// ===== РЕДАКТИРОВАНИЕ ИЗ ПРОФИЛЯ (ИСПРАВЛЕНО!) =====
+// ===== РЕДАКТИРОВАНИЕ ИЗ ПРОФИЛЯ =====
 function openEditProfile(){
   if(!currentUser) return;
 
-  // Заполняем форму данными текущего пользователя
   editingUserId = currentUser.id;
   document.getElementById('f-id').value = currentUser.identifier;
   document.getElementById('f-pwd').value = currentUser.pwd || '';
@@ -634,7 +688,6 @@ function openEditProfile(){
   document.getElementById('f-from').value = formData.from;
   document.getElementById('f-help').checked = formData.help;
 
-  // Сбрасываем все кнопки-опции и устанавливаем выбранные
   var btns = document.querySelectorAll('.opt-btn');
   for(var i=0;i<btns.length;i++){
     var b=btns[i],f=b.getAttribute('data-f'),v=b.getAttribute('data-v');
@@ -645,15 +698,21 @@ function openEditProfile(){
     if(f==='shash'&&formData.shash.indexOf(v)!==-1) b.classList.add('selected');
   }
 
-  // Показать/скрыть поле "откуда"
   document.getElementById('fg-from').classList.toggle('hidden', formData.trans !== 'Доберусь сам');
 
-  // Переключаемся на экран регистрации с заполненными данными
+  // Показ списка водителей если выбран "Упаду на хвост"
+  var tailField=document.getElementById('fg-tailriders');
+  if(formData.trans==='Упаду на хвост'){
+    tailField.classList.remove('hidden');
+    renderDriversList();
+  }else{
+    tailField.classList.add('hidden');
+  }
+
   document.getElementById('aview').classList.remove('active');
   document.getElementById('rview').classList.add('active');
   document.getElementById('regTitle').textContent = '✏️ Редактирование анкеты';
 
-  // Закрываем профиль и открываем модалку авторизации (с формой редактирования)
   document.getElementById('m-profile').classList.remove('active');
   document.getElementById('m-auth').classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -730,6 +789,16 @@ function editUser(id){
     if(f==='shash'&&formData.shash.indexOf(v)!==-1)b.classList.add('selected');
   }
   document.getElementById('fg-from').classList.toggle('hidden', formData.trans!=='Доберусь сам');
+
+  // Показ списка водителей если выбран "Упаду на хвост"
+  var tailField=document.getElementById('fg-tailriders');
+  if(formData.trans==='Упаду на хвост'){
+    tailField.classList.remove('hidden');
+    renderDriversList();
+  }else{
+    tailField.classList.add('hidden');
+  }
+
   document.getElementById('aview').classList.remove('active');
   document.getElementById('rview').classList.add('active');
   document.getElementById('regTitle').textContent='✏️ Редактирование анкеты';
@@ -749,14 +818,22 @@ document.addEventListener('click',function(e){
     for(var i=0;i<sib.length;i++)sib[i].classList.remove('selected');
     btn.classList.add('selected');
     formData[field]=value;
+
     if(field==='trans'){
       var fromField=document.getElementById('fg-from');
+      var tailField=document.getElementById('fg-tailriders');
       if(value==='Доберусь сам'){
         fromField.classList.remove('hidden');
-      }else{
+        tailField.classList.add('hidden');
+      }else if(value==='Упаду на хвост'){
         fromField.classList.add('hidden');
         formData.from='';
         document.getElementById('f-from').value='';
+        tailField.classList.remove('hidden');
+        renderDriversList();
+      }else{
+        fromField.classList.add('hidden');
+        tailField.classList.add('hidden');
       }
     }
   }
@@ -807,6 +884,10 @@ function doRegister(){
   }else{
     var newId='user_'+Date.now();
     var newUserData={id:newId,identifier:id,pwd:pwd,probability:formData.prob,transport:formData.trans,from_place:fromPlace,shashlik:formData.shash,help:formData.help,overnight:formData.night,points:0};
+
+    // ВАЖНО: сохраняем значение ДО сброса формы
+    var wasTailRider = formData.trans === 'Упаду на хвост';
+
     supaFetch('users','POST',newUserData).then(function(data){
       console.log('✅ POST успешен');
       try{
@@ -817,8 +898,13 @@ function doRegister(){
       closeM('m-auth');
       updateHeader();
       showToast('🎉 Добро пожаловать, '+id+'!');
+
+      // Создаём авто-новость ДО сброса формы
+      if(wasTailRider){
+        createAutoNews(newUserData);
+      }
+
       resetForm();
-      if(formData.trans==='Упаду на хвост') createAutoNews(newId);
     }).catch(function(e){
       console.error('❌ POST ошибка:',e);
       showToast('Ошибка: '+e.message);
@@ -833,27 +919,31 @@ function resetForm(){
   document.getElementById('f-from').classList.remove('err');
   document.getElementById('f-help').checked=false;
   document.getElementById('fg-from').classList.add('hidden');
+  document.getElementById('fg-tailriders').classList.add('hidden');
   var btns=document.querySelectorAll('.opt-btn');
   for(var i=0;i<btns.length;i++)btns[i].classList.remove('selected');
   var errs=document.querySelectorAll('.err');
   for(var i=0;i<errs.length;i++)errs[i].classList.remove('err');
   formData={prob:null,trans:null,from:'',shash:[],help:false,night:null};
   document.getElementById('regTitle').textContent='📝 Регистрация';
-  // editingUserId НЕ сбрасываем здесь — это делает showAuth()
 }
 
-function createAutoNews(userId){
-  var user=null;
-  for(var i=0;i<allUsers.length;i++){if(allUsers[i].id===userId){user=allUsers[i];break;}}
-  if(!user)return;
+// ===== АВТО-НОВОСТЬ С ОТПРАВКОЙ В ТЕЛЕГРАМ =====
+function createAutoNews(user){
+  if(!user) return;
   var today=new Date();
   var months=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
   var dateStr=today.getDate()+' '+months[today.getMonth()];
   var title='🎒 Упаду на хвост';
   var text=user.identifier;
+
   supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
     allNews.unshift({date:dateStr,title:title,text:text});
     updateHeader();
+    console.log('✅ Авто-новость создана');
+
+    // Отправляем в телеграм
+    sendToTelegram('<b>🍓 Ягодный ноябрь</b>\n\n🎒 <b>'+user.identifier+'</b> хочет упасть на хвост! Кто едет из того же района — напишите в телеграме.');
   }).catch(function(e){console.error('❌ Ошибка авто-новости:',e);});
 }
 
@@ -923,7 +1013,7 @@ function addNews(){
   var d=document.getElementById('ad-d').value,t=document.getElementById('ad-t').value,x=document.getElementById('ad-x').value;
   if(!d||!t||!x){alert('Заполни все поля!');return;}
   if(isNewsDuplicate(d,t,x)){alert('⚠️ Такая новость уже есть!');return;}
-  supaFetch('news','POST',{date:d,title:t,text:x}).then(function(data){
+  supaFetch('news','POST',{date:d,title:t,text:x}).then(function(){
     allNews.unshift({date:d,title:t,text:x});
     document.getElementById('ad-d').value='';document.getElementById('ad-t').value='';document.getElementById('ad-x').value='';
     updateHeader();showToast('📰 Новость добавлена!');
@@ -938,7 +1028,7 @@ try{
 }catch(e){}
 
 if(currentUser)prevRank=getRank(currentUser.points||0);
-updateHeader(); // включает updateCountdown()
+updateHeader();
 startBerries();
 
 if(urlParams.get('report')==='ягодный')showReport();
@@ -958,7 +1048,6 @@ loadAllData(function(){
   if(urlParams.get('report')==='ягодный')showReport();
 });
 
-// Обновляем счётчик каждый час (на случай если долго открыта страница)
 setInterval(updateCountdown, 3600000);
 </script>
 </body>
