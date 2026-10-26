@@ -18,7 +18,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .h-chip{display:flex;align-items:center;gap:8px;padding:6px 16px;border-radius:30px;background:rgba(255,45,123,.1);border:1px solid rgba(255,45,123,.3);cursor:pointer;transition:all .3s;font-size:.85rem;flex-wrap:wrap;justify-content:center}
 .h-chip:hover{background:rgba(255,45,123,.2)}
 .h-chip-name{font-weight:700;color:#fff}
-.h-chip-nick{font-size:.7rem;color:var(--ac2);font-style:italic}
 .h-chip-rank{font-size:.65rem;padding:2px 8px;border-radius:12px;background:rgba(255,45,123,.2);color:var(--ac2);font-weight:600}
 .h-chip-pts{color:var(--ac2);font-weight:700;font-size:.8rem;transition:all .3s}
 .h-chip-pts.pulse{animation:ptsPulse .8s ease}
@@ -29,8 +28,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 }
 .h-nav{display:flex;justify-content:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .h-btn{padding:8px 18px;border-radius:30px;font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .3s;border:none;text-decoration:none}
-.h-btn-auth{background:transparent;border:1px solid var(--ac);color:var(--ac)}
-.h-btn-auth:hover{background:var(--ac);color:#fff}
 .h-btn-wish{background:linear-gradient(135deg,var(--ac3),#6c2bd9);color:#fff}
 .h-btn-wish:hover{transform:translateY(-2px)}
 .h-btn-wish:disabled{opacity:.4;cursor:not-allowed;transform:none}
@@ -110,7 +107,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .auitem:hover{border-color:rgba(255,45,123,.3)}
 .auitem-top{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
 .auname{font-weight:600;color:#fff}
-.aunick{font-size:.7rem;color:var(--ac2);font-style:italic;margin-top:2px}
 .aupoints{font-size:.78rem;color:var(--ac2)}
 .auedit{padding:4px 10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:var(--t);font-size:.72rem;cursor:pointer}
 .auedit:hover{background:var(--ac);color:#fff}
@@ -150,7 +146,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .driver-card{padding:10px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;transition:all .3s}
 .driver-card:hover{background:rgba(255,45,123,.08);border-color:var(--ac2)}
 .driver-name{font-weight:600;color:#fff;font-size:.88rem;margin-bottom:3px}
-.driver-nick{font-size:.7rem;color:var(--ac2);font-style:italic}
 .driver-from{color:var(--td);font-size:.8rem}
 .driver-from b{color:var(--t);font-weight:500}
 .drivers-empty{padding:12px;text-align:center;color:var(--td);font-size:.82rem;background:rgba(255,255,255,.03);border-radius:8px}
@@ -201,16 +196,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 
 .h-rating-title{font-size:.72rem;color:var(--ac2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;text-align:center}
 .h-rating{display:flex;flex-direction:column;gap:5px}
-.rating-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;font-size:.78rem;transition:all .3s;flex-direction:column;text-align:center}
+.rating-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;font-size:.78rem;transition:all .3s}
 .rating-item.me{background:rgba(255,45,123,.12);border-color:rgba(255,45,123,.4)}
-.rating-top{display:flex;align-items:center;gap:6px;width:100%}
 .rating-pos{flex-shrink:0;width:22px;text-align:center}
 .rating-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t);font-weight:500;text-align:left}
 .rating-pts{color:var(--ac2);font-weight:700;flex-shrink:0}
-.rating-nick{font-size:.65rem;color:var(--ac2);font-style:italic;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rating-empty{padding:12px;text-align:center;color:var(--td);font-size:.75rem;background:rgba(255,255,255,.03);border-radius:8px}
 
-/* ===== МОБИЛЬНЫЕ: СКРЫВАЕМ РЕЙТИНГ ===== */
 @media(max-width:700px){
   .h-right{display:none}
   .h-main{flex-direction:column}
@@ -418,6 +410,55 @@ function getRank(p){
   return 'Незрелый 🌱';
 }
 
+// ===== ПОЛНОЕ ИМЯ (прозвище + имя) =====
+function getFullName(user){
+  if(!user) return '';
+  if(user.nickname) return user.nickname + ' ' + user.identifier;
+  return user.identifier;
+}
+
+// ===== ЭКРАНИРОВАНИЕ ДЛЯ TELEGRAM =====
+function escapeTelegram(str){
+  if(!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// ===== ОТПРАВКА В TELEGRAM С ЛОГИРОВАНИЕМ =====
+function sendToTelegram(text){
+  if(!TG_BOT_TOKEN || !TG_CHAT_ID){
+    console.log('TG: токен или чат не заданы');
+    return;
+  }
+  var url = 'https://api.telegram.org/bot' + TG_BOT_TOKEN + '/sendMessage';
+  console.log('TG: отправка...');
+  fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({chat_id: TG_CHAT_ID, text: text, parse_mode: 'HTML'})
+  })
+  .then(function(r){
+    if(!r.ok){
+      return r.text().then(function(t){
+        console.error('TG ошибка:', r.status, t);
+        // Если упал парсинг HTML — пробуем без него
+        if(t.indexOf('parse') !== -1 || t.indexOf('entities') !== -1){
+          console.log('TG: пробуем без parse_mode');
+          return fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: TG_CHAT_ID, text: text.replace(/<[^>]*>/g, '')})
+          });
+        }
+      });
+    }
+    console.log('TG: отправлено ✅');
+  })
+  .catch(function(e){ console.error('TG fetch ошибка:', e); });
+}
+
 function daysUntil(dateStr){
   var target = new Date(dateStr + 'T15:00:00');
   var now = new Date();
@@ -442,7 +483,7 @@ function updateCountdown(){
   if(!el) return;
   if(days > 0){
     var word = pluralize(days, 'день', 'дня', 'дней');
-    el.innerHTML = 'До праздника <b>'+days+'</b> '+word;
+    el.innerHTML = 'До праздника <b>' + days + '</b> ' + word;
   } else if(days === 0){
     el.innerHTML = '<b>🎉 Сегодня!</b>';
   } else {
@@ -506,6 +547,7 @@ function isNewsDuplicate(date,title,text){
   return false;
 }
 
+// ===== ПРОЗВИЩА =====
 var nicknamePairs=[
   {m:'Клубничный барон', f:'Клубничная баронесса'},
   {m:'Ягода-малинка', f:'Ягода-малинка'},
@@ -554,8 +596,7 @@ function renderDriversList(){
   for(var i=0;i<drivers.length;i++){
     var d=drivers[i];
     html+='<div class="driver-card">';
-    html+='<div class="driver-name">🚗 '+d.identifier+'</div>';
-    if(d.nickname) html+='<div class="driver-nick">'+d.nickname+'</div>';
+    html+='<div class="driver-name">🚗 '+getFullName(d)+'</div>';
     html+='<div class="driver-from">📍 <b>'+d.from_place+'</b></div>';
     html+='</div>';
   }
@@ -639,18 +680,18 @@ function updateHeader(){
   var unread=getUnread();
   if(currentUser){
     prevRank=getRank(currentUser.points||0);
-    var chipHtml='<div class="h-chip" onclick="openProfile()">';
-    chipHtml+='<span class="h-chip-name">'+currentUser.identifier+'</span>';
-    if(currentUser.nickname) chipHtml+='<span class="h-chip-nick">'+currentUser.nickname+'</span>';
-    chipHtml+='<span class="h-chip-rank">'+getRank(currentUser.points||0)+'</span>';
-    chipHtml+='<span class="h-chip-pts" id="pts-counter">🍓 '+(currentUser.points||0)+'</span>';
-    chipHtml+='</div>';
-    userSlot.innerHTML=chipHtml;
-    navSlot.innerHTML='<button class="h-btn h-btn-wish" onclick="openWish()">🎁 Wish-лист</button><a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
+    userSlot.innerHTML='<div class="h-chip" onclick="openProfile()">'+
+      '<span class="h-chip-name">'+getFullName(currentUser)+'</span>'+
+      '<span class="h-chip-rank">'+getRank(currentUser.points||0)+'</span>'+
+      '<span class="h-chip-pts" id="pts-counter">🍓 '+(currentUser.points||0)+'</span>'+
+      '</div>';
+    navSlot.innerHTML='<button class="h-btn h-btn-wish" onclick="openWish()">🎁 Wish-лист</button>'+
+      '<a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
     cornerSlot.innerHTML='<button class="h-corner-btn" onclick="logout()">Выйти</button>';
   }else{
     userSlot.innerHTML='';
-    navSlot.innerHTML='<button class="h-btn h-btn-wish" disabled>🎁 Wish-лист</button><a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
+    navSlot.innerHTML='<button class="h-btn h-btn-wish" disabled>🎁 Wish-лист</button>'+
+      '<a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
     cornerSlot.innerHTML='<button class="h-corner-btn" onclick="openAuth()">Войти</button>';
   }
   var badge=document.getElementById('newsBadge');
@@ -676,12 +717,9 @@ function renderRating(){
     var u=top5[i];
     var isMe = currentUser && u.id===currentUser.id;
     html+='<div class="rating-item'+(isMe?' me':'')+'">';
-    html+='<div class="rating-top">';
     html+='<span class="rating-pos">'+medals[i]+'</span>';
-    html+='<span class="rating-name">'+u.identifier+'</span>';
+    html+='<span class="rating-name">'+getFullName(u)+'</span>';
     html+='<span class="rating-pts">🍓 '+(u.points||0)+'</span>';
-    html+='</div>';
-    if(u.nickname) html+='<div class="rating-nick">'+u.nickname+'</div>';
     html+='</div>';
   }
   el.innerHTML=html;
@@ -730,33 +768,30 @@ function getVerb(gender){
 function createOvertakeNews(who, whom){
   var dateStr = getDateStr();
   var title = '🏆 Обгон в рейтинге!';
-  var whoTitle = who.nickname ? who.nickname+' '+who.identifier : who.identifier;
-  var whomTitle = whom.nickname ? whom.nickname+' '+whom.identifier : whom.identifier;
+  var whoTitle = escapeTelegram(getFullName(who));
+  var whomTitle = escapeTelegram(getFullName(whom));
   var verb = getVerb(who.gender);
-  var text = whoTitle + ' ' + verb + ' ' + whomTitle + ' в ягодном рейтинге!';
+  var text = getFullName(who) + ' ' + verb + ' ' + getFullName(whom) + ' в ягодном рейтинге!';
 
   supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
     allNews.unshift({date:dateStr,title:title,text:text});
     updateHeader();
-    console.log('✅ Обгон:', whoTitle, verb, whomTitle);
     sendToTelegram('<b>🏆 Обгон в рейтинге!</b>\n\n<i>'+whoTitle+'</i> '+verb+' <i>'+whomTitle+'</i> в ягодном рейтинге! 🍓');
-  }).catch(function(e){console.error('❌ Ошибка обгона:',e);});
+  }).catch(function(e){console.error(e);});
 }
 
-// ===== НОВОСТЬ О НОВОМ ГОСТЕ =====
 function createWelcomeNews(user){
   if(!user) return;
   var dateStr = getDateStr();
   var title = '🍓 Новый гость!';
-  var userTitle = user.nickname ? user.nickname + ' ' + user.identifier : user.identifier;
-  var text = userTitle + ' присоединяется к ягодному ноябрю! Добро пожаловать!';
+  var fullName = getFullName(user);
+  var text = fullName + ' присоединяется к ягодному ноябрю! Добро пожаловать!';
 
   supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
     allNews.unshift({date:dateStr,title:title,text:text});
     updateHeader();
-    console.log('✅ Добро пожаловать:', userTitle);
-    sendToTelegram('<b>🍓 Ягодный ноябрь</b>\n\n🍓 <i>'+userTitle+'</i> присоединяется к ягодному ноябрю! Добро пожаловать!');
-  }).catch(function(e){console.error('❌ Ошибка welcome:',e);});
+    sendToTelegram('<b>🍓 Ягодный ноябрь</b>\n\n🍓 <i>'+escapeTelegram(fullName)+'</i> присоединяется к ягодному ноябрю! Добро пожаловать!');
+  }).catch(function(e){console.error(e);});
 }
 
 function showRankUpModal(oldPos, newPos){
@@ -813,14 +848,14 @@ function generateReport(){
   for(var i=0;i<probs.length;i++){
     var g=allUsers.filter(function(u){return u.probability===probs[i];});
     text+=probs[i]+': '+g.length+'\n';
-    for(var j=0;j<g.length;j++)text+='  • '+g[j].identifier+(g[j].nickname?' ('+g[j].nickname+')':'')+'\n';
+    for(var j=0;j<g.length;j++)text+='  • '+getFullName(g[j])+'\n';
   }
   text+='\n--- НОЧЁВКА ---\n';
   var nights=['Да, хотел бы','Как получится','Нет, я уеду в субботу'];
   for(var i=0;i<nights.length;i++){
     var g=allUsers.filter(function(u){return u.overnight===nights[i];});
     text+=nights[i]+': '+g.length+'\n';
-    for(var j=0;j<g.length;j++)text+='  • '+g[j].identifier+'\n';
+    for(var j=0;j<g.length;j++)text+='  • '+getFullName(g[j])+'\n';
   }
   text+='\n--- ШАШЛЫК ---\n';
   var types=['Свинина','Курица','Овощи'];
@@ -831,18 +866,18 @@ function generateReport(){
   text+='\n--- ПОМОЩЬ В 15:00 ---\n';
   var helpers=allUsers.filter(function(u){return u.help;});
   text+='Готовы помочь: '+helpers.length+'\n';
-  for(var i=0;i<helpers.length;i++)text+='  • '+helpers[i].identifier+'\n';
+  for(var i=0;i<helpers.length;i++)text+='  • '+getFullName(helpers[i])+'\n';
   text+='\n--- ТРАНСПОРТ ---\n';
   var selfDrivers=allUsers.filter(function(u){return u.transport==='Доберусь сам';});
   var tailRiders=allUsers.filter(function(u){return u.transport==='Упаду на хвост';});
   text+='Добираются сами: '+selfDrivers.length+'\n';
   for(var j=0;j<selfDrivers.length;j++){
     var from=selfDrivers[j].from_place||'';
-    text+='  • '+selfDrivers[j].identifier+(from?' (откуда: '+from+')':'')+'\n';
+    text+='  • '+getFullName(selfDrivers[j])+(from?' (откуда: '+from+')':'')+'\n';
   }
   text+='Упадут на хвост: '+tailRiders.length+'\n';
   for(var j=0;j<tailRiders.length;j++){
-    text+='  • '+tailRiders[j].identifier+'\n';
+    text+='  • '+getFullName(tailRiders[j])+'\n';
   }
   return text;
 }
@@ -886,7 +921,11 @@ function showReg(){
   document.getElementById('regTitle').textContent='📝 Регистрация';
   resetForm();
 }
-function openWish(){if(!currentUser){showToast('Сначала авторизуйтесь!');return;}renderWish();openM('m-wish');}
+function openWish(){
+  console.log('openWish: currentUser =', currentUser ? currentUser.identifier : 'NULL');
+  if(!currentUser){showToast('Сначала авторизуйтесь!');return;}
+  renderWish();openM('m-wish');
+}
 function openProfile(){if(!currentUser)return;renderProfile();openM('m-profile');}
 
 function openEditProfile(){
@@ -946,10 +985,7 @@ function renderProfile(){
     }
   }
   var html='';
-  html+='<div class="profile-item"><div class="profile-label">Идентификатор</div><div class="profile-value">'+currentUser.identifier+'</div></div>';
-  if(currentUser.nickname){
-    html+='<div class="profile-item"><div class="profile-label">Прозвище</div><div class="profile-value accent">'+currentUser.nickname+'</div></div>';
-  }
+  html+='<div class="profile-item"><div class="profile-label">Имя</div><div class="profile-value">'+getFullName(currentUser)+'</div></div>';
   html+='<div class="profile-item"><div class="profile-label">Звание</div><div class="profile-value accent">'+getRank(currentUser.points||0)+'</div></div>';
   html+='<div class="profile-item"><div class="profile-label">Ягод поймано</div><div class="profile-value accent">🍓 '+(currentUser.points||0)+'</div></div>';
   html+='<div class="profile-item"><div class="profile-label">Подарок</div><div class="profile-value">'+giftHtml+'</div></div>';
@@ -971,8 +1007,7 @@ function renderAuthList(){
   for(var i=0;i<allUsers.length;i++){
     var u=allUsers[i];
     html+='<div class="auitem"><div class="auitem-top" onclick="togglePwd(\''+u.id+'\')"><div>';
-    html+='<div class="auname">'+u.identifier+'</div>';
-    if(u.nickname) html+='<div class="aunick">'+u.nickname+'</div>';
+    html+='<div class="auname">'+getFullName(u)+'</div>';
     html+='<div class="aupoints">'+getRank(u.points||0)+' · 🍓 '+(u.points||0)+'</div>';
     html+='</div><button class="auedit" onclick="event.stopPropagation();editUser(\''+u.id+'\')">✏️</button></div>';
     html+='<div class="au-pwd" id="pwd-'+u.id+'"><input type="password" id="pwdin-'+u.id+'" placeholder="Пароль"><button onclick="tryLogin(\''+u.id+'\')">Войти</button></div></div>';
@@ -1079,6 +1114,7 @@ function createAutoNews(user){
   if(!user) return;
   var dateStr=getDateStr();
   var title='🎒 Упаду на хвост';
+  var fullName=getFullName(user);
   var drivers=allUsers.filter(function(u){
     if(u.id===user.id) return false;
     return u.transport==='Доберусь сам' && u.from_place && u.from_place.trim();
@@ -1087,18 +1123,16 @@ function createAutoNews(user){
   if(drivers.length>0){
     driversText='\n\nЕсть кому подумать:\n';
     for(var i=0;i<drivers.length;i++){
-      var nick = drivers[i].nickname ? ' ('+drivers[i].nickname+')' : '';
-      driversText+='🚗 '+drivers[i].identifier+nick+' — '+drivers[i].from_place+'\n';
+      driversText+='🚗 '+getFullName(drivers[i])+' — '+drivers[i].from_place+'\n';
     }
   }else{
     driversText='\n\nПока никто не указал адрес старта.';
   }
-  var userTitle = user.nickname ? user.nickname+' '+user.identifier : user.identifier;
-  var text=userTitle+driversText;
+  var text=fullName+driversText;
   supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
     allNews.unshift({date:dateStr,title:title,text:text});
     updateHeader();
-    sendToTelegram('<b>🍓 Ягодный ноябрь</b>\n\n🎒 <i>'+userTitle+'</i> хочет упасть на хвост!\n'+driversText);
+    sendToTelegram('<b>🍓 Ягодный ноябрь</b>\n\n🎒 <i>'+escapeTelegram(fullName)+'</i> хочет упасть на хвост!\n'+escapeTelegram(driversText));
   }).catch(function(e){console.error(e);});
 }
 
@@ -1106,21 +1140,20 @@ function createDriverNews(user, fromPlace){
   if(!user) return;
   var dateStr=getDateStr();
   var title='🚗 Доберусь сам';
-  var userTitle = user.nickname ? user.nickname+' '+user.identifier : user.identifier;
-  var text=userTitle+'. Доберусь сам, все могут расслабиться.';
+  var fullName=getFullName(user);
+  var text=fullName+'. Доберусь сам, все могут расслабиться.';
   if(fromPlace && fromPlace.trim()){
     text+='\n\n📍 Стартует из: '+fromPlace;
   }
   supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
     allNews.unshift({date:dateStr,title:title,text:text});
     updateHeader();
-    var tgText='<b>🍓 Ягодный ноябрь</b>\n\n🚗 <i>'+userTitle+'</i> доберётся сам, все могут расслабиться!';
-    if(fromPlace && fromPlace.trim()) tgText+='\n📍 Стартует из: '+fromPlace;
+    var tgText='<b>🍓 Ягодный ноябрь</b>\n\n🚗 <i>'+escapeTelegram(fullName)+'</i> доберётся сам, все могут расслабиться!';
+    if(fromPlace && fromPlace.trim()) tgText+='\n📍 Стартует из: '+escapeTelegram(fromPlace);
     sendToTelegram(tgText);
   }).catch(function(e){console.error(e);});
 }
 
-// ===== ВСПОМОГАТЕЛЬНАЯ: установить состояние кнопки =====
 function setRegBtnState(loading, text){
   var btn = document.getElementById('btnDoReg');
   if(!btn) return;
@@ -1160,19 +1193,16 @@ function doRegister(){
 
   var oldTransport = null;
   var oldFromPlace = null;
-  var oldNickname = null;
   if(isEditing){
     for(var i=0;i<allUsers.length;i++){
       if(allUsers[i].id===editId){
         oldTransport=allUsers[i].transport;
         oldFromPlace=allUsers[i].from_place;
-        oldNickname=allUsers[i].nickname;
         break;
       }
     }
   }
 
-  // ===== ИНДИКАТОР ЗАГРУЗКИ =====
   setRegBtnState(true, isEditing ? 'Сохраняем...' : 'Регистрируем...');
 
   if(isEditing){
@@ -1222,11 +1252,9 @@ function doRegister(){
       setRegBtnState(false);
       closeM('m-auth');
       updateHeader();
-      showToast('🎉 Добро пожаловать, '+nickname+' '+id+'!');
+      showToast('🎉 Добро пожаловать, '+getFullName(newUserData)+'!');
 
-      // ===== НОВОСТЬ О НОВОМ ГОСТЕ (только при регистрации, не при редактировании) =====
       createWelcomeNews(newUserData);
-
       if(newTrans==='Упаду на хвост') createAutoNews(newUserData);
       if(newTrans==='Доберусь сам') createDriverNews(newUserData, newFrom);
       resetForm();
@@ -1265,12 +1293,8 @@ function renderWish(){
     if(myGift){
       myGiftDiv.style.display='block';
       var giftHtml = myGift.title;
-      if(myGift.link){
-        giftHtml += ' <a href="'+myGift.link+'" target="_blank" rel="noopener">↗ Ссылка</a>';
-      }
-      if(myGift.link2){
-        giftHtml += ' <a href="'+myGift.link2+'" target="_blank" rel="noopener">↗ Ещё вариант</a>';
-      }
+      if(myGift.link) giftHtml += ' <a href="'+myGift.link+'" target="_blank" rel="noopener">↗ Ссылка</a>';
+      if(myGift.link2) giftHtml += ' <a href="'+myGift.link2+'" target="_blank" rel="noopener">↗ Ещё вариант</a>';
       document.getElementById('myGiftText').innerHTML=giftHtml;
     }
   }else{myGiftDiv.style.display='none';}
@@ -1327,16 +1351,6 @@ function cancelMyGift(){
 
 function showToast(msg){var t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},3500);}
 
-function sendToTelegram(text){
-  if(!TG_BOT_TOKEN||!TG_CHAT_ID)return;
-  var url='https://api.telegram.org/bot'+TG_BOT_TOKEN+'/sendMessage';
-  fetch(url,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({chat_id:TG_CHAT_ID,text:text,parse_mode:'HTML'})
-  }).catch(function(e){console.error('TG:',e);});
-}
-
 var urlParams=new URLSearchParams(location.search);
 if(urlParams.get('admin')==='саша2026'){
   var bar=document.createElement('div');bar.className='abar';
@@ -1351,10 +1365,11 @@ function addNews(){
     allNews.unshift({date:d,title:t,text:x});
     document.getElementById('ad-d').value='';document.getElementById('ad-t').value='';document.getElementById('ad-x').value='';
     updateHeader();showToast('📰 Новость добавлена!');
-    sendToTelegram('<b>🍓 Ягодный ноябрь: новая новость!</b>\n\n<b>'+t+'</b>\n'+x);
+    sendToTelegram('<b>🍓 Ягодный ноябрь: новая новость!</b>\n\n<b>'+escapeTelegram(t)+'</b>\n'+escapeTelegram(x));
   }).catch(function(e){showToast('Ошибка: '+e.message);});
 }
 
+// ===== ИНИЦИАЛИЗАЦИЯ =====
 try{
   var savedCur=localStorage.getItem('sasha_cur');
   if(savedCur){currentUser=JSON.parse(savedCur);}
@@ -1367,12 +1382,10 @@ startBerries();
 if(urlParams.get('report')==='ягодный')showReport();
 
 loadAllData(function(){
-  // ===== ПРОВЕРКА: currentUser ещё существует в базе? =====
   if(currentUser){
     var found = false;
     for(var i=0;i<allUsers.length;i++){
       if(allUsers[i].id===currentUser.id){
-        // Нашли — обновляем свежими данными
         currentUser=allUsers[i];
         localStorage.setItem('sasha_cur',JSON.stringify(currentUser));
         prevRank=getRank(currentUser.points||0);
@@ -1382,20 +1395,26 @@ loadAllData(function(){
       }
     }
     if(!found){
-      // Пользователь был удалён из базы — очищаем
-      console.log('⚠️ currentUser не найден в базе, очищаем');
-      currentUser = null;
-      prevRank = null;
-      localStorage.removeItem('sasha_cur');
+      // Защита: если пользователь зарегистрировался менее 60 секунд назад — не очищаем
+      var isNew = false;
+      try{
+        var ts = parseInt(currentUser.id.split('_')[1]);
+        isNew = (Date.now() - ts) < 60000;
+      }catch(e){}
+      if(isNew){
+        console.log('ℹ️ currentUser новый, пропускаем очистку');
+      } else {
+        console.log('⚠️ currentUser не найден в базе, очищаем');
+        currentUser = null;
+        prevRank = null;
+        localStorage.removeItem('sasha_cur');
+      }
     }
   }
-
-  // Инициализируем позиции рейтинга после загрузки данных
   var sorted = allUsers.slice().sort(function(a,b){return (b.points||0)-(a.points||0);});
   var top5 = sorted.slice(0,5);
   prevPositions = {};
   for(var i=0;i<top5.length;i++){prevPositions[top5[i].id] = i+1;}
-
   updateHeader();
   if(urlParams.get('report')==='ягодный')showReport();
 });
