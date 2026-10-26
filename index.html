@@ -1290,15 +1290,8 @@ function cancelMyGift(){
 }
 
 function showToast(msg){
-  var t=document.getElementById('toast');
-  if(!t) return;
-  t.textContent=msg;
-  t.classList.add('show');
-  // Убираем предыдущий таймер если был
-  if(t._timer) clearTimeout(t._timer);
-  t._timer=setTimeout(function(){
-    t.classList.remove('show');
-  },2500);
+  // Отключено: всплывающие окна мешают
+  console.log('[INFO] ' + msg);
 }
 
 // ===== АДМИНКА НОВОСТЕЙ =====
