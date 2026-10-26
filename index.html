@@ -37,7 +37,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .h-btn-tg{background:linear-gradient(135deg,#2AABEE,#229ED9);color:#fff}
 .h-btn-tg:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(42,171,238,.4)}
 
-/* ===== ЦЕНТРИРОВАНИЕ ЛЕВОЙ ЧАСТИ ===== */
 .h-info{display:flex;flex-direction:column;gap:6px;max-width:420px;margin:0 auto}
 .h-row{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--td);justify-content:center}
 .h-row .ico{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
@@ -99,6 +98,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .news-item.unread{border-left:3px solid var(--ac)}
 .news-item.auto{border-left:3px solid var(--ac2);background:rgba(255,107,170,.05)}
 .news-item.overtake{border-left:3px solid #ffd700;background:rgba(255,215,0,.05)}
+.news-item.welcome{border-left:3px solid #88ff88;background:rgba(136,255,136,.05)}
 .ni-date{font-size:.7rem;color:var(--ac);font-weight:600;text-transform:uppercase;margin-bottom:3px}
 .ni-title{font-weight:700;font-size:.9rem;color:#fff;margin-bottom:3px}
 .ni-text{font-size:.82rem;color:var(--td);line-height:1.5;white-space:pre-line}
@@ -137,8 +137,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .opt-btn.selected{background:linear-gradient(135deg,rgba(255,45,123,.3),rgba(200,80,192,.3));border-color:var(--ac);color:#fff;font-weight:700}
 .check-row{display:flex;align-items:center;gap:10px;padding:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--rs);cursor:pointer;font-size:.88rem}
 .check-row input{width:18px;height:18px;accent-color:var(--ac)}
-.bsubmit{width:100%;padding:15px;background:linear-gradient(135deg,#ff2d7b,#c850c0);color:#fff;border:none;border-radius:14px;font-family:inherit;font-size:1.05rem;font-weight:700;cursor:pointer;margin-top:10px;transition:all .3s}
+.bsubmit{width:100%;padding:15px;background:linear-gradient(135deg,#ff2d7b,#c850c0);color:#fff;border:none;border-radius:14px;font-family:inherit;font-size:1.05rem;font-weight:700;cursor:pointer;margin-top:10px;transition:all .3s;position:relative}
 .bsubmit:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(255,45,123,.4)}
+.bsubmit:disabled{opacity:.7;cursor:not-allowed;transform:none;box-shadow:none}
+.bsubmit .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 .drivers-block{margin-top:10px;padding:14px;background:rgba(255,45,123,.05);border:1px solid rgba(255,45,123,.2);border-radius:var(--rs);animation:driversIn .3s ease}
 @keyframes driversIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
@@ -185,7 +188,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:linear-gradient(135deg,#1a0a22,#2d1b3d);border:1px solid var(--ac);color:#fff;padding:14px 28px;border-radius:14px;font-weight:600;font-size:.95rem;z-index:10002;box-shadow:0 10px 40px rgba(255,45,123,.4);transition:transform .4s ease;text-align:center;max-width:90%}
 .toast.show{transform:translateX(-50%) translateY(0)}
-@media(max-width:600px){.opt-grid{grid-template-columns:1fr}.opt-grid.three{grid-template-columns:1fr}.profile-grid{grid-template-columns:1fr}.inv{padding:20px}}
 
 .h-days{position:absolute;top:10px;left:16px;font-size:.7rem;color:var(--td);letter-spacing:.3px}
 .h-days b{color:var(--ac2);font-weight:700;font-size:.85rem}
@@ -208,11 +210,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .rating-nick{font-size:.65rem;color:var(--ac2);font-style:italic;margin-top:2px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rating-empty{padding:12px;text-align:center;color:var(--td);font-size:.75rem;background:rgba(255,255,255,.03);border-radius:8px}
 
+/* ===== МОБИЛЬНЫЕ: СКРЫВАЕМ РЕЙТИНГ ===== */
 @media(max-width:700px){
+  .h-right{display:none}
   .h-main{flex-direction:column}
-  .h-right{max-width:100%;min-width:0;width:100%}
-  .h-rating{flex-direction:row;flex-wrap:wrap;gap:6px}
-  .rating-item{flex:1;min-width:140px}
+  .opt-grid{grid-template-columns:1fr}
+  .opt-grid.three{grid-template-columns:1fr}
+  .profile-grid{grid-template-columns:1fr}
+  .inv{padding:20px}
 }
 </style>
 </head>
@@ -445,7 +450,6 @@ function updateCountdown(){
   }
 }
 
-// ===== ОБНОВЛЁННЫЙ ВИШЛИСТ =====
 var wishData=[
   {id:101,title:"Электро-турка для кофе (самоотключающаяся)",link:"",role:false},
   {id:102,title:"Фен профессиональный",link:"",role:false},
@@ -502,7 +506,6 @@ function isNewsDuplicate(date,title,text){
   return false;
 }
 
-// ===== ПРОЗВИЩА =====
 var nicknamePairs=[
   {m:'Клубничный барон', f:'Клубничная баронесса'},
   {m:'Ягода-малинка', f:'Ягода-малинка'},
@@ -684,7 +687,6 @@ function renderRating(){
   el.innerHTML=html;
 }
 
-// ===== ОБГОН В РЕЙТИНГЕ =====
 function checkRatingChange(){
   var sorted = allUsers.slice().sort(function(a,b){return (b.points||0) - (a.points||0);});
   var newPositions = {};
@@ -701,7 +703,6 @@ function checkRatingChange(){
       showRankUpModal(null, myNewPos);
     }
 
-    // Проверяем кого мы обогнали
     if(myOldPos && myNewPos){
       for(var j=0;j<sorted.length;j++){
         var them = sorted[j];
@@ -709,10 +710,9 @@ function checkRatingChange(){
         var theirOldPos = prevPositions[them.id];
         var theirNewPos = newPositions[them.id];
         if(!theirOldPos || !theirNewPos) continue;
-        // Мы были ниже них (больше номер), теперь выше или равны (меньше или равно)
         if(myOldPos > theirOldPos && myNewPos <= theirNewPos){
           createOvertakeNews(currentUser, them);
-          break; // одна новость за раз
+          break;
         }
       }
     }
@@ -741,6 +741,22 @@ function createOvertakeNews(who, whom){
     console.log('✅ Обгон:', whoTitle, verb, whomTitle);
     sendToTelegram('<b>🏆 Обгон в рейтинге!</b>\n\n<i>'+whoTitle+'</i> '+verb+' <i>'+whomTitle+'</i> в ягодном рейтинге! 🍓');
   }).catch(function(e){console.error('❌ Ошибка обгона:',e);});
+}
+
+// ===== НОВОСТЬ О НОВОМ ГОСТЕ =====
+function createWelcomeNews(user){
+  if(!user) return;
+  var dateStr = getDateStr();
+  var title = '🍓 Новый гость!';
+  var userTitle = user.nickname ? user.nickname + ' ' + user.identifier : user.identifier;
+  var text = userTitle + ' присоединяется к ягодному ноябрю! Добро пожаловать!';
+
+  supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
+    allNews.unshift({date:dateStr,title:title,text:text});
+    updateHeader();
+    console.log('✅ Добро пожаловать:', userTitle);
+    sendToTelegram('<b>🍓 Ягодный ноябрь</b>\n\n🍓 <i>'+userTitle+'</i> присоединяется к ягодному ноябрю! Добро пожаловать!');
+  }).catch(function(e){console.error('❌ Ошибка welcome:',e);});
 }
 
 function showRankUpModal(oldPos, newPos){
@@ -774,9 +790,11 @@ function openNews(){
     var t = allNews[i].title||'';
     var isAuto = t.indexOf('🎒 Упаду на хвост')===0 || t.indexOf('🚗 Доберусь сам')===0;
     var isOvertake = t.indexOf('🏆 Обгон')===0;
+    var isWelcome = t.indexOf('🍓 Новый гость')===0;
     var cls='news-item';
     if(unread) cls+=' unread';
     if(isOvertake) cls+=' overtake';
+    else if(isWelcome) cls+=' welcome';
     else if(isAuto) cls+=' auto';
     html+='<div class="'+cls+'">';
     html+='<div class="ni-date">'+(allNews[i].date||'')+'</div>';
@@ -1102,6 +1120,18 @@ function createDriverNews(user, fromPlace){
   }).catch(function(e){console.error(e);});
 }
 
+// ===== ВСПОМОГАТЕЛЬНАЯ: установить состояние кнопки =====
+function setRegBtnState(loading, text){
+  var btn = document.getElementById('btnDoReg');
+  if(!btn) return;
+  btn.disabled = loading;
+  if(loading){
+    btn.innerHTML = '<span class="spinner"></span>' + (text || 'Сохраняем...');
+  } else {
+    btn.textContent = text || '🍓 Зарегистрироваться';
+  }
+}
+
 function doRegister(){
   var grids=document.querySelectorAll('.opt-grid');
   for(var i=0;i<grids.length;i++)grids[i].classList.remove('err');
@@ -1142,6 +1172,9 @@ function doRegister(){
     }
   }
 
+  // ===== ИНДИКАТОР ЗАГРУЗКИ =====
+  setRegBtnState(true, isEditing ? 'Сохраняем...' : 'Регистрируем...');
+
   if(isEditing){
     var updateData={identifier:id,pwd:pwd,probability:formData.prob,transport:newTrans,from_place:newFrom,shashlik:formData.shash,help:formData.help,overnight:formData.night};
     if(gender) updateData.gender = gender;
@@ -1156,6 +1189,7 @@ function doRegister(){
         Object.assign(currentUser,updateData);
         localStorage.setItem('sasha_cur',JSON.stringify(currentUser));
       }
+      setRegBtnState(false);
       closeM('m-auth');updateHeader();showToast('✅ Анкета обновлена!');
       editingUserId=null;
       resetForm();
@@ -1169,7 +1203,11 @@ function doRegister(){
       } else if(newTrans === 'Доберусь сам' && oldFromPlace !== newFrom){
         createDriverNews(currentUser, newFrom);
       }
-    }).catch(function(e){console.error(e);showToast('Ошибка: '+e.message);});
+    }).catch(function(e){
+      console.error(e);
+      setRegBtnState(false);
+      showToast('Ошибка: '+e.message);
+    });
   }else{
     var newId='user_'+Date.now();
     var nickname = generateNickname(gender);
@@ -1181,14 +1219,20 @@ function doRegister(){
         currentUser=newUserData;
         localStorage.setItem('sasha_cur',JSON.stringify(newUserData));
       }catch(err){console.error(err);}
+      setRegBtnState(false);
       closeM('m-auth');
       updateHeader();
       showToast('🎉 Добро пожаловать, '+nickname+' '+id+'!');
+
+      // ===== НОВОСТЬ О НОВОМ ГОСТЕ (только при регистрации, не при редактировании) =====
+      createWelcomeNews(newUserData);
+
       if(newTrans==='Упаду на хвост') createAutoNews(newUserData);
       if(newTrans==='Доберусь сам') createDriverNews(newUserData, newFrom);
       resetForm();
     }).catch(function(e){
       console.error(e);
+      setRegBtnState(false);
       showToast('Ошибка: '+e.message);
     });
   }
@@ -1208,6 +1252,7 @@ function resetForm(){
   for(var i=0;i<errs.length;i++)errs[i].classList.remove('err');
   formData={prob:null,trans:null,from:'',shash:[],help:false,night:null,gender:null};
   document.getElementById('regTitle').textContent='📝 Регистрация';
+  setRegBtnState(false);
 }
 
 function renderWish(){
