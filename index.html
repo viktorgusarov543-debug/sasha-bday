@@ -676,33 +676,8 @@ function renderDriversList(){
 }
 
 function showLevelUp(newRank){
-  var overlay=document.getElementById('levelupOverlay');
-  if(!overlay) return;
-  document.getElementById('levelupRank').textContent=newRank;
-  overlay.classList.add('active');
-  
-  // Фейерверк
-  for(var i=0;i<30;i++){
-    var p=document.createElement('div');p.className='fw-particle';
-    p.style.left='50%';p.style.top='50%';
-    p.style.background='hsl('+(Math.random()*360)+',90%,60%)';
-    var angle=Math.random()*Math.PI*2,dist=100+Math.random()*200;
-    p.style.setProperty('--fx',Math.cos(angle)*dist+'px');
-    p.style.setProperty('--fy',Math.sin(angle)*dist+'px');
-    document.body.appendChild(p);
-    setTimeout(function(el){return function(){el.remove();};}(p),1200);
-  }
-  
-  // Закрытие по клику
-  var closeFn=function(){overlay.classList.remove('active');};
-  overlay.onclick=closeFn;
-  
-  // АВТОЗАКРЫТИЕ через 4 секунды
-  setTimeout(function(){
-    if(overlay.classList.contains('active')){
-      overlay.classList.remove('active');
-    }
-  },4000);
+  // Вместо оверлея показываем тост
+  showToast('🎆 Новый уровень: ' + newRank + '!');
 }
 
 var berryE=['🍓','🍒','🍇','🫐','🍑','🍉','🍊','🍋','🥝'];
@@ -850,40 +825,13 @@ function createWelcomeNews(user){
   }).catch(function(){});
 }
 
-function showRankUpModal(oldPos,newPos){
-  var overlay=document.getElementById('rankupOverlay');
-  var text=document.getElementById('rankupText');
-  if(!overlay||!text) return;
-  
+function showRankUpModal(oldPos, newPos){
+  // Вместо оверлея показываем тост
   if(oldPos){
-    text.textContent='Ты поднялся с '+oldPos+' на '+newPos+' место! 🎉';
+    showToast('📈 Подъём! Ты на ' + newPos + ' месте (был ' + oldPos + ')');
   }else{
-    text.textContent='Ты впервые в топ-5! Место: '+newPos+' 🎉';
+    showToast('📈 Ты впервые в топ-5! Место: ' + newPos);
   }
-  overlay.classList.add('active');
-  
-  // Фейерверк
-  for(var i=0;i<25;i++){
-    var p=document.createElement('div');p.className='fw-particle';
-    p.style.left='50%';p.style.top='50%';
-    p.style.background='hsl('+(Math.random()*360)+',90%,60%)';
-    var angle=Math.random()*Math.PI*2,dist=80+Math.random()*180;
-    p.style.setProperty('--fx',Math.cos(angle)*dist+'px');
-    p.style.setProperty('--fy',Math.sin(angle)*dist+'px');
-    document.body.appendChild(p);
-    setTimeout(function(el){return function(){el.remove();};}(p),1200);
-  }
-  
-  // Закрытие по клику
-  var closeFn=function(){overlay.classList.remove('active');};
-  overlay.onclick=closeFn;
-  
-  // АВТОЗАКРЫТИЕ через 4 секунды
-  setTimeout(function(){
-    if(overlay.classList.contains('active')){
-      overlay.classList.remove('active');
-    }
-  },4000);
 }
 
 function openNews(){
@@ -1342,9 +1290,15 @@ function cancelMyGift(){
 }
 
 function showToast(msg){
-  var t=document.getElementById('toast');if(!t)return;
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(function(){t.classList.remove('show');},3500);
+  var t=document.getElementById('toast');
+  if(!t) return;
+  t.textContent=msg;
+  t.classList.add('show');
+  // Убираем предыдущий таймер если был
+  if(t._timer) clearTimeout(t._timer);
+  t._timer=setTimeout(function(){
+    t.classList.remove('show');
+  },2500);
 }
 
 // ===== АДМИНКА НОВОСТЕЙ =====
