@@ -1201,7 +1201,6 @@ function doRegister(){
       localStorage.setItem('sasha_cur',JSON.stringify(newUserData));
       setRegBtnState(false);
       closeM('m-auth');updateHeader();
-      createWelcomeNews(newUserData);
       createTransportNews(newUserData,newFrom);
       resetForm();
     }).catch(function(e){setRegBtnState(false);showToast('Ошибка: '+e.message);});
