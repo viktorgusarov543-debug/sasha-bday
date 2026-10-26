@@ -677,8 +677,11 @@ function renderDriversList(){
 
 function showLevelUp(newRank){
   var overlay=document.getElementById('levelupOverlay');
+  if(!overlay) return;
   document.getElementById('levelupRank').textContent=newRank;
   overlay.classList.add('active');
+  
+  // Фейерверк
   for(var i=0;i<30;i++){
     var p=document.createElement('div');p.className='fw-particle';
     p.style.left='50%';p.style.top='50%';
@@ -689,7 +692,17 @@ function showLevelUp(newRank){
     document.body.appendChild(p);
     setTimeout(function(el){return function(){el.remove();};}(p),1200);
   }
-  overlay.onclick=function(){overlay.classList.remove('active');};
+  
+  // Закрытие по клику
+  var closeFn=function(){overlay.classList.remove('active');};
+  overlay.onclick=closeFn;
+  
+  // АВТОЗАКРЫТИЕ через 4 секунды
+  setTimeout(function(){
+    if(overlay.classList.contains('active')){
+      overlay.classList.remove('active');
+    }
+  },4000);
 }
 
 var berryE=['🍓','🍒','🍇','🫐','🍑','🍉','🍊','🍋','🥝'];
@@ -841,8 +854,15 @@ function showRankUpModal(oldPos,newPos){
   var overlay=document.getElementById('rankupOverlay');
   var text=document.getElementById('rankupText');
   if(!overlay||!text) return;
-  text.textContent=oldPos ? 'Ты поднялся с '+oldPos+' на '+newPos+' место! 🎉' : 'Ты впервые в топ-5! Место: '+newPos+' 🎉';
+  
+  if(oldPos){
+    text.textContent='Ты поднялся с '+oldPos+' на '+newPos+' место! 🎉';
+  }else{
+    text.textContent='Ты впервые в топ-5! Место: '+newPos+' 🎉';
+  }
   overlay.classList.add('active');
+  
+  // Фейерверк
   for(var i=0;i<25;i++){
     var p=document.createElement('div');p.className='fw-particle';
     p.style.left='50%';p.style.top='50%';
@@ -853,7 +873,17 @@ function showRankUpModal(oldPos,newPos){
     document.body.appendChild(p);
     setTimeout(function(el){return function(){el.remove();};}(p),1200);
   }
-  overlay.onclick=function(){overlay.classList.remove('active');};
+  
+  // Закрытие по клику
+  var closeFn=function(){overlay.classList.remove('active');};
+  overlay.onclick=closeFn;
+  
+  // АВТОЗАКРЫТИЕ через 4 секунды
+  setTimeout(function(){
+    if(overlay.classList.contains('active')){
+      overlay.classList.remove('active');
+    }
+  },4000);
 }
 
 function openNews(){
