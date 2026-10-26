@@ -1367,19 +1367,35 @@ startBerries();
 if(urlParams.get('report')==='ягодный')showReport();
 
 loadAllData(function(){
+  // ===== ПРОВЕРКА: currentUser ещё существует в базе? =====
   if(currentUser){
+    var found = false;
     for(var i=0;i<allUsers.length;i++){
       if(allUsers[i].id===currentUser.id){
+        // Нашли — обновляем свежими данными
         currentUser=allUsers[i];
         localStorage.setItem('sasha_cur',JSON.stringify(currentUser));
         prevRank=getRank(currentUser.points||0);
+        found = true;
+        console.log('✅ currentUser актуален:', currentUser.identifier);
         break;
       }
     }
+    if(!found){
+      // Пользователь был удалён из базы — очищаем
+      console.log('⚠️ currentUser не найден в базе, очищаем');
+      currentUser = null;
+      prevRank = null;
+      localStorage.removeItem('sasha_cur');
+    }
   }
+
+  // Инициализируем позиции рейтинга после загрузки данных
   var sorted = allUsers.slice().sort(function(a,b){return (b.points||0)-(a.points||0);});
+  var top5 = sorted.slice(0,5);
   prevPositions = {};
-  for(var i=0;i<sorted.length;i++){prevPositions[sorted[i].id] = i+1;}
+  for(var i=0;i<top5.length;i++){prevPositions[top5[i].id] = i+1;}
+
   updateHeader();
   if(urlParams.get('report')==='ягодный')showReport();
 });
