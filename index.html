@@ -542,7 +542,7 @@ function createFlyObj(item,x,y){
   var dist=90+Math.random()*150; // 90-240px разлёт
   var dx=Math.cos(angle)*dist;
   var dy=Math.sin(angle)*dist;
-  var dur=1.0+Math.random()*0.4; // 1.0-1.4s жизнь
+  var dur=3.0+Math.random()*0.4; // 1.0-1.4s жизнь
   el.style.setProperty('--dx',dx+'px');
   el.style.setProperty('--dy',dy+'px');
   el.style.setProperty('--dur',dur+'s');
