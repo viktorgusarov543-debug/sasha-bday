@@ -50,16 +50,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .b4{width:300px;height:300px;background:#ff6baa;top:60%;left:10%;animation-delay:-15s}
 @keyframes bm{0%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.1)}100%{transform:translate(-20px,20px) scale(.95)}}
 
-/* ===== ЛЕТАЮЩИЕ ОБЪЕКТЫ ===== */
-.flying-berry{position:fixed;width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;z-index:500;user-select:none;animation:bf linear infinite;filter:drop-shadow(0 4px 8px rgba(0,0,0,.3))}
-.fly-img{width:48px;height:48px;border-radius:50%;object-fit:cover;display:block;border:2px solid rgba(255,255,255,.3)}
-.flying-berry.boom{animation:be .5s ease-out forwards!important;pointer-events:none}
-@keyframes bf{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(30px,-40px) rotate(90deg)}50%{transform:translate(-20px,-80px) rotate(180deg)}75%{transform:translate(40px,-120px) rotate(270deg)}100%{transform:translate(0,-160px) rotate(360deg);opacity:0}}
-@keyframes be{0%{transform:scale(1);opacity:1}100%{transform:scale(3);opacity:0}}
+/* ===== ЛЕТАЮЩИЕ ОБЪЕКТЫ (залп по тапу) ===== */
+.fly-obj{
+  position:fixed;width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.9rem;cursor:pointer;user-select:none;z-index:500;
+  pointer-events:auto;
+  animation:burstFly var(--dur,1.2s) cubic-bezier(.15,.85,.35,1) forwards;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.35));
+  will-change:transform,opacity;
+}
+.fly-img{width:44px;height:44px;border-radius:50%;object-fit:cover;display:block;border:2px solid rgba(255,255,255,.35)}
+@keyframes burstFly{
+  0%{transform:translate(0,0) scale(.3) rotate(0);opacity:0}
+  12%{opacity:1;transform:translate(calc(var(--dx)*.12),calc(var(--dy)*.12)) scale(1.05) rotate(50deg)}
+  100%{transform:translate(var(--dx),var(--dy)) scale(.9) rotate(360deg);opacity:0}
+}
 .bp{position:fixed;width:8px;height:8px;border-radius:50%;z-index:501;pointer-events:none;animation:pf .8s ease-out forwards}
 @keyframes pf{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
-
-/* всплывающие +1 / -3 */
 .point-popup{position:fixed;z-index:600;font-weight:900;font-size:1.5rem;pointer-events:none;transform:translate(-50%,-50%);animation:pointFly 1s ease-out forwards;text-shadow:0 0 12px currentColor}
 @keyframes pointFly{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-180%) scale(1.6)}}
 
@@ -184,7 +192,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .h-corner-btn{padding:5px 14px;border-radius:20px;font-family:inherit;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .3s;background:transparent;border:1px solid var(--ac);color:var(--ac)}
 .h-corner-btn:hover{background:var(--ac);color:#fff}
 
-/* ===== ЦЕНТРИРОВАННАЯ ШАПКА ===== */
 .h-main{position:relative;display:block}
 .h-left{max-width:520px;margin:0 auto;text-align:center}
 .h-right{display:none}
@@ -201,6 +208,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .rating-pts{color:var(--ac2);font-weight:700;flex-shrink:0}
 .rating-empty{padding:12px;text-align:center;color:var(--td);font-size:.75rem;background:rgba(255,255,255,.03);border-radius:8px}
 
+/* ВИШЛИСТ: брони не прокручиваются */
+#m-wish .mbox{display:flex;flex-direction:column;overflow:hidden;max-height:90vh}
+#m-wish .wscroll{flex:1;overflow-y:auto;padding:2px;margin-top:6px}
+#m-wish .wscroll::-webkit-scrollbar{width:6px}
+#m-wish .wscroll::-webkit-scrollbar-thumb{background:var(--ac3);border-radius:4px}
+#m-wish .mygift{flex-shrink:0;background:#221130;z-index:5;box-shadow:0 8px 20px rgba(13,5,17,.8)}
+
 .debug-log{position:fixed;bottom:0;left:0;right:0;z-index:99999;background:rgba(0,0,0,.96);color:#0f0;font-family:monospace;font-size:11px;max-height:32vh;overflow-y:auto;padding:10px;border-top:2px solid #0f0;display:none}
 .debug-log.active{display:block}
 .debug-log .log-line{margin-bottom:4px;word-break:break-all;line-height:1.4}
@@ -215,16 +229,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
   .opt-grid.three{grid-template-columns:1fr}
   .profile-grid{grid-template-columns:1fr}
   .inv{padding:20px}
-}
-#m-wish .mbox{display:flex;flex-direction:column;overflow:hidden;max-height:90vh}
-#m-wish .wscroll{flex:1;overflow-y:auto;padding:2px;margin-top:6px}
-#m-wish .wscroll::-webkit-scrollbar{width:6px}
-#m-wish .wscroll::-webkit-scrollbar-thumb{background:var(--ac3);border-radius:4px}
-#m-wish .mygift{
-  flex-shrink:0;
-  background:#221130;
-  z-index:5;
-  box-shadow:0 8px 20px rgba(13,5,17,.8);
 }
 </style>
 </head>
@@ -385,7 +389,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 <script>
 var urlParams = new URLSearchParams(location.search);
 
-// ===== ОТЛАДКА =====
 var debugActive = false;
 function toggleDebug(){
   debugActive = !debugActive;
@@ -412,7 +415,6 @@ if(urlParams.has('debug')){
   },500);
 }
 
-// ===== SUPABASE =====
 var SUPA_URL='https://fkmdpikxyttwyfyoyivm.supabase.co';
 var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrbWRwaWt4eXR0d3lmeW95aXZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExODY4NDksImV4cCI6MjEwNjc2Mjg0OX0.5knt9zOTk40cNnMN_F-Xgsyg52e0klya3FaDhDzceIQ';
 var TG_BOT_TOKEN='8828283274:AAFKjiAA95Ye9J4nXFTQTHEtq2ZCVjKW4QE';
@@ -501,25 +503,113 @@ function updateCountdown(){
   else el.innerHTML='<b>🍓</b> Праздник прошёл';
 }
 
-// ===== ЛЕТАЮЩИЕ ОБЪЕКТЫ (фрукты + рожи) =====
-// Картинки лежат в корне репозитория рядом с index.html
-var flyItems=[
-  {kind:'emoji',c:'🍓',pts:1},
-  {kind:'emoji',c:'🍒',pts:1},
-  {kind:'emoji',c:'🍇',pts:1},
-  {kind:'emoji',c:'🫐',pts:1},
-  {kind:'emoji',c:'🍑',pts:1},
-  {kind:'emoji',c:'🍉',pts:1},
-  {kind:'emoji',c:'🍊',pts:1},
-  {kind:'emoji',c:'🍋',pts:1},
-  {kind:'emoji',c:'🥝',pts:1},
-  {kind:'img',src:'loza.png',pts:5},
-  {kind:'img',src:'petrosyan.png',pts:-3},
-  {kind:'img',src:'bomb.png',pts:-3},
-  {kind:'img',src:'face4.png',pts:-3}
+// ===== ИГРА: залп по тапу =====
+var berryEmojis=['🍓','🍒','🍇','🫐','🍑','🍉','🍊','🍋','🥝'];
+var flyImages=[
+  {src:'loza.png',pts:5},
+  {src:'petrosyan.png',pts:-3},
+  {src:'bomb.png',pts:-3},
+  {src:'face4.png',pts:-3}
 ];
+var IMG_CHANCE=0.08; // картинки редко: 8%
 
-// ===== ВИШЛИСТ =====
+function pickFlyItem(){
+  if(Math.random()<IMG_CHANCE){
+    var img=flyImages[Math.floor(Math.random()*flyImages.length)];
+    return {kind:'img',src:img.src,pts:img.pts};
+  }
+  return {kind:'emoji',c:berryEmojis[Math.floor(Math.random()*berryEmojis.length)],pts:1};
+}
+
+function burst(x,y){
+  var count=9+Math.floor(Math.random()*5); // 9-13 объектов
+  for(var i=0;i<count;i++){
+    createFlyObj(pickFlyItem(),x,y);
+  }
+}
+
+function createFlyObj(item,x,y){
+  var el=document.createElement('div');
+  el.className='fly-obj';
+  if(item.kind==='emoji'){
+    el.textContent=item.c;
+  }else{
+    var img=document.createElement('img');
+    img.src=item.src;img.className='fly-img';img.alt='';
+    el.appendChild(img);
+  }
+  var angle=Math.random()*Math.PI*2;
+  var dist=90+Math.random()*150; // 90-240px разлёт
+  var dx=Math.cos(angle)*dist;
+  var dy=Math.sin(angle)*dist;
+  var dur=1.0+Math.random()*0.4; // 1.0-1.4s жизнь
+  el.style.setProperty('--dx',dx+'px');
+  el.style.setProperty('--dy',dy+'px');
+  el.style.setProperty('--dur',dur+'s');
+  var size=44;
+  el.style.left=(x-size/2)+'px';
+  el.style.top=(y-size/2)+'px';
+  el.addEventListener('click',function(e){
+    e.stopPropagation();
+    hitFly(el,item);
+  });
+  document.body.appendChild(el);
+  setTimeout(function(){if(el.parentNode)el.remove();},dur*1000+100);
+}
+
+function hitFly(el,item){
+  var r=el.getBoundingClientRect();
+  var cx=r.left+r.width/2;
+  var cy=r.top+r.height/2;
+  spawnParticles(cx,cy);
+  el.style.pointerEvents='none';
+  el.remove();
+  var pts=item.pts;
+  if(currentUser){
+    currentUser.points=Math.max(0,(currentUser.points||0)+pts);
+    supaFetch('users?id=eq.'+currentUser.id,'PATCH',{points:currentUser.points}).catch(function(){});
+    for(var k=0;k<allUsers.length;k++){
+      if(allUsers[k].id===currentUser.id){allUsers[k].points=currentUser.points;break;}
+    }
+    var newRank=getRank(currentUser.points);
+    if(prevRank&&prevRank!==newRank)showLevelUp(newRank);
+    prevRank=newRank;
+    renderRating();checkRatingChange();pulsePoints();updateHeader();
+  }
+  showPointPopup(cx,cy,pts);
+}
+
+function spawnParticles(cx,cy){
+  for(var i=0;i<8;i++){
+    var p=document.createElement('div');p.className='bp';
+    p.style.left=cx+'px';p.style.top=cy+'px';
+    p.style.background='hsl('+(Math.random()*60+300)+',80%,60%)';
+    var a=Math.PI*2*i/8,d=50+Math.random()*50;
+    p.style.setProperty('--dx',Math.cos(a)*d+'px');
+    p.style.setProperty('--dy',Math.sin(a)*d+'px');
+    document.body.appendChild(p);
+    setTimeout(function(el){return function(){el.remove();};}(p),800);
+  }
+}
+
+function showPointPopup(x,y,pts){
+  var el=document.createElement('div');
+  el.className='point-popup';
+  el.textContent=(pts>0?'+':'')+pts;
+  el.style.left=x+'px';
+  el.style.top=y+'px';
+  el.style.color=pts>0?'#7CFC7C':'#ff5c5c';
+  document.body.appendChild(el);
+  setTimeout(function(){el.remove();},1000);
+}
+
+function initTapGame(){
+  document.addEventListener('click',function(e){
+    if(e.target.closest('button, a, input, label, .moverlay, .abar, .toast, .debug-log, .debug-toggle, .fly-obj, .header')) return;
+    burst(e.clientX,e.clientY);
+  });
+}
+
 var wishData=[
   {id:101,title:"Электро-турка для кофе (самоотключающаяся)",link:"",role:false},
   {id:102,title:"Фен профессиональный",link:"",role:false},
@@ -596,7 +686,6 @@ function isNewsDuplicate(date,title,text){
   return false;
 }
 
-// ===== ПРОЗВИЩА (род меняется только где грамотно) =====
 var nicknames=[
   {base:'Клубничный барон',female:'Клубничная баронесса'},
   {base:'Ягода-малинка'},
@@ -650,14 +739,11 @@ function renderDriversList(){
   list.innerHTML=html;
 }
 
-function showLevelUp(newRank){
-  showToast('🎆 Новый уровень: '+newRank+'!');
-}
+function showLevelUp(newRank){showToast('🎆 Новый уровень: '+newRank+'!');}
 function showRankUpModal(oldPos,newPos){
   if(oldPos)showToast('📈 Подъём! Ты на '+newPos+' месте (был '+oldPos+')');
   else showToast('📈 Ты впервые в топ-5! Место: '+newPos);
 }
-
 function showToast(msg){
   var t=document.getElementById('toast');
   if(!t)return;
@@ -665,78 +751,6 @@ function showToast(msg){
   t.classList.add('show');
   if(t._timer)clearTimeout(t._timer);
   t._timer=setTimeout(function(){t.classList.remove('show');},2200);
-}
-
-// ===== ЛЕТАЮЩИЕ ОБЪЕКТЫ =====
-function spawnFly(){
-  var item=flyItems[Math.floor(Math.random()*flyItems.length)];
-  var b=document.createElement('div');
-  b.className='flying-berry';
-  if(item.kind==='emoji'){
-    b.textContent=item.c;
-  }else{
-    var img=document.createElement('img');
-    img.src=item.src;
-    img.className='fly-img';
-    img.alt='';
-    b.appendChild(img);
-  }
-  b.style.left=Math.random()*(window.innerWidth-60)+'px';
-  b.style.top=(window.innerHeight-60)+'px';
-  var dur=4+Math.random()*4; // быстрее: 4-8 сек
-  b.style.animationDuration=dur+'s';
-  b.onclick=function(e){e.stopPropagation();hitFly(b,item);};
-  document.body.appendChild(b);
-  setTimeout(function(){if(b.parentNode)b.remove();},dur*1000);
-}
-function hitFly(b,item){
-  var r=b.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
-  for(var i=0;i<8;i++){
-    var p=document.createElement('div');p.className='bp';
-    p.style.left=cx+'px';p.style.top=cy+'px';
-    p.style.background='hsl('+(Math.random()*60+300)+',80%,60%)';
-    var a=Math.PI*2*i/8,d=50+Math.random()*50;
-    p.style.setProperty('--dx',Math.cos(a)*d+'px');
-    p.style.setProperty('--dy',Math.sin(a)*d+'px');
-    document.body.appendChild(p);
-    setTimeout(function(el){return function(){el.remove();};}(p),800);
-  }
-  b.classList.add('boom');
-  setTimeout(function(){b.remove();},500);
-
-  var pts=item.pts;
-  if(currentUser){
-    currentUser.points=(currentUser.points||0)+pts;
-    if(currentUser.points<0)currentUser.points=0;
-    supaFetch('users?id=eq.'+currentUser.id,'PATCH',{points:currentUser.points}).catch(function(){});
-    for(var k=0;k<allUsers.length;k++){
-      if(allUsers[k].id===currentUser.id){allUsers[k].points=currentUser.points;break;}
-    }
-    var newRank=getRank(currentUser.points);
-    if(prevRank&&prevRank!==newRank)showLevelUp(newRank);
-    prevRank=newRank;
-    renderRating();checkRatingChange();pulsePoints();updateHeader();
-  }
-  showPointPopup(cx,cy,pts);
-}
-function showPointPopup(x,y,pts){
-  var el=document.createElement('div');
-  el.className='point-popup';
-  el.textContent=(pts>0?'+':'')+pts;
-  el.style.left=x+'px';
-  el.style.top=y+'px';
-  el.style.color=pts>0?'#7CFC7C':'#ff5c5c';
-  document.body.appendChild(el);
-  setTimeout(function(){el.remove();},1000);
-}
-function startBerries(){
-  setInterval(spawnFly,1200); // чаще, азартнее
-  for(var i=0;i<5;i++)setTimeout(spawnFly,i*250);
-}
-function pulsePoints(){
-  var el=document.getElementById('pts-counter');
-  if(!el)return;
-  el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse');
 }
 
 function updateHeader(){
@@ -826,18 +840,6 @@ function createOvertakeNews(who,whom){
   supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
     allNews.unshift({date:dateStr,title:title,text:text});updateHeader();
     sendToTelegram('<b>🏆 Обгон в рейтинге!</b>\n\n<i>'+whoT+'</i> '+verb+' <i>'+whomT+'</i> в ягодном рейтинге! 🍓');
-  }).catch(function(){});
-}
-
-function createWelcomeNews(user){
-  if(!user)return;
-  var dateStr=getDateStr();
-  var title='🍓 Новый гость!';
-  var fullName=getFullName(user);
-  var text=fullName+' присоединяется к ягодному ноябрю! Добро пожаловать!';
-  supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
-    allNews.unshift({date:dateStr,title:title,text:text});updateHeader();
-    sendToTelegram('<b>🍓 Ягодный ноябрь</b>\n\n🍓 <i>'+escapeTelegram(fullName)+'</i> присоединяется к ягодному ноябрю! Добро пожаловать!');
   }).catch(function(){});
 }
 
@@ -1224,7 +1226,6 @@ function resetForm(){
   setRegBtnState(false);
 }
 
-// ===== ВИШЛИСТ: подарок + роль одновременно =====
 function renderWish(){
   var grid=document.getElementById('wgrid'),html='';
   var myGift=getMyGift();
@@ -1301,7 +1302,6 @@ function cancelReserve(reserveId){
   }).catch(function(e){showToast('Ошибка: '+e.message);});
 }
 
-// ===== АДМИНКА НОВОСТЕЙ =====
 if(urlParams.get('admin')==='саша2026'){
   var bar=document.createElement('div');bar.className='abar';
   bar.innerHTML='<span style="color:#ff2d7b;font-weight:700">🔧 Новости:</span><input id="ad-d" placeholder="Дата" style="width:100px"><input id="ad-t" placeholder="Заголовок" style="flex:1;min-width:120px"><input id="ad-x" placeholder="Текст" style="flex:2;min-width:200px"><button onclick="addNews()">Добавить</button>';
@@ -1323,7 +1323,6 @@ function addNews(){
   }).catch(function(e){showToast('Ошибка: '+e.message);});
 }
 
-// ===== ИНИЦИАЛИЗАЦИЯ =====
 try{
   var savedCur=localStorage.getItem('sasha_cur');
   if(savedCur)currentUser=JSON.parse(savedCur);
@@ -1332,7 +1331,7 @@ try{
 dlog('🚀 Старт. currentUser='+(currentUser?getFullName(currentUser):'null'));
 if(currentUser)prevRank=getRank(currentUser.points||0);
 updateHeader();
-startBerries();
+initTapGame();
 
 if(urlParams.get('report')==='ягодный')showReport();
 
