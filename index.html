@@ -539,10 +539,10 @@ function createFlyObj(item,x,y){
     el.appendChild(img);
   }
   var angle=Math.random()*Math.PI*2;
-  var dist=55+Math.random()*85; // 55-140px — летят ближе к точке тапа
+  var dist=120+Math.random()*340; // 120-460px — разлетаются по всему экрану
   var dx=Math.cos(angle)*dist;
   var dy=Math.sin(angle)*dist;
-  var dur=3.5+Math.random()*1.5; // 3.5-5.0s — вдвое дольше на экране
+  var dur=4.0+Math.random()*2.0; // 4-6 секунд
   el.style.setProperty('--dx',dx+'px');
   el.style.setProperty('--dy',dy+'px');
   el.style.setProperty('--dur',dur+'s');
