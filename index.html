@@ -522,7 +522,12 @@ function pickFlyItem(){
 }
 
 function burst(x,y){
-  var count=9+Math.floor(Math.random()*5); // 9-13 объектов
+  // защита от перегрузки: если объектов слишком много — чистим старые
+  var objs=document.querySelectorAll('.fly-obj');
+  if(objs.length>80){
+    for(var i=0;i<objs.length-60;i++){if(objs[i].parentNode)objs[i].remove();}
+  }
+  var count=9+Math.floor(Math.random()*5);
   for(var i=0;i<count;i++){
     createFlyObj(pickFlyItem(),x,y);
   }
@@ -558,25 +563,29 @@ function createFlyObj(item,x,y){
 }
 
 function hitFly(el,item){
-  var r=el.getBoundingClientRect();
-  var cx=r.left+r.width/2;
-  var cy=r.top+r.height/2;
-  spawnParticles(cx,cy);
-  el.style.pointerEvents='none';
-  el.remove();
-  var pts=item.pts;
-  if(currentUser){
-    currentUser.points=Math.max(0,(currentUser.points||0)+pts);
-    supaFetch('users?id=eq.'+currentUser.id,'PATCH',{points:currentUser.points}).catch(function(){});
-    for(var k=0;k<allUsers.length;k++){
-      if(allUsers[k].id===currentUser.id){allUsers[k].points=currentUser.points;break;}
+  try{
+    var r=el.getBoundingClientRect();
+    var cx=r.left+r.width/2;
+    var cy=r.top+r.height/2;
+    spawnParticles(cx,cy);
+    el.style.pointerEvents='none';
+    el.remove();
+    var pts=item.pts;
+    if(currentUser){
+      currentUser.points=Math.max(0,(currentUser.points||0)+pts);
+      for(var k=0;k<allUsers.length;k++){
+        if(allUsers[k].id===currentUser.id){allUsers[k].points=currentUser.points;break;}
+      }
+      savePointsDebounced(); // сохраняем в базу не чаще раза в 0.8с
+      var newRank=getRank(currentUser.points);
+      if(prevRank&&prevRank!==newRank)showLevelUp(newRank);
+      prevRank=newRank;
+      renderRating();checkRatingChange();pulsePoints();updateHeader();
     }
-    var newRank=getRank(currentUser.points);
-    if(prevRank&&prevRank!==newRank)showLevelUp(newRank);
-    prevRank=newRank;
-    renderRating();checkRatingChange();pulsePoints();updateHeader();
+    showPointPopup(cx,cy,pts);
+  }catch(err){
+    dlog('❌ hitFly ошибка: '+err.message);
   }
-  showPointPopup(cx,cy,pts);
 }
 
 function spawnParticles(cx,cy){
@@ -635,7 +644,15 @@ var allUsers=[];
 var allNews=[];
 var allReserves=[];
 var prevPositions={};
-
+var savePointsTimer=null;
+function savePointsDebounced(){
+  if(savePointsTimer)clearTimeout(savePointsTimer);
+  savePointsTimer=setTimeout(function(){
+    if(currentUser){
+      supaFetch('users?id=eq.'+currentUser.id,'PATCH',{points:currentUser.points}).catch(function(){});
+    }
+  },800);
+}
 function openMap(){window.open('https://yandex.ru/maps/?pt=49.025928,55.647778&z=16&l=map','_blank','noopener,noreferrer');}
 
 function loadAllData(cb){
