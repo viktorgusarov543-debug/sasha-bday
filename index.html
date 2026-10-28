@@ -74,11 +74,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 /* ===== КОНТЕНТ: занимает весь остаток экрана, плитка растягивается ===== */
 .content{position:relative;z-index:1;max-width:800px;width:100%;margin:0 auto;padding:8px 14px;flex:1;min-height:0;display:flex;flex-direction:column}
 .inv{background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.09);border-radius:14px;
-  padding:12px 16px;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-evenly;overflow:hidden}
+  padding:6px 16px;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-evenly;overflow:hidden}
 .inv-head{display:flex;align-items:center;justify-content:center;gap:10px;
   font-size:clamp(1.5rem,3.4vh,2.1rem);color:var(--ac2);font-weight:900;letter-spacing:.5px;flex-shrink:0}
 .inv-head-ico{font-size:clamp(1.3rem,3vh,1.9rem)}
-.inv p{font-size:clamp(.72rem,1.75vh,1.02rem);line-height:clamp(1.2,2.1vh,1.5)}
+.inv p{font-size:clamp(.68rem,1.55vh,.92rem);line-height:clamp(1.15,1.85vh,1.35)}
 .hl{background:linear-gradient(135deg,rgba(255,45,123,.2),rgba(200,80,192,.2));padding:1px 8px;border-radius:6px;font-weight:600;color:var(--ac2)}
 .content,.inv,.inv p,.hl{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none}
 
@@ -921,7 +921,7 @@ function updateHeader(){
   var navSlot=document.getElementById('hNav');
   var cornerSlot=document.getElementById('hCorner');
   var unread=getUnread();
-  var newsBtnHtml='<button class="h-corner-btn news-btn" onclick="openNews()">📰'+
+  var newsBtnHtml='<button class="h-corner-btn news-btn" onclick="openNews()">Новости'+
     '<span class="h-badge'+(unread===0?' zero':'')+'" id="newsBadge">'+unread+'</span></button>';
   if(currentUser){
     prevRank=getRank(currentUser.points||0);
