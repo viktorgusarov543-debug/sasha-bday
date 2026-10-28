@@ -259,6 +259,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 .wish-top{flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:12px;margin-bottom:2px}
 .wish-subhead{flex-shrink:0;font-size:.78rem;color:var(--ac2);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:10px 0 8px;text-align:center}
 .roletakers{font-size:.72rem;color:var(--td);margin:6px 0 8px;line-height:1.4}
+.role-participants{font-size:.75rem;color:var(--td);font-weight:400;margin-top:-2px}
 </style>
 </head>
 <body>
@@ -1452,6 +1453,16 @@ function renderWish(){
     if(rw){
       linesHtml+='<div class="mygift-line">✨ Роль: '+rw.title;
       linesHtml+='<button class="wcancel" onclick="cancelReserve('+myRole.id+')">✕ снять</button></div>';
+      var roleTakers=[];
+      for(var ri=0;ri<allReserves.length;ri++){
+        if(allReserves[ri].gift_id===rw.id){
+          var ru=getUserById(allReserves[ri].user_id);
+          if(ru)roleTakers.push(ru.id===currentUser.id?'Вы':getFullName(ru));
+        }
+      }
+      if(roleTakers.length>0){
+        linesHtml+='<div class="mygift-line role-participants">👥 В группе: '+roleTakers.join(', ')+'</div>';
+      }
     }
   }
   if(linesHtml){myGiftDiv.style.display='block';linesDiv.innerHTML=linesHtml;}
