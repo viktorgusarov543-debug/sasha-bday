@@ -33,15 +33,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .h-btn-wish:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .h-btn-tg{background:linear-gradient(135deg,#2AABEE,#229ED9);color:#fff}
 .h-btn-tg:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(42,171,238,.4)}
-.h-info{display:flex;flex-direction:column;gap:5px;max-width:420px;margin:0 auto}
-.h-row{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--td);justify-content:center;text-align:center}
-.h-row .ico{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
-.h-row b{color:var(--t);font-weight:600}
-.h-row a{color:var(--ac2);text-decoration:none;font-weight:600;cursor:pointer}
-.h-row a:hover{text-decoration:underline}
-.h-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:9px;background:var(--ac);color:#fff;font-size:.65rem;font-weight:800;padding:0 5px;margin-left:6px}
-.h-badge.zero{display:none}
+.h-info{display:flex;flex-direction:column;gap:5px;max-width:440px;margin:0 auto}
 .map-link{color:var(--ac2);text-decoration:underline;cursor:pointer}
+
+/* ===== ПЛИТКИ ИНФО ===== */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:440px;margin:0 auto}
+.info-tile{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;text-align:left;transition:all .3s}
+.info-tile.clickable{cursor:pointer}
+.info-tile.clickable:hover{background:rgba(255,45,123,.1);border-color:var(--ac2);transform:translateY(-2px)}
+.info-tile.wide{grid-column:1/-1}
+.tile-ico{font-size:1.3rem;flex-shrink:0;width:28px;text-align:center}
+.tile-label{font-size:.6rem;color:var(--td);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}
+.tile-value{font-size:.78rem;color:var(--t);font-weight:600;line-height:1.3}
+.info-tile.clickable .tile-value{color:var(--ac2);text-decoration:underline}
 
 .bg-blobs{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
 .blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;animation:bm 20s ease-in-out infinite alternate}
@@ -51,14 +55,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .b4{width:300px;height:300px;background:#ff6baa;top:60%;left:10%;animation-delay:-15s}
 @keyframes bm{0%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.1)}100%{transform:translate(-20px,20px) scale(.95)}}
 
-.fly-obj{
-  position:fixed;left:0;top:0;width:44px;height:44px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:1.9rem;user-select:none;z-index:950;
-  pointer-events:none;
-  filter:drop-shadow(0 4px 8px rgba(0,0,0,.35));
-  will-change:transform;
-}
+.fly-obj{position:fixed;left:0;top:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.9rem;user-select:none;z-index:950;pointer-events:none;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35));will-change:transform}
 .fly-img{width:44px;height:44px;border-radius:50%;object-fit:cover;display:block;border:2px solid rgba(255,255,255,.35)}
 .bp{position:fixed;width:8px;height:8px;border-radius:50%;z-index:951;pointer-events:none;animation:pf .8s ease-out forwards}
 @keyframes pf{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
@@ -71,12 +68,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 @keyframes introOut{to{opacity:0}}
 
 .content{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:calc(10px * var(--inv-scale,1)) 14px}
-.inv{background:rgba(255,255,255,.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:16px;
-  padding:calc(14px * var(--inv-scale,1)) calc(16px * var(--inv-scale,1))}
+.inv{background:rgba(255,255,255,.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:calc(14px * var(--inv-scale,1)) calc(16px * var(--inv-scale,1))}
 .inv p{margin-bottom:calc(7px * var(--inv-scale,1));font-size:calc(.9rem * var(--inv-scale,1));line-height:calc(1.35 * var(--inv-scale,1))}
 .inv p:last-child{margin-bottom:0}
 .hl{background:linear-gradient(135deg,rgba(255,45,123,.2),rgba(200,80,192,.2));padding:1px 8px;border-radius:6px;font-weight:600;color:var(--ac2)}
-/* текст как картинка: не выделяется, нет меню браузера */
 .content,.inv,.inv p,.hl{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none}
 
 .report-page{display:none;position:relative;z-index:1;max-width:800px;margin:0 auto;padding:30px 20px}
@@ -191,9 +186,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 
 .h-days{position:absolute;top:10px;left:16px;font-size:.7rem;color:var(--td);letter-spacing:.3px}
 .h-days b{color:var(--ac2);font-weight:700;font-size:.85rem}
-.h-corner{position:absolute;top:8px;right:16px}
+.h-corner{position:absolute;top:8px;right:16px;display:flex;gap:6px;align-items:center}
 .h-corner-btn{padding:5px 14px;border-radius:20px;font-family:inherit;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .3s;background:transparent;border:1px solid var(--ac);color:var(--ac)}
 .h-corner-btn:hover{background:var(--ac);color:#fff}
+.h-corner-btn.news-btn{border-color:var(--ac2);color:var(--ac2)}
+.h-corner-btn.news-btn:hover{background:var(--ac2);color:#0d0511}
+.h-corner .h-badge{margin-left:5px}
+
+.h-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:9px;background:var(--ac);color:#fff;font-size:.65rem;font-weight:800;padding:0 5px}
+.h-badge.zero{display:none}
 
 .h-main{position:relative;display:block}
 .h-left{max-width:520px;margin:0 auto;text-align:center}
@@ -233,13 +234,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
   .h-chip{padding:5px 12px;font-size:.78rem;gap:6px}
   .h-nav{margin-bottom:8px;gap:8px}
   .h-btn{padding:6px 14px;font-size:.78rem}
-  .h-info{gap:3px}
-  .h-row{font-size:.74rem;gap:6px}
-  .h-row .ico{font-size:.9rem;width:16px}
   .h-days{font-size:.62rem;top:8px;left:10px}
   .h-days b{font-size:.75rem}
   .h-corner{top:6px;right:10px}
   .h-corner-btn{padding:4px 11px;font-size:.7rem}
+  .info-grid{gap:6px}
+  .info-tile{padding:8px 10px;gap:8px}
+  .tile-ico{font-size:1.1rem;width:22px}
+  .tile-value{font-size:.72rem}
   .opt-grid{grid-template-columns:1fr}
   .opt-grid.three{grid-template-columns:1fr}
   .profile-grid{grid-template-columns:1fr}
@@ -260,11 +262,28 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
       <div class="h-user" id="hUser"></div>
       <div class="h-nav" id="hNav"></div>
       <div class="h-info">
-        <div class="h-row"><span class="ico">📅</span> <b>14 ноября</b>&nbsp;·&nbsp;<span class="ico">🕐</span> <b>15:00 СБ → 17:00 ВС</b></div>
-        <div class="h-row"><span class="ico">📍</span> <a class="map-link" onclick="openMap()">Бор.Матюшинский лес ↗</a></div>
-        <div class="h-row"><span class="ico">👗</span> Дресс-код: <b>ягодный</b></div>
-        <div class="h-row"><span class="ico">🎒</span> Возьми с собой: <b>любимый напиток</b></div>
-        <div class="h-row"><span class="ico">📰</span> <a onclick="openNews()">Новости<span class="h-badge" id="newsBadge">0</span></a></div>
+        <div class="info-grid">
+          <div class="info-tile">
+            <div class="tile-ico">📅</div>
+            <div class="tile-body"><div class="tile-label">Дата</div><div class="tile-value">14 ноября</div></div>
+          </div>
+          <div class="info-tile">
+            <div class="tile-ico">🕐</div>
+            <div class="tile-body"><div class="tile-label">Время</div><div class="tile-value">15:00 СБ → 17:00 ВС</div></div>
+          </div>
+          <div class="info-tile clickable" onclick="openMap()">
+            <div class="tile-ico">📍</div>
+            <div class="tile-body"><div class="tile-label">Место</div><div class="tile-value">Бор.Матюшинский лес ↗</div></div>
+          </div>
+          <div class="info-tile">
+            <div class="tile-ico">👗</div>
+            <div class="tile-body"><div class="tile-label">Дресс-код</div><div class="tile-value">ягодный</div></div>
+          </div>
+          <div class="info-tile wide">
+            <div class="tile-ico">🎒</div>
+            <div class="tile-body"><div class="tile-label">Возьми с собой</div><div class="tile-value">любимый напиток</div></div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="h-right">
@@ -375,10 +394,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
   <div class="mbox">
     <button class="mclose" onclick="closeM('m-wish')">✕</button>
     <div class="mtitle">🎁 Wish-лист</div>
-    <div class="msub">Несколько идей для подарка</div>
-    <p style="color:var(--td);margin-bottom:14px;font-size:.85rem">Можно выбрать <b>и подарок, и роль</b>.</p>
+    <div class="msub">Несколько идей для подарка (это абсолютно по желанию)</div>
+    <p style="color:var(--td);margin-bottom:14px;font-size:.85rem">Можно выбрать <b>и подарок, и роль</b> (услугу) одновременно. Забронированные исчезают из общего списка.</p>
     <div class="mygift" id="myGift" style="display:none">
-      <div class="mygift-title">🎁 Выбрано:</div>
+      <div class="mygift-title">🎁 Ваши брони:</div>
       <div id="myGiftLines"></div>
     </div>
     <div class="wscroll">
@@ -548,7 +567,6 @@ window.addEventListener('orientationchange',scheduleFit);
 window.addEventListener('load',fitInvitation);
 if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){fitInvitation();});}
 
-// ===== ИГРА =====
 var berryEmojis=['🍓','🍒','🍇','🫐','🍑','🍉','🍊','🍋','🥝'];
 var flyImages=[
   {src:'loza.png',pts:5},
@@ -636,7 +654,7 @@ function startGameLoop(){
 
 function findFlyAt(px,py){
   var best=null,bestD=Infinity;
-  var rr=50; // радиус захвата
+  var rr=50;
   for(var i=0;i<activeFlyObjs.length;i++){
     var o=activeFlyObjs[i];
     if(o.hit)continue;
@@ -655,7 +673,6 @@ function hitFly(o,tapX,tapY){
   var idx=activeFlyObjs.indexOf(o);
   if(idx>-1)activeFlyObjs.splice(idx,1);
   if(o.el&&o.el.parentNode)o.el.parentNode.removeChild(o.el);
-  // СНАЧАЛА показываем очки и эффект — всегда, до любых расчётов
   showPointPopup(tapX,tapY,pts);
   spawnParticles(tapX,tapY);
   dlog('🎯 hit '+(pts>0?'+':'')+pts);
@@ -922,6 +939,8 @@ function updateHeader(){
   var navSlot=document.getElementById('hNav');
   var cornerSlot=document.getElementById('hCorner');
   var unread=getUnread();
+  var newsBtnHtml='<button class="h-corner-btn news-btn" onclick="openNews()">📰'+
+    '<span class="h-badge'+(unread===0?' zero':'')+'" id="newsBadge">'+unread+'</span></button>';
   if(currentUser){
     prevRank=getRank(currentUser.points||0);
     userSlot.innerHTML='<div class="h-chip" onclick="openProfile()">'+
@@ -930,16 +949,13 @@ function updateHeader(){
       '<span class="h-chip-pts" id="pts-counter">🍓 '+(currentUser.points||0)+'</span></div>';
     navSlot.innerHTML='<button class="h-btn h-btn-wish" onclick="openWish()">🎁 Wish-лист</button>'+
       '<a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
-    cornerSlot.innerHTML='<button class="h-corner-btn" onclick="logout()">Выйти</button>';
+    cornerSlot.innerHTML=newsBtnHtml+'<button class="h-corner-btn" onclick="logout()">Выйти</button>';
   }else{
     userSlot.innerHTML='';
     navSlot.innerHTML='<button class="h-btn h-btn-wish" disabled>🎁 Wish-лист</button>'+
       '<a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
-    cornerSlot.innerHTML='<button class="h-corner-btn" onclick="openAuth()">Войти</button>';
+    cornerSlot.innerHTML=newsBtnHtml+'<button class="h-corner-btn" onclick="openAuth()">Войти</button>';
   }
-  var badge=document.getElementById('newsBadge');
-  badge.textContent=unread;
-  badge.className='h-badge'+(unread===0?' zero':'');
   renderRating();
 }
 
@@ -1481,7 +1497,6 @@ function addNews(){
   }).catch(function(e){showToast('Ошибка: '+e.message);});
 }
 
-// ===== ИНИЦИАЛИЗАЦИЯ =====
 try{
   var savedCur=localStorage.getItem('sasha_cur');
   if(savedCur)currentUser=JSON.parse(savedCur);
