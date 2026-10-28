@@ -226,7 +226,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 #m-wish .wscroll{flex:1;overflow-y:auto;padding:2px;margin-top:6px}
 #m-wish .wscroll::-webkit-scrollbar{width:6px}
 #m-wish .wscroll::-webkit-scrollbar-thumb{background:var(--ac3);border-radius:4px}
-#m-wish .mygift{flex-shrink:0;background:#221130;z-index:5;box-shadow:0 8px 20px rgba(13,5,17,.8)}
+#m-wish .mygift{flex-shrink:0;background:rgba(255,45,123,.14);border:1px solid rgba(255,45,123,.55);border-radius:var(--rs);z-index:5;box-shadow:0 4px 18px rgba(255,45,123,.2);margin-top:6px}
 
 .debug-log{position:fixed;bottom:0;left:0;right:0;z-index:99999;background:rgba(0,0,0,.96);color:#0f0;font-family:monospace;font-size:11px;max-height:32vh;overflow-y:auto;padding:10px;border-top:2px solid #0f0;display:none}
 .debug-log.active{display:block}
@@ -256,6 +256,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
   .profile-grid{grid-template-columns:1fr}
   .intro-text{font-size:1.4rem;padding:18px 24px}
 }
+.wish-top{flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:12px;margin-bottom:2px}
+.wish-subhead{flex-shrink:0;font-size:.78rem;color:var(--ac2);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:10px 0 8px;text-align:center}
 </style>
 </head>
 <body>
@@ -328,10 +330,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
     <button class="mclose" onclick="closeM('m-auth')">✕</button>
     <div class="aview active" id="aview">
       <div class="mtitle">🔐 Авторизация</div>
-      <p style="color:var(--td);margin-bottom:16px">Выберите себя из списка:</p>
-      <div class="aulist" id="aulist"></div>
-      <div class="adiv">или</div>
       <button class="bsubmit" onclick="showReg()">🍓 Зарегистрироваться</button>
+      <div class="adiv">или выберите себя</div>
+      <div class="aulist" id="aulist"></div>
     </div>
     <div class="rview" id="rview">
       <button class="bback" onclick="showAuth()">← Назад к выбору</button>
@@ -403,12 +404,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 <div class="moverlay" id="m-wish">
   <div class="mbox">
     <button class="mclose" onclick="closeM('m-wish')">✕</button>
-    <div class="mtitle">🎁 Wish-лист</div>
-    <div class="msub">Несколько идей для подарка (можно выбрать и подарок и роль)</div>
-    <div class="mygift" id="myGift" style="display:none">
-      <div class="mygift-title">🎁 Ваши брони:</div>
-      <div id="myGiftLines"></div>
+    <div class="wish-top">
+      <div class="mtitle">🎁 Wish-лист</div>
+      <div class="msub">Несколько идей для подарка (можно выбрать и подарок и роль)</div>
+      <div class="mygift" id="myGift" style="display:none">
+        <div class="mygift-title">🎁 Ваши брони:</div>
+        <div id="myGiftLines"></div>
+      </div>
     </div>
+    <div class="wish-subhead">Варианты</div>
     <div class="wscroll">
       <div class="wgrid" id="wgrid"></div>
     </div>
