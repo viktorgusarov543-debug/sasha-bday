@@ -34,7 +34,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .h-btn-tg{background:linear-gradient(135deg,#2AABEE,#229ED9);color:#fff}
 .h-btn-tg:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(42,171,238,.4)}
 .h-info{display:flex;flex-direction:column;gap:5px;max-width:440px;margin:0 auto}
-.map-link{color:var(--ac2);text-decoration:underline;cursor:pointer}
 
 /* ===== ПЛИТКИ ИНФО ===== */
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:440px;margin:0 auto}
@@ -67,8 +66,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .intro-overlay.hide{animation:introOut .4s ease forwards}
 @keyframes introOut{to{opacity:0}}
 
+/* ===== КОНТЕНТ: приглашение как единая плитка ===== */
 .content{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:calc(10px * var(--inv-scale,1)) 14px}
-.inv{background:rgba(255,255,255,.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:calc(14px * var(--inv-scale,1)) calc(16px * var(--inv-scale,1))}
+.inv{background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.09);border-radius:14px;
+  padding:calc(14px * var(--inv-scale,1)) calc(16px * var(--inv-scale,1))}
+.inv-head{display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:calc(.7rem * var(--inv-scale,1));color:var(--ac2);font-weight:700;
+  text-transform:uppercase;letter-spacing:1px;margin-bottom:calc(10px * var(--inv-scale,1))}
+.inv-head-ico{font-size:calc(1.15rem * var(--inv-scale,1))}
 .inv p{margin-bottom:calc(7px * var(--inv-scale,1));font-size:calc(.9rem * var(--inv-scale,1));line-height:calc(1.35 * var(--inv-scale,1))}
 .inv p:last-child{margin-bottom:0}
 .hl{background:linear-gradient(135deg,rgba(255,45,123,.2),rgba(200,80,192,.2));padding:1px 8px;border-radius:6px;font-weight:600;color:var(--ac2)}
@@ -295,6 +300,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 
 <div class="content" id="mainContent">
   <section class="inv">
+    <div class="inv-head"><span class="inv-head-ico">💌</span>Приглашение</div>
     <p>Хэй-хэй-хэй!</p>
     <p>14 ноября я приглашаю тебя в терем в Бор.Матюшинском лесу. В программе — встреча. В целом, считаю, достаточно!</p>
     <p>Но — бонусом мы попаримся в бане, будем петь, пить, играть, нюхать лес и шашлык и, возможно, очень неплохо проведем этот осенний уикенд.</p>
@@ -394,8 +400,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
   <div class="mbox">
     <button class="mclose" onclick="closeM('m-wish')">✕</button>
     <div class="mtitle">🎁 Wish-лист</div>
-    <div class="msub">Несколько идей для подарка (это абсолютно по желанию)</div>
-    <p style="color:var(--td);margin-bottom:14px;font-size:.85rem">Можно выбрать <b>и подарок, и роль</b> (услугу) одновременно. Забронированные исчезают из общего списка.</p>
+    <div class="msub">Несколько идей для подарка</div>
+    <p style="color:var(--td);margin-bottom:14px;font-size:.85rem">Можно выбрать <b>и подарок, и роль</b>.</p>
     <div class="mygift" id="myGift" style="display:none">
       <div class="mygift-title">🎁 Ваши брони:</div>
       <div id="myGiftLines"></div>
@@ -541,6 +547,8 @@ function updateCountdown(){
   else el.innerHTML='<b>🍓</b> Праздник прошёл';
 }
 
+// Масштабирование приглашения. Пересчёт только при загрузке и повороте —
+// НЕ при скролле/изменении адресной строки, чтобы блок не «прыгал».
 function fitInvitation(){
   var header=document.getElementById('mainHeader');
   var content=document.getElementById('mainContent');
@@ -560,12 +568,12 @@ function fitInvitation(){
 var fitTimer=null;
 function scheduleFit(){
   if(fitTimer)clearTimeout(fitTimer);
-  fitTimer=setTimeout(fitInvitation,80);
+  fitTimer=setTimeout(fitInvitation,120);
 }
-window.addEventListener('resize',scheduleFit);
 window.addEventListener('orientationchange',scheduleFit);
-window.addEventListener('load',fitInvitation);
-if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){fitInvitation();});}
+if(document.fonts&&document.fonts.ready){
+  document.fonts.ready.then(function(){setTimeout(fitInvitation,50);});
+}
 
 var berryEmojis=['🍓','🍒','🍇','🫐','🍑','🍉','🍊','🍋','🥝'];
 var flyImages=[
@@ -1507,7 +1515,6 @@ updateHeader();
 initTapGame();
 startGameLoop();
 maybeShowIntro();
-setTimeout(fitInvitation,100);
 
 if(urlParams.get('report')==='ягодный')showReport();
 
