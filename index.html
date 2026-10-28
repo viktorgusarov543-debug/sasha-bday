@@ -1432,6 +1432,28 @@ function notifyRoleJoin(wish){
   var text='<b>🍓 Ягодный ноябрь</b>\n\n✨ <i>'+escapeTelegram(getFullName(currentUser))+'</i> '+verb+' к группе «'+escapeTelegram(wish.title)+'»\n\nУже в группе:\n'+listStr;
   sendToTelegram(text);
 }
+function notifyRoleLeave(wish){
+  if(!currentUser||!wish)return;
+  // участники, ОСТАВШИЕСЯ в роли (бронь уже удалена из allReserves)
+  var takers=[];
+  for(var i=0;i<allReserves.length;i++){
+    if(allReserves[i].gift_id===wish.id){
+      var u=getUserById(allReserves[i].user_id);
+      if(u)takers.push(getFullName(u));
+    }
+  }
+  // если ушёл и никого не осталось — новость не шлём
+  if(takers.length===0)return;
+  var verb='передумал(а)';
+  if(currentUser.gender==='male')verb='передумал';
+  else if(currentUser.gender==='female')verb='передумала';
+  var listStr='';
+  for(var i=0;i<takers.length;i++){
+    listStr+=(i+1)+'. '+escapeTelegram(takers[i])+'\n';
+  }
+  var text='<b>🍓 Ягодный ноябрь</b>\n\n💨 <i>'+escapeTelegram(getFullName(currentUser))+'</i> '+verb+' участвовать в группе «'+escapeTelegram(wish.title)+'»\n\nОстались в группе:\n'+listStr;
+  sendToTelegram(text);
+}
 function renderWish(){
   var grid=document.getElementById('wgrid'),html='';
   var myGift=getMyGift();
@@ -1529,9 +1551,18 @@ function reserveGift(gid){
 }
 
 function cancelReserve(reserveId){
+  // запоминаем, что снимаем, ДО удаления
+  var reserve=null;
+  for(var i=0;i<allReserves.length;i++){
+    if(allReserves[i].id===reserveId){reserve=allReserves[i];break;}
+  }
+  var wish=reserve?getWishById(reserve.gift_id):null;
+  var isRole=wish&&wish.role;
+
   supaFetch('reserves?id=eq.'+reserveId,'DELETE').then(function(){
     allReserves=allReserves.filter(function(r){return r.id!==reserveId;});
     renderWish();
+    if(isRole)notifyRoleLeave(wish);
   }).catch(function(e){showToast('Ошибка: '+e.message);});
 }
 
