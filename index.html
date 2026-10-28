@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0d0511;--ac:#ff2d7b;--ac2:#ff6baa;--ac3:#c850c0;--t:#f0e6f0;--td:#9a8a9e;--rs:12px}
+:root{--bg:#0d0511;--ac:#ff2d7b;--ac2:#ff6baa;--ac3:#c850c0;--t:#f0e6f0;--td:#9a8a9e;--rs:12px;--inv-scale:1}
 html{scroll-behavior:smooth;overscroll-behavior:none}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;line-height:1.6;
   -webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior:none}
@@ -71,6 +71,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .bp{position:fixed;width:8px;height:8px;border-radius:50%;z-index:951;pointer-events:none;animation:pf .8s ease-out forwards}
 @keyframes pf{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
 
+/* ===== ПОПАП ОЧКОВ ===== */
+.pt-popup{position:fixed;z-index:99999;font-weight:900;font-size:1.9rem;pointer-events:none;transform:translate(-50%,-50%);animation:ptFly 1.2s ease-out forwards;text-shadow:0 0 16px currentColor,0 2px 4px rgba(0,0,0,.5)}
+@keyframes ptFly{
+  0%{opacity:1;transform:translate(-50%,-50%) scale(.8)}
+  20%{opacity:1;transform:translate(-50%,-70%) scale(1.15)}
+  100%{opacity:0;transform:translate(-50%,-240%) scale(1.3)}
+}
+
 /* ===== ИНТРО ===== */
 .intro-overlay{position:fixed;inset:0;z-index:940;display:flex;align-items:center;justify-content:center;pointer-events:none;animation:introFade .4s ease}
 .intro-text{font-size:1.9rem;font-weight:900;color:#fff;text-align:center;padding:22px 34px;background:linear-gradient(135deg,rgba(255,45,123,.92),rgba(200,80,192,.92));border-radius:20px;box-shadow:0 10px 50px rgba(255,45,123,.55);animation:introPulse 1.2s ease infinite;line-height:1.3}
@@ -79,10 +87,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .intro-overlay.hide{animation:introOut .4s ease forwards}
 @keyframes introOut{to{opacity:0}}
 
-/* ===== КОНТЕНТ (компактный) ===== */
-.content{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:10px 14px}
-.inv{background:rgba(255,255,255,.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:14px 16px}
-.inv p{margin-bottom:7px;font-size:.78rem;line-height:1.35}
+/* ===== КОНТЕНТ (масштабируется под экран) ===== */
+.content{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:calc(10px * var(--inv-scale,1)) 14px}
+.inv{background:rgba(255,255,255,.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:16px;
+  padding:calc(14px * var(--inv-scale,1)) calc(16px * var(--inv-scale,1));
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.inv p{margin-bottom:calc(7px * var(--inv-scale,1));font-size:calc(.9rem * var(--inv-scale,1));line-height:calc(1.35 * var(--inv-scale,1))}
 .inv p:last-child{margin-bottom:0}
 .hl{background:linear-gradient(135deg,rgba(255,45,123,.2),rgba(200,80,192,.2));padding:1px 8px;border-radius:6px;font-weight:600;color:var(--ac2)}
 
@@ -233,7 +243,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .debug-toggle{position:fixed;bottom:15px;right:15px;z-index:99998;width:46px;height:46px;border-radius:50%;background:#111;color:#0f0;border:2px solid #0f0;font-size:22px;cursor:pointer;display:none;box-shadow:0 4px 15px rgba(0,255,0,.3)}
 .debug-toggle.active{display:flex;align-items:center;justify-content:center}
 
-/* ===== МОБИЛЬНАЯ КОМПАКТНОСТЬ ===== */
 @media(max-width:700px){
   .header{padding:30px 12px 10px}
   .h-title{font-size:1.15rem;margin-bottom:6px}
@@ -248,9 +257,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
   .h-days b{font-size:.75rem}
   .h-corner{top:6px;right:10px}
   .h-corner-btn{padding:4px 11px;font-size:.7rem}
-  .content{padding:8px 12px}
-  .inv{padding:12px 14px;border-radius:14px}
-  .inv p{margin-bottom:6px;font-size:.74rem;line-height:1.3}
   .opt-grid{grid-template-columns:1fr}
   .opt-grid.three{grid-template-columns:1fr}
   .profile-grid{grid-template-columns:1fr}
@@ -533,6 +539,34 @@ function updateCountdown(){
   else el.innerHTML='<b>🍓</b> Праздник прошёл';
 }
 
+// ===== МАСШТАБИРОВАНИЕ НИЗА ПОД ЭКРАН =====
+function fitInvitation(){
+  var header=document.getElementById('mainHeader');
+  var content=document.getElementById('mainContent');
+  if(!header||!content)return;
+  var root=document.documentElement;
+  root.style.setProperty('--inv-scale','1');
+  var avail=window.innerHeight-header.offsetHeight-14;
+  var natural=content.offsetHeight;
+  var scale=1;
+  if(natural>0){
+    scale=avail/natural;
+    if(scale>1.2)scale=1.2;
+    if(scale<0.5)scale=0.5;
+  }
+  root.style.setProperty('--inv-scale',scale.toFixed(3));
+  dlog('📐 fit: avail='+Math.round(avail)+' natural='+Math.round(natural)+' scale='+scale.toFixed(2));
+}
+var fitTimer=null;
+function scheduleFit(){
+  if(fitTimer)clearTimeout(fitTimer);
+  fitTimer=setTimeout(fitInvitation,80);
+}
+window.addEventListener('resize',scheduleFit);
+window.addEventListener('orientationchange',scheduleFit);
+window.addEventListener('load',fitInvitation);
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){fitInvitation();});}
+
 // ===== ИГРА =====
 var berryEmojis=['🍓','🍒','🍇','🫐','🍑','🍉','🍊','🍋','🥝'];
 var flyImages=[
@@ -542,6 +576,7 @@ var flyImages=[
   {src:'face4.png',pts:-3}
 ];
 var IMG_CHANCE=0.08;
+var activeFlyObjs=[];
 
 function pickFlyItem(){
   if(Math.random()<IMG_CHANCE){
@@ -574,7 +609,7 @@ function createFlyObj(item,x,y){
   var dist=120+Math.random()*340;
   var dx=Math.cos(angle)*dist;
   var dy=Math.sin(angle)*dist;
-  var dur=7.0+Math.random()*3.0; // 7-10 сек жизнь
+  var dur=7.0+Math.random()*3.0;
   el.style.setProperty('--dx',dx+'px');
   el.style.setProperty('--dy',dy+'px');
   el.style.setProperty('--dur',dur+'s');
@@ -582,11 +617,33 @@ function createFlyObj(item,x,y){
   el.style.left=(x-size/2)+'px';
   el.style.top=(y-size/2)+'px';
   document.body.appendChild(el);
-  setTimeout(function(){if(el.parentNode)el.remove();},dur*1000+100);
+  activeFlyObjs.push(el);
+  setTimeout(function(){
+    if(el.parentNode)el.remove();
+    var i=activeFlyObjs.indexOf(el);
+    if(i>-1)activeFlyObjs.splice(i,1);
+  },dur*1000+100);
+}
+
+// РУЧНОЙ поиск объекта под пальцем (надёжнее, чем e.target)
+function findFlyAt(px,py){
+  var pad=18;
+  for(var i=activeFlyObjs.length-1;i>=0;i--){
+    var el=activeFlyObjs[i];
+    if(!el.parentNode){activeFlyObjs.splice(i,1);continue;}
+    if(el.dataset.hit)continue;
+    var r=el.getBoundingClientRect();
+    if(px>=r.left-pad&&px<=r.right+pad&&py>=r.top-pad&&py<=r.bottom+pad){
+      return el;
+    }
+  }
+  return null;
 }
 
 function hitFly(el,item,tapX,tapY){
   if(!item)item={pts:1};
+  var i=activeFlyObjs.indexOf(el);
+  if(i>-1)activeFlyObjs.splice(i,1);
   spawnParticles(tapX,tapY);
   el.style.pointerEvents='none';
   if(el.parentNode)el.remove();
@@ -603,6 +660,7 @@ function hitFly(el,item,tapX,tapY){
     renderRating();checkRatingChange();updateHeader();pulsePoints();
   }
   showPointPopup(tapX,tapY,pts);
+  dlog('🎯 hit '+(pts>0?'+':'')+pts);
 }
 
 function spawnParticles(cx,cy){
@@ -620,37 +678,38 @@ function spawnParticles(cx,cy){
 
 function showPointPopup(x,y,pts){
   var el=document.createElement('div');
+  el.className='pt-popup';
   el.textContent=(pts>0?'+':'')+pts;
-  el.style.cssText='position:fixed;z-index:99999;left:'+x+'px;top:'+y+
-    'px;transform:translate(-50%,-50%);font-weight:900;font-size:1.7rem;'+
-    'color:'+(pts>0?'#7CFC7C':'#ff5c5c')+
-    ';text-shadow:0 0 14px currentColor;pointer-events:none;';
+  el.style.left=x+'px';
+  el.style.top=y+'px';
+  el.style.color=pts>0?'#7CFC7C':'#ff5c5c';
   document.body.appendChild(el);
-  var start=performance.now();
-  function frame(now){
-    var t=(now-start)/1400;
-    if(t>=1){if(el.parentNode)el.remove();return;}
-    el.style.opacity=String(1-t);
-    el.style.transform='translate(-50%,-'+(50+t*150)+'%) scale('+(1+t*0.7)+')';
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
+  setTimeout(function(){if(el.parentNode)el.remove();},1250);
 }
 
 function initTapGame(){
-  document.addEventListener('pointerdown',function(e){
-    var tgt=e.target;
-    if(!tgt||!tgt.closest)return;
-    var obj=tgt.closest('.fly-obj');
+  function handleTap(px,py,target){
+    var obj=findFlyAt(px,py);
     if(obj){
-      if(obj.dataset.hit)return;
       obj.dataset.hit='1';
-      hitFly(obj,obj._flyItem,e.clientX,e.clientY);
+      hitFly(obj,obj._flyItem,px,py);
       return;
     }
-    if(tgt.closest('button, a, input, label, .moverlay, .abar, .toast, .debug-log, .debug-toggle, .header, .intro-overlay')) return;
-    burst(e.clientX,e.clientY);
-  });
+    if(target&&target.closest&&target.closest('button, a, input, label, .moverlay, .abar, .toast, .debug-log, .debug-toggle, .header, .intro-overlay'))return;
+    burst(px,py);
+  }
+  if(window.PointerEvent){
+    document.addEventListener('pointerdown',function(e){
+      handleTap(e.clientX,e.clientY,e.target);
+    });
+  }else{
+    document.addEventListener('touchstart',function(e){
+      if(e.touches&&e.touches[0])handleTap(e.touches[0].clientX,e.touches[0].clientY,e.target);
+    },{passive:true});
+    document.addEventListener('mousedown',function(e){
+      handleTap(e.clientX,e.clientY,e.target);
+    });
+  }
 }
 
 // ===== ИНТРО =====
@@ -1404,7 +1463,7 @@ function addNews(){
     document.getElementById('ad-t').value='';
     document.getElementById('ad-x').value='';
     updateHeader();
-    sendToTelegram('<b>🍓 Ягодный ноябрь: новость!</b>\n\n<b>'+escapeTelegram(t)+'</b>\n'+escapeTelegram(x));
+    sendToTelegram('<b>🍓 Ягодный ноябрь: новая новость!</b>\n\n<b>'+escapeTelegram(t)+'</b>\n'+escapeTelegram(x));
   }).catch(function(e){showToast('Ошибка: '+e.message);});
 }
 
@@ -1418,6 +1477,7 @@ if(currentUser)prevRank=getRank(currentUser.points||0);
 updateHeader();
 initTapGame();
 maybeShowIntro();
+setTimeout(fitInvitation,100);
 
 if(urlParams.get('report')==='ягодный')showReport();
 
@@ -1445,6 +1505,7 @@ loadAllData(function(){
   prevPositions={};
   for(var i=0;i<sorted.length;i++)prevPositions[sorted[i].id]=i+1;
   updateHeader();
+  fitInvitation();
   if(urlParams.get('report')==='ягодный')showReport();
 });
 
