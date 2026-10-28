@@ -2,18 +2,19 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>🍓 Ягодный ноябрь</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0d0511;--ac:#ff2d7b;--ac2:#ff6baa;--ac3:#c850c0;--t:#f0e6f0;--td:#9a8a9e;--rs:12px}
-html{scroll-behavior:smooth}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;line-height:1.6}
+html{scroll-behavior:smooth;overscroll-behavior:none}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;line-height:1.6;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior:none}
 
-.header{position:sticky;top:0;z-index:900;background:rgba(13,5,17,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,45,123,.2);padding:36px 20px 16px}
-.h-title{text-align:center;font-size:1.5rem;font-weight:900;margin-bottom:10px;background:linear-gradient(135deg,#ff2d7b,#ff6baa,#c850c0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.h-user{display:flex;justify-content:center;margin-bottom:10px}
+.header{position:sticky;top:0;z-index:900;background:rgba(13,5,17,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,45,123,.2);padding:34px 16px 12px}
+.h-title{text-align:center;font-size:1.5rem;font-weight:900;margin-bottom:8px;background:linear-gradient(135deg,#ff2d7b,#ff6baa,#c850c0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.h-user{display:flex;justify-content:center;margin-bottom:8px}
 .h-chip{display:flex;align-items:center;gap:8px;padding:6px 16px;border-radius:30px;background:rgba(255,45,123,.1);border:1px solid rgba(255,45,123,.3);cursor:pointer;transition:all .3s;font-size:.85rem;flex-wrap:wrap;justify-content:center}
 .h-chip:hover{background:rgba(255,45,123,.2)}
 .h-chip-name{font-weight:700;color:#fff}
@@ -25,14 +26,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
   50%{transform:scale(1.4);text-shadow:0 0 15px var(--ac),0 0 25px var(--ac2)}
   100%{transform:scale(1);text-shadow:none}
 }
-.h-nav{display:flex;justify-content:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.h-nav{display:flex;justify-content:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .h-btn{padding:8px 18px;border-radius:30px;font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .3s;border:none;text-decoration:none}
 .h-btn-wish{background:linear-gradient(135deg,var(--ac3),#6c2bd9);color:#fff}
 .h-btn-wish:hover{transform:translateY(-2px)}
 .h-btn-wish:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .h-btn-tg{background:linear-gradient(135deg,#2AABEE,#229ED9);color:#fff}
 .h-btn-tg:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(42,171,238,.4)}
-.h-info{display:flex;flex-direction:column;gap:6px;max-width:420px;margin:0 auto}
+.h-info{display:flex;flex-direction:column;gap:5px;max-width:420px;margin:0 auto}
 .h-row{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--td);justify-content:center;text-align:center}
 .h-row .ico{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
 .h-row b{color:var(--t);font-weight:600}
@@ -50,7 +51,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .b4{width:300px;height:300px;background:#ff6baa;top:60%;left:10%;animation-delay:-15s}
 @keyframes bm{0%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.1)}100%{transform:translate(-20px,20px) scale(.95)}}
 
-/* ===== ЛЕТАЮЩИЕ ОБЪЕКТЫ (поверх шапки) ===== */
+/* ===== ИГРА ===== */
 .fly-obj{
   position:fixed;width:44px;height:44px;
   display:flex;align-items:center;justify-content:center;
@@ -59,19 +60,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
   animation:burstFly var(--dur,7s) linear forwards;
   filter:drop-shadow(0 4px 8px rgba(0,0,0,.35));
   will-change:transform,opacity;
+  touch-action:none;
 }
-.fly-img{width:44px;height:44px;border-radius:50%;object-fit:cover;display:block;border:2px solid rgba(255,255,255,.35)}
+.fly-img{width:44px;height:44px;border-radius:50%;object-fit:cover;display:block;border:2px solid rgba(255,255,255,.35);pointer-events:none}
 @keyframes burstFly{
   0%{transform:translate(0,0) scale(.3) rotate(0);opacity:0}
-  8%{opacity:1;transform:translate(calc(var(--dx)*.08),calc(var(--dy)*.08)) scale(1.05) rotate(30deg)}
+  6%{opacity:1;transform:translate(calc(var(--dx)*.06),calc(var(--dy)*.06)) scale(1.05) rotate(20deg)}
   100%{transform:translate(var(--dx),var(--dy)) scale(.9) rotate(360deg);opacity:0}
 }
 .bp{position:fixed;width:8px;height:8px;border-radius:50%;z-index:951;pointer-events:none;animation:pf .8s ease-out forwards}
 @keyframes pf{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
-.point-popup{position:fixed;z-index:952;font-weight:900;font-size:1.6rem;pointer-events:none;transform:translate(-50%,-50%);animation:pointFly 1.1s ease-out forwards;text-shadow:0 0 14px currentColor}
-@keyframes pointFly{0%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-200%) scale(1.7)}}
 
-/* ===== ИНТРО-ОВЕРЛЕЙ ===== */
+/* ===== ИНТРО ===== */
 .intro-overlay{position:fixed;inset:0;z-index:940;display:flex;align-items:center;justify-content:center;pointer-events:none;animation:introFade .4s ease}
 .intro-text{font-size:1.9rem;font-weight:900;color:#fff;text-align:center;padding:22px 34px;background:linear-gradient(135deg,rgba(255,45,123,.92),rgba(200,80,192,.92));border-radius:20px;box-shadow:0 10px 50px rgba(255,45,123,.55);animation:introPulse 1.2s ease infinite;line-height:1.3}
 @keyframes introPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
@@ -79,10 +79,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .intro-overlay.hide{animation:introOut .4s ease forwards}
 @keyframes introOut{to{opacity:0}}
 
-.content{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:30px 20px}
-.inv{background:rgba(255,255,255,.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:30px}
-.inv p{margin-bottom:14px;font-size:1rem;line-height:1.8}
-.hl{background:linear-gradient(135deg,rgba(255,45,123,.2),rgba(200,80,192,.2));padding:2px 10px;border-radius:6px;font-weight:600;color:var(--ac2)}
+/* ===== КОНТЕНТ (компактный) ===== */
+.content{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:10px 14px}
+.inv{background:rgba(255,255,255,.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:14px 16px}
+.inv p{margin-bottom:7px;font-size:.78rem;line-height:1.35}
+.inv p:last-child{margin-bottom:0}
+.hl{background:linear-gradient(135deg,rgba(255,45,123,.2),rgba(200,80,192,.2));padding:1px 8px;border-radius:6px;font-weight:600;color:var(--ac2)}
 
 .report-page{display:none;position:relative;z-index:1;max-width:800px;margin:0 auto;padding:30px 20px}
 .report-page.active{display:block}
@@ -231,11 +233,27 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .debug-toggle{position:fixed;bottom:15px;right:15px;z-index:99998;width:46px;height:46px;border-radius:50%;background:#111;color:#0f0;border:2px solid #0f0;font-size:22px;cursor:pointer;display:none;box-shadow:0 4px 15px rgba(0,255,0,.3)}
 .debug-toggle.active{display:flex;align-items:center;justify-content:center}
 
+/* ===== МОБИЛЬНАЯ КОМПАКТНОСТЬ ===== */
 @media(max-width:700px){
+  .header{padding:30px 12px 10px}
+  .h-title{font-size:1.15rem;margin-bottom:6px}
+  .h-user{margin-bottom:6px}
+  .h-chip{padding:5px 12px;font-size:.78rem;gap:6px}
+  .h-nav{margin-bottom:8px;gap:8px}
+  .h-btn{padding:6px 14px;font-size:.78rem}
+  .h-info{gap:3px}
+  .h-row{font-size:.74rem;gap:6px}
+  .h-row .ico{font-size:.9rem;width:16px}
+  .h-days{font-size:.62rem;top:8px;left:10px}
+  .h-days b{font-size:.75rem}
+  .h-corner{top:6px;right:10px}
+  .h-corner-btn{padding:4px 11px;font-size:.7rem}
+  .content{padding:8px 12px}
+  .inv{padding:12px 14px;border-radius:14px}
+  .inv p{margin-bottom:6px;font-size:.74rem;line-height:1.3}
   .opt-grid{grid-template-columns:1fr}
   .opt-grid.three{grid-template-columns:1fr}
   .profile-grid{grid-template-columns:1fr}
-  .inv{padding:20px}
   .intro-text{font-size:1.4rem;padding:18px 24px}
 }
 </style>
@@ -468,7 +486,6 @@ function sendToTelegram(text){
   .catch(function(e){dlog('💥 TG: '+e.message);});
 }
 
-// ===== 15 ЗВАНИЙ =====
 function getRank(p){
   if(p>1000)return'Спирт 126% 🔥';
   if(p>=900)return'Ректификат ⚗️';
@@ -516,7 +533,7 @@ function updateCountdown(){
   else el.innerHTML='<b>🍓</b> Праздник прошёл';
 }
 
-// ===== ИГРА: залп по тапу =====
+// ===== ИГРА =====
 var berryEmojis=['🍓','🍒','🍇','🫐','🍑','🍉','🍊','🍋','🥝'];
 var flyImages=[
   {src:'loza.png',pts:5},
@@ -550,13 +567,14 @@ function createFlyObj(item,x,y){
   }else{
     var img=document.createElement('img');
     img.src=item.src;img.className='fly-img';img.alt='';
+    img.draggable=false;
     el.appendChild(img);
   }
   var angle=Math.random()*Math.PI*2;
-  var dist=120+Math.random()*340; // разлёт по всему экрану
+  var dist=120+Math.random()*340;
   var dx=Math.cos(angle)*dist;
   var dy=Math.sin(angle)*dist;
-  var dur=7.0+Math.random()*3.0; // 7-10 сек — вдвое дольше
+  var dur=7.0+Math.random()*3.0; // 7-10 сек жизнь
   el.style.setProperty('--dx',dx+'px');
   el.style.setProperty('--dy',dy+'px');
   el.style.setProperty('--dur',dur+'s');
@@ -568,9 +586,10 @@ function createFlyObj(item,x,y){
 }
 
 function hitFly(el,item,tapX,tapY){
+  if(!item)item={pts:1};
   spawnParticles(tapX,tapY);
   el.style.pointerEvents='none';
-  el.remove();
+  if(el.parentNode)el.remove();
   var pts=item.pts;
   if(currentUser){
     currentUser.points=Math.max(0,(currentUser.points||0)+pts);
@@ -595,7 +614,7 @@ function spawnParticles(cx,cy){
     p.style.setProperty('--dx',Math.cos(a)*d+'px');
     p.style.setProperty('--dy',Math.sin(a)*d+'px');
     document.body.appendChild(p);
-    setTimeout(function(el){return function(){el.remove();};}(p),800);
+    setTimeout(function(el){return function(){if(el.parentNode)el.remove();};}(p),800);
   }
 }
 
@@ -610,7 +629,7 @@ function showPointPopup(x,y,pts){
   var start=performance.now();
   function frame(now){
     var t=(now-start)/1400;
-    if(t>=1){el.remove();return;}
+    if(t>=1){if(el.parentNode)el.remove();return;}
     el.style.opacity=String(1-t);
     el.style.transform='translate(-50%,-'+(50+t*150)+'%) scale('+(1+t*0.7)+')';
     requestAnimationFrame(frame);
@@ -620,20 +639,21 @@ function showPointPopup(x,y,pts){
 
 function initTapGame(){
   document.addEventListener('pointerdown',function(e){
-    var obj=e.target.closest('.fly-obj');
+    var tgt=e.target;
+    if(!tgt||!tgt.closest)return;
+    var obj=tgt.closest('.fly-obj');
     if(obj){
-      e.stopPropagation();
       if(obj.dataset.hit)return;
       obj.dataset.hit='1';
       hitFly(obj,obj._flyItem,e.clientX,e.clientY);
       return;
     }
-    if(e.target.closest('button, a, input, label, .moverlay, .abar, .toast, .debug-log, .debug-toggle, .header, .intro-overlay')) return;
+    if(tgt.closest('button, a, input, label, .moverlay, .abar, .toast, .debug-log, .debug-toggle, .header, .intro-overlay')) return;
     burst(e.clientX,e.clientY);
   });
 }
 
-// ===== ИНТРО: первый визит =====
+// ===== ИНТРО =====
 function maybeShowIntro(){
   if(localStorage.getItem('sasha_intro_done'))return;
   setTimeout(function(){
@@ -692,7 +712,6 @@ function loadAllData(cb){
   supaFetch('reserves?select=*').then(function(d){allReserves=d||[];done();}).catch(function(){allReserves=[];done();});
 }
 
-// ===== АВТООБНОВЛЕНИЕ (каждые 15 сек) =====
 function refreshUsers(){
   supaFetch('users?select=*').then(function(d){
     if(!d)return;
@@ -848,6 +867,7 @@ function updateHeader(){
   var badge=document.getElementById('newsBadge');
   badge.textContent=unread;
   badge.className='h-badge'+(unread===0?' zero':'');
+  renderRating();
 }
 
 function renderRating(){
@@ -1384,7 +1404,7 @@ function addNews(){
     document.getElementById('ad-t').value='';
     document.getElementById('ad-x').value='';
     updateHeader();
-    sendToTelegram('<b>🍓 Ягодный ноябрь: новая новость!</b>\n\n<b>'+escapeTelegram(t)+'</b>\n'+escapeTelegram(x));
+    sendToTelegram('<b>🍓 Ягодный ноябрь: новость!</b>\n\n<b>'+escapeTelegram(t)+'</b>\n'+escapeTelegram(x));
   }).catch(function(e){showToast('Ошибка: '+e.message);});
 }
 
@@ -1429,7 +1449,7 @@ loadAllData(function(){
 });
 
 setInterval(updateCountdown,3600000);
-setInterval(refreshUsers,15000); // автообновление рейтинга
+setInterval(refreshUsers,15000);
 </script>
 </body>
 </html>
