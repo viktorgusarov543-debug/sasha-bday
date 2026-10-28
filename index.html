@@ -258,6 +258,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 }
 .wish-top{flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:12px;margin-bottom:2px}
 .wish-subhead{flex-shrink:0;font-size:.78rem;color:var(--ac2);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:10px 0 8px;text-align:center}
+.roletakers{font-size:.72rem;color:var(--td);margin:6px 0 8px;line-height:1.4}
 </style>
 </head>
 <body>
@@ -1102,6 +1103,19 @@ function generateReport(){
   }
   text+='🚫 Ничего из вышеперечисленного: '+nones.length+'\n';
   for(var j=0;j<nones.length;j++)text+='  • '+getFullName(nones[j])+'\n';
+  text+='\n--- РОЛИ (кто за что отвечает) ---\n';
+  for(var i=0;i<wishData.length;i++){
+    var w=wishData[i];
+    if(!w.role)continue;
+    var takers=[];
+    for(var j=0;j<allReserves.length;j++){
+      if(allReserves[j].gift_id===w.id){
+        var u=getUserById(allReserves[j].user_id);
+        if(u)takers.push(getFullName(u));
+      }
+    }
+    text+='• '+w.title+': '+(takers.length?takers.join(', '):'пока никто')+'\n';
+  }
   return text;
 }
 function showReport(){
@@ -1393,7 +1407,30 @@ function resetForm(){
   document.getElementById('regTitle').textContent='📝 Регистрация';
   setRegBtnState(false);
 }
+function getUserById(id){
+  for(var i=0;i<allUsers.length;i++){if(allUsers[i].id===id)return allUsers[i];}
+  return null;
+}
 
+function notifyRoleJoin(wish){
+  if(!currentUser||!wish)return;
+  var verb='присоединился(ась)';
+  if(currentUser.gender==='male')verb='присоединился';
+  else if(currentUser.gender==='female')verb='присоединилась';
+  var takers=[];
+  for(var i=0;i<allReserves.length;i++){
+    if(allReserves[i].gift_id===wish.id){
+      var u=getUserById(allReserves[i].user_id);
+      if(u)takers.push(getFullName(u));
+    }
+  }
+  var listStr='';
+  for(var i=0;i<takers.length;i++){
+    listStr+=(i+1)+'. '+escapeTelegram(takers[i])+'\n';
+  }
+  var text='<b>🍓 Ягодный ноябрь</b>\n\n✨ <i>'+escapeTelegram(getFullName(currentUser))+'</i> '+verb+' к группе «'+escapeTelegram(wish.title)+'»\n\nУже в группе:\n'+listStr;
+  sendToTelegram(text);
+}
 function renderWish(){
   var grid=document.getElementById('wgrid'),html='';
   var myGift=getMyGift();
@@ -1425,11 +1462,27 @@ function renderWish(){
 
   for(var i=0;i<wishData.length;i++){
     var w=wishData[i];
-    var reserve=getReserve(w.id);
+    if(!w.role){
+      // подарок: скрываем, если его забрал кто-то другой
+      var resv=getReserve(w.id);
+      if(resv&&resv.user_id!==currentUser.id)continue;
+    }
+    // роли НЕ скрываем — их могут выбирать многие
     var isMine=(!w.role&&w.id===myGiftId)||(w.role&&w.id===myRoleId);
-    if(reserve&&!isMine)continue;
     html+='<div class="wcard"><div class="wttl">'+w.title+'</div>';
-    if(w.role)html+='<span class="wbadge wbadge-role">✨ Роль</span>';
+    if(w.role){
+      html+='<span class="wbadge wbadge-role">✨ Роль</span>';
+      var takers=[];
+      for(var j=0;j<allReserves.length;j++){
+        if(allReserves[j].gift_id===w.id){
+          var tu=getUserById(allReserves[j].user_id);
+          if(tu)takers.push(tu.id===currentUser.id?'Вы':getFullName(tu));
+        }
+      }
+      if(takers.length>0){
+        html+='<div class="roletakers">👥 Уже выбрали: '+takers.join(', ')+'</div>';
+      }
+    }
     if(isMine)html+='<span class="wbadge wbadge-mine">✓ Ваш</span><br>';
     if(w.link)html+='<a href="'+w.link+'" target="_blank" rel="noopener" class="wlink">Ссылка 1 ↗</a>';
     if(w.link2)html+='<a href="'+w.link2+'" target="_blank" rel="noopener" class="wlink">Ссылка 2 ↗</a>';
@@ -1460,6 +1513,7 @@ function reserveGift(gid){
     if(data&&data[0])allReserves.push(data[0]);
     else allReserves.push({gift_id:gid,user_id:currentUser.id});
     renderWish();
+    if(isRole)notifyRoleJoin(wish);
   }).catch(function(e){showToast('Ошибка: '+e.message);});
 }
 
