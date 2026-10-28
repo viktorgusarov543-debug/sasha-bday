@@ -10,7 +10,7 @@
 :root{--bg:#0d0511;--ac:#ff2d7b;--ac2:#ff6baa;--ac3:#c850c0;--t:#f0e6f0;--td:#9a8a9e;--rs:12px;--inv-scale:1}
 html{scroll-behavior:smooth;overscroll-behavior:none}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;line-height:1.6;
-  -webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior:none}
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior:none;-webkit-touch-callout:none}
 
 .header{position:sticky;top:0;z-index:900;background:rgba(13,5,17,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,45,123,.2);padding:34px 16px 12px}
 .h-title{text-align:center;font-size:1.5rem;font-weight:900;margin-bottom:8px;background:linear-gradient(135deg,#ff2d7b,#ff6baa,#c850c0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -51,7 +51,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .b4{width:300px;height:300px;background:#ff6baa;top:60%;left:10%;animation-delay:-15s}
 @keyframes bm{0%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.1)}100%{transform:translate(-20px,20px) scale(.95)}}
 
-/* ===== ИГРА (позиционируется через JS/transform) ===== */
 .fly-obj{
   position:fixed;left:0;top:0;width:44px;height:44px;
   display:flex;align-items:center;justify-content:center;
@@ -64,13 +63,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .bp{position:fixed;width:8px;height:8px;border-radius:50%;z-index:951;pointer-events:none;animation:pf .8s ease-out forwards}
 @keyframes pf{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
 
-.pt-popup{position:fixed;z-index:99999;font-weight:900;font-size:1.9rem;pointer-events:none;transform:translate(-50%,-50%);animation:ptFly 1.2s ease-out forwards;text-shadow:0 0 16px currentColor,0 2px 4px rgba(0,0,0,.5)}
-@keyframes ptFly{
-  0%{opacity:1;transform:translate(-50%,-50%) scale(.8)}
-  20%{opacity:1;transform:translate(-50%,-70%) scale(1.15)}
-  100%{opacity:0;transform:translate(-50%,-240%) scale(1.3)}
-}
-
 .intro-overlay{position:fixed;inset:0;z-index:940;display:flex;align-items:center;justify-content:center;pointer-events:none;animation:introFade .4s ease}
 .intro-text{font-size:1.9rem;font-weight:900;color:#fff;text-align:center;padding:22px 34px;background:linear-gradient(135deg,rgba(255,45,123,.92),rgba(200,80,192,.92));border-radius:20px;box-shadow:0 10px 50px rgba(255,45,123,.55);animation:introPulse 1.2s ease infinite;line-height:1.3}
 @keyframes introPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
@@ -80,11 +72,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 
 .content{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:calc(10px * var(--inv-scale,1)) 14px}
 .inv{background:rgba(255,255,255,.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:16px;
-  padding:calc(14px * var(--inv-scale,1)) calc(16px * var(--inv-scale,1));
-  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  padding:calc(14px * var(--inv-scale,1)) calc(16px * var(--inv-scale,1))}
 .inv p{margin-bottom:calc(7px * var(--inv-scale,1));font-size:calc(.9rem * var(--inv-scale,1));line-height:calc(1.35 * var(--inv-scale,1))}
 .inv p:last-child{margin-bottom:0}
 .hl{background:linear-gradient(135deg,rgba(255,45,123,.2),rgba(200,80,192,.2));padding:1px 8px;border-radius:6px;font-weight:600;color:var(--ac2)}
+/* текст как картинка: не выделяется, нет меню браузера */
+.content,.inv,.inv p,.hl{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none}
 
 .report-page{display:none;position:relative;z-index:1;max-width:800px;margin:0 auto;padding:30px 20px}
 .report-page.active{display:block}
@@ -133,7 +126,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .fg{margin-bottom:16px}
 .fg.hidden{display:none}
 .fl{display:block;font-size:.85rem;font-weight:600;color:var(--td);margin-bottom:6px}
-.fi{width:100%;padding:11px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:var(--rs);color:#fff;font-family:inherit;font-size:.95rem;transition:all .3s}
+.fi{width:100%;padding:11px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:var(--rs);color:#fff;font-family:inherit;font-size:.95rem;transition:all .3s;user-select:text;-webkit-user-select:text}
 .fi:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px rgba(255,45,123,.15)}
 .fi.err{border-color:#ff4444!important}
 .opt-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
@@ -529,7 +522,6 @@ function updateCountdown(){
   else el.innerHTML='<b>🍓</b> Праздник прошёл';
 }
 
-// ===== МАСШТАБИРОВАНИЕ НИЗА ПОД ЭКРАН =====
 function fitInvitation(){
   var header=document.getElementById('mainHeader');
   var content=document.getElementById('mainContent');
@@ -556,7 +548,7 @@ window.addEventListener('orientationchange',scheduleFit);
 window.addEventListener('load',fitInvitation);
 if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){fitInvitation();});}
 
-// ===== ИГРА (JS-движение + отскок от краёв) =====
+// ===== ИГРА =====
 var berryEmojis=['🍓','🍒','🍇','🫐','🍑','🍉','🍊','🍋','🥝'];
 var flyImages=[
   {src:'loza.png',pts:5},
@@ -577,10 +569,8 @@ function pickFlyItem(){
 
 function burst(x,y){
   var count=9+Math.floor(Math.random()*5);
-  for(var i=0;i<count;i++){
-    createFlyObj(pickFlyItem(),x,y);
-  }
-  dlog('💥 burst x'+count);
+  for(var i=0;i<count;i++){createFlyObj(pickFlyItem(),x,y);}
+  dlog('💥 burst x'+count+' (live:'+activeFlyObjs.length+')');
 }
 
 function createFlyObj(item,x,y){
@@ -597,14 +587,14 @@ function createFlyObj(item,x,y){
   el.style.transform='translate('+(x-22)+'px,'+(y-22)+'px)';
   document.body.appendChild(el);
   var angle=Math.random()*Math.PI*2;
-  var speed=70+Math.random()*70; // 70-140 px/s
+  var speed=70+Math.random()*70;
   var now=performance.now();
   activeFlyObjs.push({
     el:el,x:x,y:y,
     vx:Math.cos(angle)*speed,
     vy:Math.sin(angle)*speed,
     born:now,lastNow:now,
-    life:(7+Math.random()*3)*1000, // 7-10 сек
+    life:(7+Math.random()*3)*1000,
     item:item,hit:false
   });
 }
@@ -644,10 +634,9 @@ function startGameLoop(){
   requestAnimationFrame(loop);
 }
 
-// поиск объекта по координатам (точным, из JS)
 function findFlyAt(px,py){
   var best=null,bestD=Infinity;
-  var rr=44; // радиус 22 + запас 22
+  var rr=50; // радиус захвата
   for(var i=0;i<activeFlyObjs.length;i++){
     var o=activeFlyObjs[i];
     if(o.hit)continue;
@@ -662,12 +651,16 @@ function hitFly(o,tapX,tapY){
   if(!o||o.hit)return;
   o.hit=true;
   var item=o.item||{pts:1};
+  var pts=item.pts;
   var idx=activeFlyObjs.indexOf(o);
   if(idx>-1)activeFlyObjs.splice(idx,1);
-  spawnParticles(tapX,tapY);
   if(o.el&&o.el.parentNode)o.el.parentNode.removeChild(o.el);
-  var pts=item.pts;
-  if(currentUser){
+  // СНАЧАЛА показываем очки и эффект — всегда, до любых расчётов
+  showPointPopup(tapX,tapY,pts);
+  spawnParticles(tapX,tapY);
+  dlog('🎯 hit '+(pts>0?'+':'')+pts);
+  if(!currentUser)return;
+  try{
     currentUser.points=Math.max(0,(currentUser.points||0)+pts);
     supaFetch('users?id=eq.'+currentUser.id,'PATCH',{points:currentUser.points}).catch(function(){});
     for(var k=0;k<allUsers.length;k++){
@@ -677,9 +670,9 @@ function hitFly(o,tapX,tapY){
     if(prevRank&&prevRank!==newRank)showLevelUp(newRank);
     prevRank=newRank;
     renderRating();checkRatingChange();updateHeader();pulsePoints();
+  }catch(err){
+    dlog('⚠️ score err: '+err.message);
   }
-  showPointPopup(tapX,tapY,pts);
-  dlog('🎯 hit '+(pts>0?'+':'')+pts);
 }
 
 function spawnParticles(cx,cy){
@@ -697,13 +690,21 @@ function spawnParticles(cx,cy){
 
 function showPointPopup(x,y,pts){
   var el=document.createElement('div');
-  el.className='pt-popup';
   el.textContent=(pts>0?'+':'')+pts;
-  el.style.left=x+'px';
-  el.style.top=y+'px';
-  el.style.color=pts>0?'#7CFC7C':'#ff5c5c';
+  el.style.cssText='position:fixed;z-index:99999;left:'+x+'px;top:'+y+'px;'+
+    'transform:translate(-50%,-50%);font-weight:900;font-size:2rem;'+
+    'color:'+(pts>0?'#7CFC7C':'#ff5c5c')+';'+
+    'text-shadow:0 0 16px currentColor,0 2px 4px rgba(0,0,0,.6);pointer-events:none;';
   document.body.appendChild(el);
-  setTimeout(function(){if(el.parentNode)el.remove();},1250);
+  var start=performance.now();
+  function step(now){
+    var t=(now-start)/1200;
+    if(t>=1){if(el.parentNode)el.parentNode.removeChild(el);return;}
+    el.style.opacity=String(1-t);
+    el.style.transform='translate(-50%,-'+(50+t*180)+'%) scale('+(0.9+t*0.5)+')';
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
 function initTapGame(){
@@ -717,20 +718,15 @@ function initTapGame(){
     burst(px,py);
   }
   if(window.PointerEvent){
-    document.addEventListener('pointerdown',function(e){
-      handleTap(e.clientX,e.clientY,e.target);
-    });
+    document.addEventListener('pointerdown',function(e){handleTap(e.clientX,e.clientY,e.target);});
   }else{
     document.addEventListener('touchstart',function(e){
       if(e.touches&&e.touches[0])handleTap(e.touches[0].clientX,e.touches[0].clientY,e.target);
     },{passive:true});
-    document.addEventListener('mousedown',function(e){
-      handleTap(e.clientX,e.clientY,e.target);
-    });
+    document.addEventListener('mousedown',function(e){handleTap(e.clientX,e.clientY,e.target);});
   }
 }
 
-// ===== ИНТРО =====
 function maybeShowIntro(){
   if(localStorage.getItem('sasha_intro_done'))return;
   setTimeout(function(){
@@ -1481,7 +1477,7 @@ function addNews(){
     document.getElementById('ad-t').value='';
     document.getElementById('ad-x').value='';
     updateHeader();
-    sendToTelegram('<b>🍓 Ягодный ноябрь: новая новость!</b>\n\n<b>'+escapeTelegram(t)+'</b>\n'+escapeTelegram(x));
+    sendToTelegram('<b>🍓 Ягодный ноябрь: новость</b>\n\n<b>'+escapeTelegram(t)+'</b>\n'+escapeTelegram(x));
   }).catch(function(e){showToast('Ошибка: '+e.message);});
 }
 
