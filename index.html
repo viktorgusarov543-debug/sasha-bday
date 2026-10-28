@@ -11,7 +11,8 @@
 html{height:100%;overflow:hidden;overscroll-behavior:none}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:100%;overflow:hidden;
   display:flex;flex-direction:column;line-height:1.6;
-  -webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior:none;-webkit-touch-callout:none}
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior:none;-webkit-touch-callout:none;
+  user-select:none;-webkit-user-select:none}
 
 /* ===== ШАПКА (фикс. высота, не скроллится) ===== */
 .header{flex-shrink:0;position:relative;z-index:900;background:rgba(13,5,17,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,45,123,.2);padding:32px 16px 12px}
@@ -707,22 +708,27 @@ function showPointPopup(x,y,pts){
 }
 
 function initTapGame(){
-  function handleTap(px,py,target){
+  function isUI(target){
+    return target&&target.closest&&target.closest('button, a, input, label, textarea, select, .moverlay, .abar, .toast, .debug-log, .debug-toggle, .header, .intro-overlay');
+  }
+  function handleTap(e,px,py,target){
     var obj=findFlyAt(px,py);
     if(obj){
+      if(e.cancelable)e.preventDefault();
       hitFly(obj,px,py);
       return;
     }
-    if(target&&target.closest&&target.closest('button, a, input, label, .moverlay, .abar, .toast, .debug-log, .debug-toggle, .header, .intro-overlay'))return;
+    if(isUI(target))return;
+    if(e.cancelable)e.preventDefault();
     burst(px,py);
   }
   if(window.PointerEvent){
-    document.addEventListener('pointerdown',function(e){handleTap(e.clientX,e.clientY,e.target);});
+    document.addEventListener('pointerdown',function(e){handleTap(e,e.clientX,e.clientY,e.target);});
   }else{
     document.addEventListener('touchstart',function(e){
-      if(e.touches&&e.touches[0])handleTap(e.touches[0].clientX,e.touches[0].clientY,e.target);
-    },{passive:true});
-    document.addEventListener('mousedown',function(e){handleTap(e.clientX,e.clientY,e.target);});
+      if(e.touches&&e.touches[0])handleTap(e,e.touches[0].clientX,e.touches[0].clientY,e.target);
+    },{passive:false});
+    document.addEventListener('mousedown',function(e){handleTap(e,e.clientX,e.clientY,e.target);});
   }
 }
 
