@@ -56,7 +56,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
   display:flex;align-items:center;justify-content:center;
   font-size:1.9rem;cursor:pointer;user-select:none;z-index:950;
   pointer-events:auto;
-  animation:burstFly var(--dur,3.5s) linear forwards;
+  animation:burstFly var(--dur,7s) linear forwards;
   filter:drop-shadow(0 4px 8px rgba(0,0,0,.35));
   will-change:transform,opacity;
 }
@@ -544,6 +544,7 @@ function burst(x,y){
 function createFlyObj(item,x,y){
   var el=document.createElement('div');
   el.className='fly-obj';
+  el._flyItem=item;
   if(item.kind==='emoji'){
     el.textContent=item.c;
   }else{
@@ -555,17 +556,13 @@ function createFlyObj(item,x,y){
   var dist=120+Math.random()*340; // разлёт по всему экрану
   var dx=Math.cos(angle)*dist;
   var dy=Math.sin(angle)*dist;
-  var dur=3.5+Math.random()*1.5; // медленный полёт
+  var dur=7.0+Math.random()*3.0; // 7-10 сек — вдвое дольше
   el.style.setProperty('--dx',dx+'px');
   el.style.setProperty('--dy',dy+'px');
   el.style.setProperty('--dur',dur+'s');
   var size=44;
   el.style.left=(x-size/2)+'px';
   el.style.top=(y-size/2)+'px';
-  el.addEventListener('click',function(e){
-    e.stopPropagation();
-    hitFly(el,item,e.clientX,e.clientY);
-  });
   document.body.appendChild(el);
   setTimeout(function(){if(el.parentNode)el.remove();},dur*1000+100);
 }
@@ -604,18 +601,34 @@ function spawnParticles(cx,cy){
 
 function showPointPopup(x,y,pts){
   var el=document.createElement('div');
-  el.className='point-popup';
   el.textContent=(pts>0?'+':'')+pts;
-  el.style.left=x+'px';
-  el.style.top=y+'px';
-  el.style.color=pts>0?'#7CFC7C':'#ff5c5c';
+  el.style.cssText='position:fixed;z-index:99999;left:'+x+'px;top:'+y+
+    'px;transform:translate(-50%,-50%);font-weight:900;font-size:1.7rem;'+
+    'color:'+(pts>0?'#7CFC7C':'#ff5c5c')+
+    ';text-shadow:0 0 14px currentColor;pointer-events:none;';
   document.body.appendChild(el);
-  setTimeout(function(){el.remove();},1100);
+  var start=performance.now();
+  function frame(now){
+    var t=(now-start)/1400;
+    if(t>=1){el.remove();return;}
+    el.style.opacity=String(1-t);
+    el.style.transform='translate(-50%,-'+(50+t*150)+'%) scale('+(1+t*0.7)+')';
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
 }
 
 function initTapGame(){
-  document.addEventListener('click',function(e){
-    if(e.target.closest('button, a, input, label, .moverlay, .abar, .toast, .debug-log, .debug-toggle, .fly-obj, .header, .intro-overlay')) return;
+  document.addEventListener('pointerdown',function(e){
+    var obj=e.target.closest('.fly-obj');
+    if(obj){
+      e.stopPropagation();
+      if(obj.dataset.hit)return;
+      obj.dataset.hit='1';
+      hitFly(obj,obj._flyItem,e.clientX,e.clientY);
+      return;
+    }
+    if(e.target.closest('button, a, input, label, .moverlay, .abar, .toast, .debug-log, .debug-toggle, .header, .intro-overlay')) return;
     burst(e.clientX,e.clientY);
   });
 }
