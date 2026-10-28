@@ -7,13 +7,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0d0511;--ac:#ff2d7b;--ac2:#ff6baa;--ac3:#c850c0;--t:#f0e6f0;--td:#9a8a9e;--rs:12px;--inv-scale:1;--avail-h:auto}
-html{scroll-behavior:smooth;overscroll-behavior:none}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;line-height:1.6;
+:root{--bg:#0d0511;--ac:#ff2d7b;--ac2:#ff6baa;--ac3:#c850c0;--t:#f0e6f0;--td:#9a8a9e;--rs:12px}
+html{height:100%;overflow:hidden;overscroll-behavior:none}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:100%;overflow:hidden;
+  display:flex;flex-direction:column;line-height:1.6;
   -webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior:none;-webkit-touch-callout:none}
 
-.header{position:sticky;top:0;z-index:900;background:rgba(13,5,17,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,45,123,.2);padding:34px 16px 12px}
-.h-title{text-align:center;font-size:1.7rem;font-weight:900;margin-bottom:8px;background:linear-gradient(135deg,#ff2d7b,#ff6baa,#c850c0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+/* ===== ШАПКА (фикс. высота, не скроллится) ===== */
+.header{flex-shrink:0;position:relative;z-index:900;background:rgba(13,5,17,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,45,123,.2);padding:32px 16px 12px}
+.h-title{text-align:center;font-size:clamp(1.5rem,3.4vh,2.1rem);font-weight:900;margin-bottom:8px;background:linear-gradient(135deg,#ff2d7b,#ff6baa,#c850c0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .h-user{display:flex;justify-content:center;margin-bottom:8px}
 .h-chip{display:flex;align-items:center;gap:8px;padding:6px 16px;border-radius:30px;background:rgba(255,45,123,.1);border:1px solid rgba(255,45,123,.3);cursor:pointer;transition:all .3s;font-size:.85rem;flex-wrap:wrap;justify-content:center}
 .h-chip:hover{background:rgba(255,45,123,.2)}
@@ -33,14 +35,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .h-btn-wish:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .h-btn-tg{background:linear-gradient(135deg,#2AABEE,#229ED9);color:#fff}
 .h-btn-tg:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(42,171,238,.4)}
-.h-info{display:flex;flex-direction:column;gap:5px;max-width:440px;margin:0 auto}
+.h-info{display:flex;flex-direction:column;gap:5px;max-width:440px;margin:0 auto;width:100%}
 
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:440px;margin:0 auto}
-.info-tile{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;text-align:left;transition:all .3s}
+/* ===== ПЛИТКИ ИНФО ===== */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:440px;margin:0 auto;width:100%}
+.info-tile{display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;text-align:left;transition:all .3s}
 .info-tile.clickable{cursor:pointer}
 .info-tile.clickable:hover{background:rgba(255,45,123,.1);border-color:var(--ac2);transform:translateY(-2px)}
 .info-tile.wide{grid-column:1/-1}
-.tile-ico{font-size:1.3rem;flex-shrink:0;width:28px;text-align:center}
+.tile-ico{font-size:1.25rem;flex-shrink:0;width:26px;text-align:center}
 .tile-label{font-size:.6rem;color:var(--td);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}
 .tile-value{font-size:.78rem;color:var(--t);font-weight:600;line-height:1.3}
 .info-tile.clickable .tile-value{color:var(--ac2);text-decoration:underline}
@@ -53,11 +56,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .b4{width:300px;height:300px;background:#ff6baa;top:60%;left:10%;animation-delay:-15s}
 @keyframes bm{0%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.1)}100%{transform:translate(-20px,20px) scale(.95)}}
 
+/* ===== ЛЕТАЮЩИЕ ОБЪЕКТЫ ===== */
 .fly-obj{position:fixed;left:0;top:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.9rem;user-select:none;z-index:950;pointer-events:none;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35));will-change:transform}
-.fly-img{width:44px;height:44px;border-radius:50%;object-fit:cover;display:block;border:2px solid rgba(255,255,255,.35)}
+/* картинка без рамки и без принудительного скругления */
+.fly-img{width:44px;height:44px;object-fit:contain;display:block}
 .bp{position:fixed;width:8px;height:8px;border-radius:50%;z-index:951;pointer-events:none;animation:pf .8s ease-out forwards}
 @keyframes pf{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
 
+/* ===== ИНТРО ===== */
 .intro-overlay{position:fixed;inset:0;z-index:940;display:flex;align-items:center;justify-content:center;pointer-events:none;animation:introFade .4s ease}
 .intro-text{font-size:1.9rem;font-weight:900;color:#fff;text-align:center;padding:22px 34px;background:linear-gradient(135deg,rgba(255,45,123,.92),rgba(200,80,192,.92));border-radius:20px;box-shadow:0 10px 50px rgba(255,45,123,.55);animation:introPulse 1.2s ease infinite;line-height:1.3}
 @keyframes introPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
@@ -65,21 +71,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .intro-overlay.hide{animation:introOut .4s ease forwards}
 @keyframes introOut{to{opacity:0}}
 
-/* ===== КОНТЕНТ: плитка на всю свободную высоту ===== */
-.content{position:relative;z-index:1;max-width:800px;margin:0 auto;
-  padding:calc(10px * var(--inv-scale,1)) 14px;
-  height:var(--avail-h,auto);display:flex;flex-direction:column}
+/* ===== КОНТЕНТ: занимает весь остаток экрана, плитка растягивается ===== */
+.content{position:relative;z-index:1;max-width:800px;width:100%;margin:0 auto;padding:8px 14px;flex:1;min-height:0;display:flex;flex-direction:column}
 .inv{background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.09);border-radius:14px;
-  padding:calc(16px * var(--inv-scale,1)) calc(18px * var(--inv-scale,1));
-  flex:1;display:flex;flex-direction:column;justify-content:space-evenly}
+  padding:12px 16px;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-evenly;overflow:hidden}
 .inv-head{display:flex;align-items:center;justify-content:center;gap:10px;
-  font-size:1.7rem;color:var(--ac2);font-weight:900;letter-spacing:.5px}
-.inv-head-ico{font-size:1.5rem}
-.inv p{font-size:calc(.9rem * var(--inv-scale,1));line-height:calc(1.35 * var(--inv-scale,1))}
+  font-size:clamp(1.5rem,3.4vh,2.1rem);color:var(--ac2);font-weight:900;letter-spacing:.5px;flex-shrink:0}
+.inv-head-ico{font-size:clamp(1.3rem,3vh,1.9rem)}
+.inv p{font-size:clamp(.72rem,1.75vh,1.02rem);line-height:clamp(1.2,2.1vh,1.5)}
 .hl{background:linear-gradient(135deg,rgba(255,45,123,.2),rgba(200,80,192,.2));padding:1px 8px;border-radius:6px;font-weight:600;color:var(--ac2)}
 .content,.inv,.inv p,.hl{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none}
 
-.report-page{display:none;position:relative;z-index:1;max-width:800px;margin:0 auto;padding:30px 20px}
+/* ===== ОТЧЁТ (со своим скроллом) ===== */
+.report-page{display:none;position:relative;z-index:1;max-width:800px;width:100%;margin:0 auto;padding:30px 20px;flex:1;min-height:0;overflow-y:auto}
 .report-page.active{display:block}
 .report-block{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px;margin-bottom:20px}
 .report-block h3{color:var(--ac2);font-size:1.1rem;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:8px}
@@ -93,7 +97,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .mclose{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:var(--td);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .mclose:hover{background:rgba(255,45,123,.3);color:#fff}
 .mtitle{font-size:1.5rem;font-weight:800;margin-bottom:18px;background:linear-gradient(135deg,#ff2d7b,#c850c0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.msub{color:var(--td);font-size:.9rem;margin:-10px 0 16px;text-align:center;font-style:italic}
+.msub{color:var(--td);font-size:.92rem;margin:-10px 0 16px;text-align:center;font-style:italic}
 
 .news-item{padding:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:var(--rs);margin-bottom:10px}
 .news-item.unread{border-left:3px solid var(--ac)}
@@ -189,7 +193,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(120px);background:linear-gradient(135deg,#1a0a22,#2d1b3d);border:1px solid var(--ac);color:#fff;padding:12px 24px;border-radius:14px;font-weight:600;font-size:.9rem;z-index:10002;box-shadow:0 10px 40px rgba(255,45,123,.4);transition:transform .3s ease;text-align:center;max-width:90%}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
-.h-days{position:absolute;top:10px;left:16px;font-size:.7rem;color:var(--td);letter-spacing:.3px}
+.h-days{position:absolute;top:8px;left:16px;font-size:.7rem;color:var(--td);letter-spacing:.3px}
 .h-days b{color:var(--ac2);font-weight:700;font-size:.85rem}
 .h-corner{position:absolute;top:8px;right:16px;display:flex;gap:6px;align-items:center}
 .h-corner-btn{padding:5px 14px;border-radius:20px;font-family:inherit;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .3s;background:transparent;border:1px solid var(--ac);color:var(--ac)}
@@ -233,21 +237,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 .debug-toggle.active{display:flex;align-items:center;justify-content:center}
 
 @media(max-width:700px){
-  .header{padding:30px 12px 10px}
-  .h-title{font-size:1.35rem;margin-bottom:6px}
-  .inv-head{font-size:1.35rem}
-  .inv-head-ico{font-size:1.2rem}
+  .header{padding:28px 12px 10px}
   .h-user{margin-bottom:6px}
   .h-chip{padding:5px 12px;font-size:.78rem;gap:6px}
   .h-nav{margin-bottom:8px;gap:8px}
   .h-btn{padding:6px 14px;font-size:.78rem}
-  .h-days{font-size:.62rem;top:8px;left:10px}
+  .h-days{font-size:.62rem;top:7px;left:10px}
   .h-days b{font-size:.75rem}
   .h-corner{top:6px;right:10px}
   .h-corner-btn{padding:4px 11px;font-size:.7rem}
   .info-grid{gap:6px}
-  .info-tile{padding:8px 10px;gap:8px}
-  .tile-ico{font-size:1.1rem;width:22px}
+  .info-tile{padding:7px 10px;gap:8px}
+  .tile-ico{font-size:1.05rem;width:20px}
   .tile-value{font-size:.72rem}
   .opt-grid{grid-template-columns:1fr}
   .opt-grid.three{grid-template-columns:1fr}
@@ -278,17 +279,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
             <div class="tile-ico">🕐</div>
             <div class="tile-body"><div class="tile-label">Время</div><div class="tile-value">15:00 СБ → 17:00 ВС</div></div>
           </div>
-          <div class="info-tile clickable" onclick="openMap()">
-            <div class="tile-ico">📍</div>
-            <div class="tile-body"><div class="tile-label">Место</div><div class="tile-value">Бор.Матюшинский лес ↗</div></div>
+          <div class="info-tile">
+            <div class="tile-ico">🎒</div>
+            <div class="tile-body"><div class="tile-label">Возьми с собой</div><div class="tile-value">любимый напиток</div></div>
           </div>
           <div class="info-tile">
             <div class="tile-ico">👗</div>
             <div class="tile-body"><div class="tile-label">Дресс-код</div><div class="tile-value">ягодный</div></div>
           </div>
-          <div class="info-tile wide">
-            <div class="tile-ico">🎒</div>
-            <div class="tile-body"><div class="tile-label">Возьми с собой</div><div class="tile-value">любимый напиток</div></div>
+          <div class="info-tile wide clickable" onclick="openMap()">
+            <div class="tile-ico">📍</div>
+            <div class="tile-body"><div class="tile-label">Место</div><div class="tile-value">Бор.Матюшинский лес ↗</div></div>
           </div>
         </div>
       </div>
@@ -546,36 +547,6 @@ function updateCountdown(){
   if(days>0)el.innerHTML='До праздника <b>'+days+'</b> '+pluralize(days,'день','дня','дней');
   else if(days===0)el.innerHTML='<b>🎉 Сегодня!</b>';
   else el.innerHTML='<b>🍓</b> Праздник прошёл';
-}
-
-// Масштаб текста + высота плитки на всю свободную область.
-// Пересчёт только при загрузке и повороте — без прыжков при скролле.
-function fitInvitation(){
-  var header=document.getElementById('mainHeader');
-  var content=document.getElementById('mainContent');
-  if(!header||!content)return;
-  var root=document.documentElement;
-  root.style.setProperty('--inv-scale','1');
-  root.style.setProperty('--avail-h','auto');
-  var avail=window.innerHeight-header.offsetHeight-14;
-  var natural=content.offsetHeight;
-  var scale=1;
-  if(natural>0){
-    scale=avail/natural;
-    if(scale>1.2)scale=1.2;
-    if(scale<0.5)scale=0.5;
-  }
-  root.style.setProperty('--inv-scale',scale.toFixed(3));
-  root.style.setProperty('--avail-h',avail+'px');
-}
-var fitTimer=null;
-function scheduleFit(){
-  if(fitTimer)clearTimeout(fitTimer);
-  fitTimer=setTimeout(fitInvitation,120);
-}
-window.addEventListener('orientationchange',scheduleFit);
-if(document.fonts&&document.fonts.ready){
-  document.fonts.ready.then(function(){setTimeout(fitInvitation,50);});
 }
 
 var berryEmojis=['🍓','🍒','🍇','🫐','🍑','🍉','🍊','🍋','🥝'];
@@ -1545,7 +1516,6 @@ loadAllData(function(){
   prevPositions={};
   for(var i=0;i<sorted.length;i++)prevPositions[sorted[i].id]=i+1;
   updateHeader();
-  fitInvitation();
   if(urlParams.get('report')==='ягодный')showReport();
 });
 
