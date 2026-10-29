@@ -818,7 +818,7 @@ var prevPositions={};
 
 function openMap(){window.open('https://yandex.ru/maps/?pt=49.025928,55.647778&z=16&l=map','_blank','noopener,noreferrer');}
 
-function openDetails(){openM('m-details');
+function openDetails(){openM('m-details');}
   
 function loadAllData(cb){
   var loaded=0;
@@ -957,6 +957,14 @@ function showToast(msg){
   t.classList.add('show');
   if(t._timer)clearTimeout(t._timer);
   t._timer=setTimeout(function(){t.classList.remove('show');},2200);
+}
+  
+function pulsePoints(){
+  var el=document.getElementById('pts-counter');
+  if(!el)return;
+  el.classList.remove('pulse');
+  void el.offsetWidth;
+  el.classList.add('pulse');
 }
 
 function updateHeader(){
