@@ -260,6 +260,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 .wish-subhead{flex-shrink:0;font-size:.78rem;color:var(--ac2);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:10px 0 8px;text-align:center}
 .roletakers{font-size:.72rem;color:var(--td);margin:6px 0 8px;line-height:1.4}
 .role-participants{font-size:.75rem;color:var(--td);font-weight:400;margin-top:-2px}
+.place-tile{justify-content:center}
+.place-tile .tile-body{text-align:center}
+.details-btn{margin-left:8px;padding:5px 12px;border-radius:16px;font-family:inherit;font-size:.72rem;font-weight:600;cursor:pointer;background:linear-gradient(135deg,var(--ac3),#6c2bd9);color:#fff;border:none;transition:all .3s;flex-shrink:0}
+.details-btn:hover{transform:translateY(-1px)}
+.details-item{margin-bottom:18px}
+.details-img{width:100%;border-radius:12px;margin-bottom:8px;display:block;background:rgba(255,255,255,.05);min-height:80px}
+.details-item p{font-size:.85rem;color:var(--td);line-height:1.5}
 </style>
 </head>
 <body>
@@ -292,9 +299,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
             <div class="tile-ico">👗</div>
             <div class="tile-body"><div class="tile-label">Дресс-код</div><div class="tile-value">ягодный</div></div>
           </div>
-          <div class="info-tile wide clickable" onclick="openMap()">
+          <div class="info-tile wide clickable place-tile" onclick="openMap()">
             <div class="tile-ico">📌</div>
-            <div class="tile-body"><div class="tile-label">Место</div><div class="tile-value">Бор.Матюшинский лес ↗</div></div>
+            <div class="tile-body">
+              <div class="tile-label">Место</div>
+              <div class="tile-value">Зелёный Бор ↗</div>
+            </div>
+            <button class="details-btn" onclick="event.stopPropagation();openDetails()">Детали</button>
           </div>
         </div>
       </div>
@@ -310,7 +321,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
   <section class="inv">
     <div class="inv-head">Приглашение</div>
     <p>Хэй-хэй-хэй!</p>
-    <p>14 ноября я приглашаю тебя в терем Бор, что в Матюшинском лесу. В программе — встреча. В целом, считаю, достаточно!</p>
+    <p>14 ноября я приглашаю тебя в терем в Зеленом Бору. В программе — встреча. В целом, считаю, достаточно!</p>
     <p>Но — бонусом мы попаримся в бане, будем петь, пить, играть, нюхать лес и шашлык и, возможно, очень неплохо проведем этот осенний уикенд.</p>
     <p><span class="hl">Дресс-код ягодный!</span> Ягодные цвета, ягоды на одежде, в волосах, зубах и конечно же в ягодицах (да, будет много остроумных шуток и забывных парадоксов).</p>
     <p>Прошу тебя взять с собой напиток, который ты предпочитаешь. Об остальном не беспокойся!</p>
@@ -417,6 +428,25 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
     <div class="wish-subhead">Варианты</div>
     <div class="wscroll">
       <div class="wgrid" id="wgrid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="moverlay" id="m-details">
+  <div class="mbox">
+    <button class="mclose" onclick="closeM('m-details')">✕</button>
+    <div class="mtitle">🚗 Как добраться до Зелёного Бора</div>
+    <div class="details-item">
+      <img class="details-img" src="route1.png" alt="Способ 1">
+      <p>Фейковый текст про первый способ добраться. Здесь будет описание маршрута: откуда ехать, где поворачивать, где парковаться. Потом заменим на реальный текст.</p>
+    </div>
+    <div class="details-item">
+      <img class="details-img" src="route2.png" alt="Способ 2">
+      <p>Фейковый текст про второй способ добраться. Например, на такси или попуткой: ориентировочная стоимость, время в пути, точка встречи.</p>
+    </div>
+    <div class="details-item">
+      <img class="details-img" src="route3.png" alt="Способ 3">
+      <p>Фейковый текст про третий способ добраться. Общественный транспорт или пешком от ближайшей остановки: сколько идти, какие ориентиры.</p>
     </div>
   </div>
 </div>
@@ -556,7 +586,7 @@ function updateCountdown(){
   else el.innerHTML='<b>🍓</b> Праздник прошёл';
 }
 
-var berryEmojis=['🍓','🍒','🍇','🫐','🍑','🍉','🍊','🍋','🥝'];
+var berryEmojis=['🍉','🍓','🫐','🍒','🍇'];
 var flyImages=[
   {src:'loza.png',pts:5},
   {src:'petrosyan.png',pts:-3},
@@ -788,6 +818,8 @@ var prevPositions={};
 
 function openMap(){window.open('https://yandex.ru/maps/?pt=49.025928,55.647778&z=16&l=map','_blank','noopener,noreferrer');}
 
+function openDetails(){openM('m-details');
+  
 function loadAllData(cb){
   var loaded=0;
   function done(){loaded++;if(loaded>=3&&cb)cb();}
