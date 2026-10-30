@@ -260,6 +260,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 .details-item{margin-bottom:18px}
 .details-img{width:100%;border-radius:12px;margin-bottom:8px;display:block;background:rgba(255,255,255,.05);min-height:80px}
 .details-item p{font-size:.85rem;color:var(--td);line-height:1.5}
+#fg-rest{transition:opacity .3s ease, max-height .3s ease;overflow:hidden}
+#fg-rest.hidden{opacity:0;max-height:0;margin:0}
+#fg-rest:not(.hidden){opacity:1;max-height:2000px}
 </style>
 </head>
 <body>
@@ -1493,7 +1496,7 @@ function resetForm(){
   document.getElementById('fg-from').classList.add('hidden');
   document.getElementById('fg-tailriders').classList.add('hidden');
   var restEl=document.getElementById('fg-rest');
-  if(restEl)restEl.classList.remove('hidden');
+  if(restEl)restEl.classList.add('hidden');
   var btns=document.querySelectorAll('.opt-btn');
   for(var i=0;i<btns.length;i++)btns[i].classList.remove('selected');
   var errs=document.querySelectorAll('.err');
