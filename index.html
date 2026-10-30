@@ -422,9 +422,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
   <div class="mbox">
     <button class="mclose" onclick="closeM('m-profile')">✕</button>
     <div class="mtitle">👤 Моя анкета</div>
+    
+    <!-- Кнопки действий сверху, выровнены по правому краю -->
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-bottom:16px;">
+      <button class="bback" style="margin:0; padding:8px 16px; font-size:.85rem;" onclick="openEditProfile()">✏️ Редактировать</button>
+      <button class="bback" style="margin:0; padding:8px 16px; font-size:.85rem; border-color:#ff4444; color:#ff8888;" onclick="logout()">🚪 Выйти</button>
+    </div>
+
+    <!-- Сетка с данными анкеты теперь идет ниже кнопок -->
     <div class="profile-grid" id="profileGrid"></div>
-    <button class="bback" style="margin-top:16px" onclick="openEditProfile()">✏️ Редактировать</button>
-    <button class="bback" style="margin-top:8px;border-color:#ff4444;color:#ff8888" onclick="logout()">🚪 Выйти из профиля</button>
   </div>
 </div>
 
