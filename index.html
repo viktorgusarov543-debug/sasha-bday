@@ -875,8 +875,8 @@ function showIntro(){
   },3000);
 }
 function maybeShowGameHint(){
-  if(localStorage.getItem('sasha_game_hint_done'))return;
-  localStorage.setItem('sasha_game_hint_done','1');
+  if(sessionStorage.getItem('sasha_game_hint_done'))return;
+  sessionStorage.setItem('sasha_game_hint_done','1');
   var el=document.createElement('div');
   el.className='game-hint';
   el.innerHTML='Игра «Ягодный ТЫК»<br>Ткни в приглашение';
@@ -1070,7 +1070,7 @@ function updateHeader(){
     '<span class="h-badge'+(unread===0?' zero':'')+'" id="newsBadge">'+unread+'</span></button>';
   if(currentUser){
     prevRank=getRank(currentUser.points||0);
-    userSlot.innerHTML='<div class="h-chip">'+
+    userSlot.innerHTML='<div class="h-chip" onclick="openProfile()">'+
       '<span class="h-chip-name">'+getFullName(currentUser)+'</span>'+
       '<span class="h-chip-rank">'+getRank(currentUser.points||0)+'</span>'+
       '<span class="h-chip-pts" id="pts-counter">🍓 '+(currentUser.points||0)+'</span></div>';
