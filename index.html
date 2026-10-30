@@ -263,6 +263,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 #fg-rest{transition:opacity .3s ease, max-height .3s ease;overflow:hidden}
 #fg-rest.hidden{opacity:0;max-height:0;margin:0}
 #fg-rest:not(.hidden){opacity:1;max-height:2000px}
+.h-chip-edit{display:inline-block;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,.15);color:var(--ac2);font-size:.68rem;font-weight:600;margin-left:4px;border:1px solid rgba(255,255,255,.2);transition:all .3s;cursor:pointer}
+.h-chip-edit:hover{background:var(--ac);color:#fff;border-color:var(--ac)}
 </style>
 </head>
 <body>
@@ -1050,7 +1052,8 @@ function updateHeader(){
     userSlot.innerHTML='<div class="h-chip" onclick="openProfile()">'+
       '<span class="h-chip-name">'+getFullName(currentUser)+'</span>'+
       '<span class="h-chip-rank">'+getRank(currentUser.points||0)+'</span>'+
-      '<span class="h-chip-pts" id="pts-counter">🍓 '+(currentUser.points||0)+'</span></div>';
+      '<span class="h-chip-pts" id="pts-counter">🍓 '+(currentUser.points||0)+'</span>'+
+      '<span class="h-chip-edit" onclick="event.stopPropagation();openEditProfile()">✏️ Анкета</span></div>';
     navSlot.innerHTML='<button class="h-btn h-btn-wish" onclick="openWish()">🎁 Wish-лист</button>'+
       '<a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
     cornerSlot.innerHTML=newsBtnHtml+'<button class="h-corner-btn" onclick="logout()">Выйти</button>';
@@ -1749,18 +1752,18 @@ function cancelReserve(reserveId){
 
 if(urlParams.get('admin')==='саша2026'){
   var bar=document.createElement('div');bar.className='abar';
-  bar.innerHTML='<span style="color:#ff2d7b;font-weight:700">🔧 Новости:</span><input id="ad-d" placeholder="Дата" style="width:100px"><input id="ad-t" placeholder="Заголовок" style="flex:1;min-width:120px"><input id="ad-x" placeholder="Текст" style="flex:2;min-width:200px"><button onclick="addNews()">Добавить</button>';
+    bar.innerHTML='<span style="color:#ff2d7b;font-weight:700">🔧 Новости:</span><input id="ad-t" placeholder="Заголовок" style="flex:1;min-width:120px"><input id="ad-x" placeholder="Текст" style="flex:2;min-width:200px"><button onclick="addNews()">Добавить</button>';
   document.body.prepend(bar);
 }
 function addNews(){
-  var d=document.getElementById('ad-d').value,t=document.getElementById('ad-t').value,x=document.getElementById('ad-x').value;
-  if(!d||!t||!x){alert('Заполни все поля!');return;}
+  var t=document.getElementById('ad-t').value,x=document.getElementById('ad-x').value;
+  if(!t||!x){alert('Заполни все поля!');return;}
+  var d=getDateStr();
   if(isNewsDuplicate(d,t,x)){alert('⚠️ Такая новость уже есть!');return;}
   dlog('📝 addNews: '+t);
   supaFetch('news','POST',{date:d,title:t,text:x}).then(function(){
     dlog('✅ addNews saved');
     allNews.unshift({date:d,title:t,text:x});
-    document.getElementById('ad-d').value='';
     document.getElementById('ad-t').value='';
     document.getElementById('ad-x').value='';
     updateHeader();
