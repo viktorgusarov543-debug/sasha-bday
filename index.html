@@ -346,8 +346,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
     <div class="rview" id="rview">
       <button class="bback" onclick="showAuth()">← Назад к выбору</button>
       <div class="mtitle" id="regTitle">📝 Регистрация</div>
-      <div class="fg"><label class="fl">Идентификатор (имя)</label><input class="fi" type="text" id="f-id" placeholder="Имя или как тебя называть"></div>
-      <div class="fg"><label class="fl">Пароль</label><input class="fi" type="password" id="f-pwd" placeholder="Придумайте пароль"></div>
+      <div class="fg"><label class="fl">Идентификатор (имя)</label><input class="fi" type="text" id="f-id" placeholder="Имя или как тебя называть" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <div class="fg"><label class="fl">Пароль</label><input class="fi" type="password" id="f-pwd" placeholder="Придумайте пароль" autocomplete="new-password">
       <div class="fg">
         <label class="fl">Пол (влияет на прозвище и глаголы)</label>
         <div class="opt-grid three" id="g-gender">
@@ -374,7 +374,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
         </div>
         <div class="fg hidden" id="fg-from">
           <label class="fl">Стартует от...</label>
-          <input class="fi" type="text" id="f-from" placeholder="Город, район или адрес">
+          <input class="fi" type="text" id="f-from" placeholder="Город, район или адрес" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         </div>
         <div class="fg hidden" id="fg-tailriders">
           <div class="drivers-block">
@@ -471,6 +471,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
   <div class="log-head">
     <b>🐛 DEBUG LOG</b>
     <div>
+      <button class="log-clear" onclick="copyDebug()">📋 Копировать</button>
       <button class="log-clear" onclick="clearDebug()">Очистить</button>
       <button class="log-clear" onclick="toggleDebug()">✕</button>
     </div>
@@ -489,6 +490,38 @@ function toggleDebug(){
   if(debugActive) dlog('🐛 Консоль открыта');
 }
 function clearDebug(){document.getElementById('debugLines').innerHTML='';}
+function copyDebug(){
+  var lines=document.getElementById('debugLines');
+  if(!lines)return;
+  var text=Array.from(lines.querySelectorAll('.log-line'))
+    .map(function(el){return el.textContent;})
+    .join('\n');
+  if(!text){showToast('Консоль пуста');return;}
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      showToast('📋 Скопировано в буфер');
+    }).catch(function(){
+      fallbackCopy(text);
+    });
+  }else{
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text){
+  var ta=document.createElement('textarea');
+  ta.value=text;
+  ta.style.position='fixed';
+  ta.style.opacity='0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{
+    document.execCommand('copy');
+    showToast('📋 Скопировано в буфер');
+  }catch(e){
+    showToast('❌ Не удалось скопировать');
+  }
+  document.body.removeChild(ta);
+}
 function dlog(msg){
   var lines=document.getElementById('debugLines');
   var log=document.getElementById('debugLog');
@@ -1365,7 +1398,7 @@ function renderAuthList(){
     html+='<div class="auname">'+getFullName(u)+'</div>';
     html+='<div class="aupoints">'+getRank(u.points||0)+' · 🍓 '+(u.points||0)+'</div></div>';
     html+='<button class="auedit" onclick="event.stopPropagation();editUser(\''+u.id+'\')">✏️</button></div>';
-    html+='<div class="au-pwd" id="pwd-'+u.id+'"><input type="password" id="pwdin-'+u.id+'" placeholder="Пароль"><button onclick="tryLogin(\''+u.id+'\')">Войти</button></div></div>';
+    html+='<div class="au-pwd" id="pwd-'+u.id+'"><input type="password" id="pwdin-'+u.id+'" placeholder="Пароль" autocomplete="new-password"><button onclick="tryLogin(\''+u.id+'\')">Войти</button></div></div>';
   }
   list.innerHTML=html;
 }
