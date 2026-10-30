@@ -536,7 +536,8 @@ function escapeTelegram(str){
 }
 
 function sendToTelegram(text){
-  if(!TG_BOT_TOKEN||!TG_CHAT_ID)return;
+  if(!TG_BOT_TOKEN||!TG_CHAT_ID){dlog('⚠️ TG: нет токена/чата');return;}
+  dlog('📤 TG send: '+text.substring(0,80)+'...');
   var url='https://api.telegram.org/bot'+TG_BOT_TOKEN+'/sendMessage';
   fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({chat_id:TG_CHAT_ID,text:text,parse_mode:'HTML'})})
@@ -1095,6 +1096,35 @@ function createTransportNews(user,fromPlace){
   }).catch(function(){});
 }
 
+function createNotComingNews(user){
+  if(!user)return;
+  var dateStr=getDateStr();
+  var title='🥲 Не приедет';
+  var fullName=getFullName(user);
+  var text=fullName+' не сможет приехать на праздник. Жаль!';
+  dlog('📨 createNotComingNews: '+fullName);
+  supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
+    allNews.unshift({date:dateStr,title:title,text:text});
+    updateHeader();
+    sendToTelegram('<b>🍓 Ягодный ноябрь</b>\n\n🥲 <i>'+escapeTelegram(fullName)+'</i> не сможет приехать на праздник. Жаль!');
+  }).catch(function(e){dlog('❌ NotComing: '+e.message);});
+}
+
+function createWelcomeNews(user){
+  if(!user)return;
+  var dateStr=getDateStr();
+  var title='🍓 Новый гость';
+  var fullName=getFullName(user);
+  var prob=user.probability||'';
+  var text=fullName+' заполнил(а) анкету: '+prob;
+  dlog('📨 createWelcomeNews: '+fullName);
+  supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
+    allNews.unshift({date:dateStr,title:title,text:text});
+    updateHeader();
+    sendToTelegram('<b>🍓 Ягодный ноябрь</b>\n\n🍓 <i>'+escapeTelegram(fullName)+'</i> заполнил(а) анкету!\n'+escapeTelegram(prob));
+  }).catch(function(e){dlog('❌ Welcome: '+e.message);});
+}
+
 function openNews(){
   var seen=parseInt(localStorage.getItem('sasha_news_seen')||'0');
   var html='';
@@ -1454,8 +1484,10 @@ function doRegister(){
       closeM('m-auth');updateHeader();
       editingUserId=null;resetForm();
       if(isNotComing){
+        if(oldProb!=='Меня не будет')createNotComingNews(currentUser);
         openM('m-sorry');
       } else if(oldProb==='Меня не будет'){
+        createWelcomeNews(currentUser);
         if(newTrans==='car'||newTrans==='taxi')createTransportNews(currentUser,newFrom);
       } else if(oldTransport!==newTrans||(newTrans!=='none'&&oldFromPlace!==newFrom)){
         createTransportNews(currentUser,newFrom);
@@ -1477,7 +1509,9 @@ function doRegister(){
       localStorage.setItem('sasha_cur',JSON.stringify(newUserData));
       setRegBtnState(false);
       closeM('m-auth');updateHeader();
+      createWelcomeNews(newUserData);
       if(isNotComing){
+        createNotComingNews(newUserData);
         openM('m-sorry');
       }else{
         createTransportNews(newUserData,newFrom);
@@ -1667,14 +1701,16 @@ function addNews(){
   var d=document.getElementById('ad-d').value,t=document.getElementById('ad-t').value,x=document.getElementById('ad-x').value;
   if(!d||!t||!x){alert('Заполни все поля!');return;}
   if(isNewsDuplicate(d,t,x)){alert('⚠️ Такая новость уже есть!');return;}
+  dlog('📝 addNews: '+t);
   supaFetch('news','POST',{date:d,title:t,text:x}).then(function(){
+    dlog('✅ addNews saved');
     allNews.unshift({date:d,title:t,text:x});
     document.getElementById('ad-d').value='';
     document.getElementById('ad-t').value='';
     document.getElementById('ad-x').value='';
     updateHeader();
     sendToTelegram('<b>🍓 Ягодный ноябрь: новость</b>\n\n<b>'+escapeTelegram(t)+'</b>\n'+escapeTelegram(x));
-  }).catch(function(e){showToast('Ошибка: '+e.message);});
+  }).catch(function(e){dlog('❌ addNews: '+e.message);showToast('Ошибка: '+e.message);});
 }
 
 try{
