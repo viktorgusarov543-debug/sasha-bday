@@ -14,7 +14,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
   -webkit-tap-highlight-color:transparent;touch-action:manipulation;overscroll-behavior:none;-webkit-touch-callout:none;
   user-select:none;-webkit-user-select:none}
 
-/* ===== ШАПКА (фикс. высота, не скроллится) ===== */
 .header{flex-shrink:0;position:relative;z-index:900;background:rgba(13,5,17,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,45,123,.2);padding:32px 16px 12px}
 .h-title{text-align:center;font-size:clamp(1.5rem,3.4vh,2.1rem);font-weight:900;margin-bottom:8px;background:linear-gradient(135deg,#ff2d7b,#ff6baa,#c850c0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .h-user{display:flex;justify-content:center;margin-bottom:8px}
@@ -38,7 +37,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 .h-btn-tg:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(42,171,238,.4)}
 .h-info{display:flex;flex-direction:column;gap:5px;max-width:440px;margin:0 auto;width:100%}
 
-/* ===== ПЛИТКИ ИНФО ===== */
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:440px;margin:0 auto;width:100%}
 .info-tile{display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;text-align:left;transition:all .3s}
 .info-tile.clickable{cursor:pointer}
@@ -57,14 +55,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 .b4{width:300px;height:300px;background:#ff6baa;top:60%;left:10%;animation-delay:-15s}
 @keyframes bm{0%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.1)}100%{transform:translate(-20px,20px) scale(.95)}}
 
-/* ===== ЛЕТАЮЩИЕ ОБЪЕКТЫ ===== */
 .fly-obj{position:fixed;left:0;top:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:1.9rem;user-select:none;z-index:950;pointer-events:none;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35));will-change:transform}
-/* картинка без рамки и без принудительного скругления */
 .fly-img{width:44px;height:44px;object-fit:contain;display:block}
 .bp{position:fixed;width:8px;height:8px;border-radius:50%;z-index:951;pointer-events:none;animation:pf .8s ease-out forwards}
 @keyframes pf{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
 
-/* ===== ИНТРО ===== */
 .intro-overlay{position:fixed;inset:0;z-index:940;display:flex;align-items:center;justify-content:center;pointer-events:none;animation:introFade .4s ease}
 .intro-text{font-size:1.9rem;font-weight:900;color:#fff;text-align:center;padding:22px 34px;background:linear-gradient(135deg,rgba(255,45,123,.92),rgba(200,80,192,.92));border-radius:20px;box-shadow:0 10px 50px rgba(255,45,123,.55);animation:introPulse 1.2s ease infinite;line-height:1.3}
 @keyframes introPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
@@ -72,7 +67,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 .intro-overlay.hide{animation:introOut .4s ease forwards}
 @keyframes introOut{to{opacity:0}}
 
-/* ===== КОНТЕНТ: занимает весь остаток экрана, плитка растягивается ===== */
 .content{position:relative;z-index:1;max-width:800px;width:100%;margin:0 auto;padding:8px 14px;flex:1;min-height:0;display:flex;flex-direction:column}
 .inv{background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.09);border-radius:14px;
   padding:6px 16px;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-evenly;overflow:hidden}
@@ -83,7 +77,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 .hl{background:linear-gradient(135deg,rgba(255,45,123,.2),rgba(200,80,192,.2));padding:1px 8px;border-radius:6px;font-weight:600;color:var(--ac2)}
 .content,.inv,.inv p,.hl{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none}
 
-/* ===== ОТЧЁТ (со своим скроллом) ===== */
 .report-page{display:none;position:relative;z-index:1;max-width:800px;width:100%;margin:0 auto;padding:30px 20px;flex:1;min-height:0;overflow-y:auto}
 .report-page.active{display:block}
 .report-block{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px;margin-bottom:20px}
@@ -303,7 +296,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
             <div class="tile-ico">📌</div>
             <div class="tile-body">
               <div class="tile-label">Место</div>
-              <div class="tile-value">Зелёный Бор ↗</div>
+              <div class="tile-value">Зелёный бор ↗</div>
             </div>
             <button class="details-btn" onclick="event.stopPropagation();openDetails()">Детали</button>
           </div>
@@ -368,36 +361,38 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
           <button type="button" class="opt-btn" data-f="prob" data-v="Меня не будет">Меня не будет</button>
         </div>
       </div>
-      <div class="fg"><label class="fl">Как добираешься</label>
-        <div class="opt-grid onecol" id="g-trans">
-          <button type="button" class="opt-btn" data-f="trans" data-v="car">🚗 Поеду на авто, возьму на хвост</button>
-          <button type="button" class="opt-btn" data-f="trans" data-v="taxi">🚕 Объединюсь с кем-то на такси</button>
-          <button type="button" class="opt-btn" data-f="trans" data-v="none">🚫 Ничего из вышеперечисленного</button>
+      <div id="fg-rest">
+        <div class="fg"><label class="fl">Как добираешься</label>
+          <div class="opt-grid onecol" id="g-trans">
+            <button type="button" class="opt-btn" data-f="trans" data-v="car">🚗 Поеду на авто, возьму на хвост</button>
+            <button type="button" class="opt-btn" data-f="trans" data-v="taxi">🚕 Объединюсь с кем-то на такси</button>
+            <button type="button" class="opt-btn" data-f="trans" data-v="none">🚫 Ничего из вышеперечисленного</button>
+          </div>
         </div>
-      </div>
-      <div class="fg hidden" id="fg-from">
-        <label class="fl">Стартует от...</label>
-        <input class="fi" type="text" id="f-from" placeholder="Город, район или адрес">
-      </div>
-      <div class="fg hidden" id="fg-tailriders">
-        <div class="drivers-block">
-          <div class="drivers-title">🚗 Кто уже едет — можно списаться в телеграме:</div>
-          <div class="drivers-list" id="driversList"></div>
+        <div class="fg hidden" id="fg-from">
+          <label class="fl">Стартует от...</label>
+          <input class="fi" type="text" id="f-from" placeholder="Город, район или адрес">
         </div>
-      </div>
-      <div class="fg"><label class="fl">Какой шашлык любишь (можно несколько)</label>
-        <div class="opt-grid" id="g-shash">
-          <button type="button" class="opt-btn" data-f="shash" data-v="Свинина">🥩 Свинина</button>
-          <button type="button" class="opt-btn" data-f="shash" data-v="Курица">🍗 Курица</button>
-          <button type="button" class="opt-btn" data-f="shash" data-v="Овощи">🥬 Овощи</button>
+        <div class="fg hidden" id="fg-tailriders">
+          <div class="drivers-block">
+            <div class="drivers-title">🚗 Кто уже едет — можно списаться в телеграме:</div>
+            <div class="drivers-list" id="driversList"></div>
+          </div>
         </div>
-      </div>
-      <div class="fg"><label class="check-row"><input type="checkbox" id="f-help"> Готов приехать к 15:00, чтоб помочь</label></div>
-      <div class="fg"><label class="fl">Хотел бы остаться с ночевой?</label>
-        <div class="opt-grid" id="g-night">
-          <button type="button" class="opt-btn" data-f="night" data-v="Да, хотел бы">Да, хотел бы</button>
-          <button type="button" class="opt-btn" data-f="night" data-v="Как получится">Как получится</button>
-          <button type="button" class="opt-btn" data-f="night" data-v="Нет, я уеду в субботу">Нет, я уеду в субботу</button>
+        <div class="fg"><label class="fl">Какой шашлык любишь (можно несколько)</label>
+          <div class="opt-grid" id="g-shash">
+            <button type="button" class="opt-btn" data-f="shash" data-v="Свинина">🥩 Свинина</button>
+            <button type="button" class="opt-btn" data-f="shash" data-v="Курица">🍗 Курица</button>
+            <button type="button" class="opt-btn" data-f="shash" data-v="Овощи">🥬 Овощи</button>
+          </div>
+        </div>
+        <div class="fg"><label class="check-row"><input type="checkbox" id="f-help"> Готов приехать к 15:00, чтоб помочь</label></div>
+        <div class="fg"><label class="fl">Хотел бы остаться с ночевой?</label>
+          <div class="opt-grid" id="g-night">
+            <button type="button" class="opt-btn" data-f="night" data-v="Да, хотел бы">Да, хотел бы</button>
+            <button type="button" class="opt-btn" data-f="night" data-v="Как получится">Как получится</button>
+            <button type="button" class="opt-btn" data-f="night" data-v="Нет, я уеду в субботу">Нет, я уеду в субботу</button>
+          </div>
         </div>
       </div>
       <button type="button" class="bsubmit" id="btnDoReg">🍓 Зарегистрироваться</button>
@@ -451,6 +446,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
     <div class="details-item">
       <img class="details-img" src="route4.jpg" alt="Деталь 4">
       <p>В конце - дом находится слева (машину можно парковать прямо на территории, или за территорией в тупике).</p>
+    </div>
+  </div>
+</div>
+
+<div class="moverlay" id="m-sorry">
+  <div class="mbox">
+    <button class="mclose" onclick="closeM('m-sorry')">✕</button>
+    <div style="text-align:center;padding:10px 0">
+      <img src="fu.jpg" alt="" style="max-width:280px;width:100%;border-radius:16px;margin-bottom:16px;display:block;margin-left:auto;margin-right:auto">
+      <div class="mtitle" style="font-size:1.3rem;margin-bottom:12px">Жаль, что не сможешь 🥲</div>
+      <p style="color:var(--td);font-size:.92rem;line-height:1.5;margin-bottom:6px">Будем скучать! Если передумаешь — просто зайди снова и поменяй ответ.</p>
+      <p style="color:var(--td);font-size:.85rem;line-height:1.5;font-style:italic">Твоя анкета сохранена — ты можешь вернуться в неё в любой момент.</p>
     </div>
   </div>
 </div>
@@ -823,7 +830,7 @@ var prevPositions={};
 function openMap(){window.open('https://yandex.ru/maps/?pt=49.025928,55.647778&z=16&l=map','_blank','noopener,noreferrer');}
 
 function openDetails(){openM('m-details');}
-  
+
 function loadAllData(cb){
   var loaded=0;
   function done(){loaded++;if(loaded>=3&&cb)cb();}
@@ -962,7 +969,7 @@ function showToast(msg){
   if(t._timer)clearTimeout(t._timer);
   t._timer=setTimeout(function(){t.classList.remove('show');},2200);
 }
-  
+
 function pulsePoints(){
   var el=document.getElementById('pts-counter');
   if(!el)return;
@@ -1224,6 +1231,7 @@ function fillFormFromUser(user){
     if(f==='shash'&&formData.shash.indexOf(v)!==-1)b.classList.add('selected');
   }
   applyTransportUI(formData.trans);
+  applyProbUI(formData.prob);
 }
 function applyTransportUI(trans){
   var fromField=document.getElementById('fg-from');
@@ -1242,6 +1250,15 @@ function applyTransportUI(trans){
   }else{
     fromField.classList.add('hidden');
     tailField.classList.add('hidden');
+  }
+}
+function applyProbUI(value){
+  var rest=document.getElementById('fg-rest');
+  if(!rest)return;
+  if(value==='Меня не будет'){
+    rest.classList.add('hidden');
+  }else{
+    rest.classList.remove('hidden');
   }
 }
 function openEditProfile(){
@@ -1348,6 +1365,9 @@ document.addEventListener('click',function(e){
         document.getElementById('f-from').value='';
       }
     }
+    if(field==='prob'){
+      applyProbUI(value);
+    }
   }
 });
 document.getElementById('f-help').addEventListener('change',function(){formData.help=this.checked;});
@@ -1380,30 +1400,44 @@ function doRegister(){
   if(!id){document.getElementById('f-id').classList.add('err');showToast('🍓 Введите идентификатор!');return;}
   if(!pwd){document.getElementById('f-pwd').classList.add('err');showToast('🍓 Введите пароль!');return;}
   if(!formData.prob){document.getElementById('g-prob').classList.add('err');showToast('🍓 Выберите вероятность!');return;}
-  if(!formData.trans){document.getElementById('g-trans').classList.add('err');showToast('🍓 Выберите транспорт!');return;}
-  if((formData.trans==='car'||formData.trans==='taxi')&&!fromPlace){
-    document.getElementById('f-from').classList.add('err');
-    showToast('🍓 Укажите точку старта!');return;
-  }
-  if(formData.shash.length===0){document.getElementById('g-shash').classList.add('err');showToast('🍓 Выберите шашлык!');return;}
-  if(!formData.night){document.getElementById('g-night').classList.add('err');showToast('🍓 Выберите ночевку!');return;}
 
-  var newTrans=formData.trans;
-  var newFrom=fromPlace;
+  var isNotComing = formData.prob==='Меня не будет';
+
+  if(!isNotComing){
+    if(!formData.trans){document.getElementById('g-trans').classList.add('err');showToast('🍓 Выберите транспорт!');return;}
+    if((formData.trans==='car'||formData.trans==='taxi')&&!fromPlace){
+      document.getElementById('f-from').classList.add('err');
+      showToast('🍓 Укажите точку старта!');return;
+    }
+    if(formData.shash.length===0){document.getElementById('g-shash').classList.add('err');showToast('🍓 Выберите шашлык!');return;}
+    if(!formData.night){document.getElementById('g-night').classList.add('err');showToast('🍓 Выберите ночевку!');return;}
+  }
+
+  var newTrans=isNotComing?null:formData.trans;
+  var newFrom=isNotComing?'':fromPlace;
   var isEditing=!!editingUserId;
   var editId=editingUserId;
   var gender=formData.gender||null;
-  var oldTransport=null,oldFromPlace=null;
+  var oldTransport=null,oldFromPlace=null,oldProb=null;
 
   if(isEditing){
     for(var i=0;i<allUsers.length;i++){
-      if(allUsers[i].id===editId){oldTransport=allUsers[i].transport;oldFromPlace=allUsers[i].from_place;break;}
+      if(allUsers[i].id===editId){
+        oldTransport=allUsers[i].transport;
+        oldFromPlace=allUsers[i].from_place;
+        oldProb=allUsers[i].probability;
+        break;
+      }
     }
   }
   setRegBtnState(true,isEditing?'Сохраняем...':'Регистрируем...');
 
   if(isEditing){
-    var updateData={identifier:id,pwd:pwd,probability:formData.prob,transport:newTrans,from_place:newFrom,shashlik:formData.shash,help:formData.help,overnight:formData.night};
+    var updateData={identifier:id,pwd:pwd,probability:formData.prob,
+      transport:newTrans,from_place:newFrom,
+      shashlik:isNotComing?[]:formData.shash,
+      help:isNotComing?false:formData.help,
+      overnight:isNotComing?null:formData.night};
     if(gender)updateData.gender=gender;
     supaFetch('users?id=eq.'+editId,'PATCH',updateData).then(function(){
       for(var i=0;i<allUsers.length;i++){
@@ -1416,21 +1450,35 @@ function doRegister(){
       setRegBtnState(false);
       closeM('m-auth');updateHeader();
       editingUserId=null;resetForm();
-      if(oldTransport!==newTrans||(newTrans!=='none'&&oldFromPlace!==newFrom)){
+      if(isNotComing){
+        openM('m-sorry');
+      } else if(oldProb==='Меня не будет'){
+        if(newTrans==='car'||newTrans==='taxi')createTransportNews(currentUser,newFrom);
+      } else if(oldTransport!==newTrans||(newTrans!=='none'&&oldFromPlace!==newFrom)){
         createTransportNews(currentUser,newFrom);
       }
     }).catch(function(e){setRegBtnState(false);showToast('Ошибка: '+e.message);});
   }else{
     var newId='user_'+Date.now();
     var nickname=generateNickname(gender);
-    var newUserData={id:newId,identifier:id,pwd:pwd,nickname:nickname,gender:gender,probability:formData.prob,transport:newTrans,from_place:newFrom,shashlik:formData.shash,help:formData.help,overnight:formData.night,points:0};
+    var newUserData={id:newId,identifier:id,pwd:pwd,nickname:nickname,gender:gender,
+      probability:formData.prob,
+      transport:newTrans,from_place:newFrom,
+      shashlik:isNotComing?[]:formData.shash,
+      help:isNotComing?false:formData.help,
+      overnight:isNotComing?null:formData.night,
+      points:0};
     supaFetch('users','POST',newUserData).then(function(){
       allUsers.push(newUserData);
       currentUser=newUserData;
       localStorage.setItem('sasha_cur',JSON.stringify(newUserData));
       setRegBtnState(false);
       closeM('m-auth');updateHeader();
-      createTransportNews(newUserData,newFrom);
+      if(isNotComing){
+        openM('m-sorry');
+      }else{
+        createTransportNews(newUserData,newFrom);
+      }
       resetForm();
     }).catch(function(e){setRegBtnState(false);showToast('Ошибка: '+e.message);});
   }
@@ -1444,6 +1492,8 @@ function resetForm(){
   document.getElementById('f-help').checked=false;
   document.getElementById('fg-from').classList.add('hidden');
   document.getElementById('fg-tailriders').classList.add('hidden');
+  var restEl=document.getElementById('fg-rest');
+  if(restEl)restEl.classList.remove('hidden');
   var btns=document.querySelectorAll('.opt-btn');
   for(var i=0;i<btns.length;i++)btns[i].classList.remove('selected');
   var errs=document.querySelectorAll('.err');
@@ -1478,7 +1528,6 @@ function notifyRoleJoin(wish){
 }
 function notifyRoleLeave(wish){
   if(!currentUser||!wish)return;
-  // участники, ОСТАВШИЕСЯ в роли (бронь уже удалена из allReserves)
   var takers=[];
   for(var i=0;i<allReserves.length;i++){
     if(allReserves[i].gift_id===wish.id){
@@ -1486,7 +1535,6 @@ function notifyRoleLeave(wish){
       if(u)takers.push(getFullName(u));
     }
   }
-  // если ушёл и никого не осталось — новость не шлём
   if(takers.length===0)return;
   var verb='передумал(а)';
   if(currentUser.gender==='male')verb='передумал';
@@ -1540,11 +1588,9 @@ function renderWish(){
   for(var i=0;i<wishData.length;i++){
     var w=wishData[i];
     if(!w.role){
-      // подарок: скрываем, если его забрал кто-то другой
       var resv=getReserve(w.id);
       if(resv&&resv.user_id!==currentUser.id)continue;
     }
-    // роли НЕ скрываем — их могут выбирать многие
     var isMine=(!w.role&&w.id===myGiftId)||(w.role&&w.id===myRoleId);
     html+='<div class="wcard"><div class="wttl">'+w.title+'</div>';
     if(w.role){
@@ -1595,7 +1641,6 @@ function reserveGift(gid){
 }
 
 function cancelReserve(reserveId){
-  // запоминаем, что снимаем, ДО удаления
   var reserve=null;
   for(var i=0;i<allReserves.length;i++){
     if(allReserves[i].id===reserveId){reserve=allReserves[i];break;}
