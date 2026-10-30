@@ -265,6 +265,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 #fg-rest:not(.hidden){opacity:1;max-height:2000px}
 .h-chip-edit{display:inline-block;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,.15);color:var(--ac2);font-size:.68rem;font-weight:600;margin-left:4px;border:1px solid rgba(255,255,255,.2);transition:all .3s;cursor:pointer}
 .h-chip-edit:hover{background:var(--ac);color:#fff;border-color:var(--ac)}
+.game-hint{
+  position:fixed;left:50%;bottom:-120px;transform:translateX(-50%);
+  z-index:9999;pointer-events:none;text-align:center;line-height:1.4;
+  font-size:clamp(1.3rem,4.5vh,2.2rem);font-weight:900;color:var(--ac2);
+  text-shadow:0 0 24px rgba(255,45,123,.9),0 2px 10px rgba(0,0,0,.9);
+  animation:hintFloat 3s ease-out forwards;
+}
+@keyframes hintFloat{
+  0%{bottom:-120px;opacity:0}
+  12%{opacity:1}
+  80%{opacity:1}
+  100%{bottom:55%;opacity:0}
+}
 </style>
 </head>
 <body>
@@ -861,7 +874,15 @@ function showIntro(){
     setTimeout(function(){ov.remove();},400);
   },3000);
 }
-
+function maybeShowGameHint(){
+  if(localStorage.getItem('sasha_game_hint_done'))return;
+  localStorage.setItem('sasha_game_hint_done','1');
+  var el=document.createElement('div');
+  el.className='game-hint';
+  el.innerHTML='Игра «Ягодный ТЫК»<br>Ткни в приглашение';
+  document.body.appendChild(el);
+  setTimeout(function(){if(el.parentNode)el.remove();},3500);
+}
 var wishData=[
   {id:101,title:"Электро-турка для кофе (самоотключающаяся)",link:"",role:false},
   {id:102,title:"Фен профессиональный",link:"",role:false},
@@ -1049,19 +1070,18 @@ function updateHeader(){
     '<span class="h-badge'+(unread===0?' zero':'')+'" id="newsBadge">'+unread+'</span></button>';
   if(currentUser){
     prevRank=getRank(currentUser.points||0);
-    userSlot.innerHTML='<div class="h-chip" onclick="openProfile()">'+
+    userSlot.innerHTML='<div class="h-chip">'+
       '<span class="h-chip-name">'+getFullName(currentUser)+'</span>'+
       '<span class="h-chip-rank">'+getRank(currentUser.points||0)+'</span>'+
-      '<span class="h-chip-pts" id="pts-counter">🍓 '+(currentUser.points||0)+'</span>'+
-      '<span class="h-chip-edit" onclick="event.stopPropagation();openEditProfile()">✏️ Анкета</span></div>';
+      '<span class="h-chip-pts" id="pts-counter">🍓 '+(currentUser.points||0)+'</span></div>';
     navSlot.innerHTML='<button class="h-btn h-btn-wish" onclick="openWish()">🎁 Wish-лист</button>'+
       '<a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
-    cornerSlot.innerHTML=newsBtnHtml+'<button class="h-corner-btn" onclick="logout()">Выйти</button>';
+    cornerSlot.innerHTML=newsBtnHtml+'<button class="h-corner-btn" onclick="openEditProfile()">Профиль</button><button class="h-corner-btn" onclick="logout()">Выйти</button>';
   }else{
     userSlot.innerHTML='';
     navSlot.innerHTML='<button class="h-btn h-btn-wish" disabled>🎁 Wish-лист</button>'+
       '<a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
-    cornerSlot.innerHTML=newsBtnHtml+'<button class="h-corner-btn" onclick="openAuth()">Войти</button>';
+    cornerSlot.innerHTML=newsBtnHtml+'<button class="h-corner-btn" onclick="openAuth()">Профиль</button>';
   }
   renderRating();
 }
@@ -1781,7 +1801,7 @@ updateHeader();
 initTapGame();
 startGameLoop();
 maybeShowIntro();
-
+maybeShowGameHint();
 if(urlParams.get('report')==='ягодный')showReport();
 
 loadAllData(function(){
