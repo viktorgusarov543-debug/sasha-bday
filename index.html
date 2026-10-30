@@ -285,7 +285,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 <header class="header" id="mainHeader">
   <div class="h-days" id="hDays">...</div>
   <div class="h-corner" id="hCorner">
-    <button class="h-corner-btn" onclick="openAuth()">Войти</button>
+    <button class="h-corner-btn" onclick="openAuth()">Профиль</button>
   </div>
   <div class="h-main">
     <div class="h-left">
@@ -424,6 +424,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
     <div class="mtitle">👤 Моя анкета</div>
     <div class="profile-grid" id="profileGrid"></div>
     <button class="bback" style="margin-top:16px" onclick="openEditProfile()">✏️ Редактировать</button>
+    <button class="bback" style="margin-top:8px;border-color:#ff4444;color:#ff8888" onclick="logout()">🚪 Выйти из профиля</button>
   </div>
 </div>
 
@@ -591,7 +592,6 @@ function sendToTelegram(text){
   dlog('📤 TG attempt ('+text.length+' chars)');
   console.log('[TG] Sending to chat',TG_CHAT_ID,':',text.substring(0,100));
   
-  // Первая попытка с HTML
   fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({chat_id:TG_CHAT_ID,text:text,parse_mode:'HTML'})})
   .then(function(r){
@@ -603,15 +603,11 @@ function sendToTelegram(text){
         dlog('✅ TG OK');
         return;
       }
-      
-      // Если ошибка парсинга HTML — пробуем без тегов
       if(responseText.indexOf('parse')!==-1||responseText.indexOf('entities')!==-1){
         dlog('🔄 TG retry без HTML...');
         return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({chat_id:TG_CHAT_ID,text:plainText})});
       }
-      
-      // Другие ошибки — показываем toast с причиной
       var errMatch=responseText.match(/"description":"([^"]+)"/);
       var reason=errMatch?errMatch[1]:responseText;
       dlog('❌ TG FAIL: '+reason);
@@ -910,7 +906,6 @@ var allReserves=[];
 var prevPositions={};
 
 function openMap(){window.open('https://yandex.ru/maps/?pt=49.025928,55.647778&z=16&l=map','_blank','noopener,noreferrer');}
-
 function openDetails(){openM('m-details');}
 
 function loadAllData(cb){
@@ -1068,19 +1063,23 @@ function updateHeader(){
   var unread=getUnread();
   var newsBtnHtml='<button class="h-corner-btn news-btn" onclick="openNews()">Новости'+
     '<span class="h-badge'+(unread===0?' zero':'')+'" id="newsBadge">'+unread+'</span></button>';
+  
   if(currentUser){
     prevRank=getRank(currentUser.points||0);
+    // Блок с именем, прозвищем, статусом и очками (всегда виден при входе)
     userSlot.innerHTML='<div class="h-chip" onclick="openProfile()">'+
       '<span class="h-chip-name">'+getFullName(currentUser)+'</span>'+
       '<span class="h-chip-rank">'+getRank(currentUser.points||0)+'</span>'+
       '<span class="h-chip-pts" id="pts-counter">🍓 '+(currentUser.points||0)+'</span></div>';
     navSlot.innerHTML='<button class="h-btn h-btn-wish" onclick="openWish()">🎁 Wish-лист</button>'+
       '<a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
-    cornerSlot.innerHTML=newsBtnHtml+'<button class="h-corner-btn" onclick="openEditProfile()">Профиль</button><button class="h-corner-btn" onclick="logout()">Выйти</button>';
+    // Кнопка "Профиль" открывает анкету, "Выйти" убрана из угла
+    cornerSlot.innerHTML=newsBtnHtml+'<button class="h-corner-btn" onclick="openProfile()">Профиль</button>';
   }else{
     userSlot.innerHTML='';
     navSlot.innerHTML='<button class="h-btn h-btn-wish" disabled>🎁 Wish-лист</button>'+
       '<a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
+    // Кнопка "Профиль" для неавторизованного открывает регистрацию
     cornerSlot.innerHTML=newsBtnHtml+'<button class="h-corner-btn" onclick="openAuth()">Профиль</button>';
   }
   renderRating();
@@ -1323,7 +1322,16 @@ function openWish(){
   if(!currentUser){showToast('Сначала авторизуйтесь!');return;}
   renderWish();openM('m-wish');
 }
-function openProfile(){if(!currentUser)return;renderProfile();openM('m-profile');}
+
+// ИЗМЕНЕНИЕ: Если не авторизован, открываем окно входа/регистрации
+function openProfile(){
+  if(!currentUser){
+    openAuth();
+    return;
+  }
+  renderProfile();
+  openM('m-profile');
+}
 
 function fillFormFromUser(user){
   document.getElementById('f-id').value=user.identifier;
@@ -1442,7 +1450,12 @@ function tryLogin(id){
   localStorage.setItem('sasha_cur',JSON.stringify(user));
   closeM('m-auth');updateHeader();
 }
-function logout(){currentUser=null;localStorage.removeItem('sasha_cur');updateHeader();}
+function logout(){
+  currentUser=null;
+  localStorage.removeItem('sasha_cur');
+  updateHeader();
+  closeM('m-profile'); // Закрываем модалку профиля при выходе
+}
 
 function editUser(id){
   var user=null;
@@ -1772,7 +1785,7 @@ function cancelReserve(reserveId){
 
 if(urlParams.get('admin')==='саша2026'){
   var bar=document.createElement('div');bar.className='abar';
-    bar.innerHTML='<span style="color:#ff2d7b;font-weight:700">🔧 Новости:</span><input id="ad-t" placeholder="Заголовок" style="flex:1;min-width:120px"><input id="ad-x" placeholder="Текст" style="flex:2;min-width:200px"><button onclick="addNews()">Добавить</button>';
+  bar.innerHTML='<span style="color:#ff2d7b;font-weight:700">🔧 Новости:</span><input id="ad-t" placeholder="Заголовок" style="flex:1;min-width:120px"><input id="ad-x" placeholder="Текст" style="flex:2;min-width:200px"><button onclick="addNews()">Добавить</button>';
   document.body.prepend(bar);
 }
 function addNews(){
@@ -1831,7 +1844,6 @@ loadAllData(function(){
   if(urlParams.get('report')==='ягодный')showReport();
 });
   
-// Проверка доступности бота при загрузке
 (function checkBot(){
   fetch('https://api.telegram.org/bot'+TG_BOT_TOKEN+'/getMe')
     .then(function(r){return r.json();})
