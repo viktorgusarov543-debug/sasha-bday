@@ -537,21 +537,43 @@ function escapeTelegram(str){
 
 function sendToTelegram(text){
   if(!TG_BOT_TOKEN||!TG_CHAT_ID){dlog('⚠️ TG: нет токена/чата');return;}
-  dlog('📤 TG send: '+text.substring(0,80)+'...');
   var url='https://api.telegram.org/bot'+TG_BOT_TOKEN+'/sendMessage';
+  var plainText=text.replace(/<[^>]*>/g,'');
+  
+  dlog('📤 TG attempt ('+text.length+' chars)');
+  console.log('[TG] Sending to chat',TG_CHAT_ID,':',text.substring(0,100));
+  
+  // Первая попытка с HTML
   fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({chat_id:TG_CHAT_ID,text:text,parse_mode:'HTML'})})
   .then(function(r){
-    return r.text().then(function(t){
-      if(!r.ok){
-        if(t.indexOf('parse')!==-1||t.indexOf('entities')!==-1){
-          return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({chat_id:TG_CHAT_ID,text:text.replace(/<[^>]*>/g,'')})});
-        }
+    return r.text().then(function(responseText){
+      console.log('[TG] Response status:',r.status,'body:',responseText);
+      dlog('📥 TG '+r.status+': '+responseText.substring(0,200));
+      
+      if(r.ok){
+        dlog('✅ TG OK');
+        return;
       }
+      
+      // Если ошибка парсинга HTML — пробуем без тегов
+      if(responseText.indexOf('parse')!==-1||responseText.indexOf('entities')!==-1){
+        dlog('🔄 TG retry без HTML...');
+        return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({chat_id:TG_CHAT_ID,text:plainText})});
+      }
+      
+      // Другие ошибки — показываем toast с причиной
+      var errMatch=responseText.match(/"description":"([^"]+)"/);
+      var reason=errMatch?errMatch[1]:responseText;
+      dlog('❌ TG FAIL: '+reason);
+      showToast('⚠️ Telegram: '+reason);
     });
   })
-  .catch(function(e){dlog('💥 TG: '+e.message);});
+  .catch(function(e){
+    dlog('💥 TG network: '+e.message);
+    showToast('💥 TG сеть: '+e.message);
+  });
 }
 
 function getRank(p){
@@ -1752,7 +1774,25 @@ loadAllData(function(){
   updateHeader();
   if(urlParams.get('report')==='ягодный')showReport();
 });
-
+  
+// Проверка доступности бота при загрузке
+(function checkBot(){
+  fetch('https://api.telegram.org/bot'+TG_BOT_TOKEN+'/getMe')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.ok){
+        dlog('🤖 Бот: @'+d.result.username+' ('+d.result.first_name+')');
+        console.log('[TG] Bot OK:',d.result);
+      }else{
+        dlog('❌ Бот недоступен: '+JSON.stringify(d));
+        showToast('❌ Бот Telegram не работает');
+      }
+    })
+    .catch(function(e){
+      dlog('❌ Бот check failed: '+e.message);
+    });
+})();
+  
 setInterval(updateCountdown,3600000);
 setInterval(refreshUsers,15000);
 </script>
