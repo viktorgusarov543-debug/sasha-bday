@@ -1306,7 +1306,39 @@ function checkRatingChange(){
     var myOldPos=prevPositions[currentUser.id];
     var myNewPos=newPositions[currentUser.id];
     if(myOldPos&&myNewPos&&myNewPos<myOldPos)showRankUpModal(myOldPos,myNewPos);
-    if(!myOldPos&&myNewPos&&myNewPos<=5)showRankUpModal(null,myNewPos);
+    if(!myOldPos&&myNewPos&&myNewPos<=3)showRankUpModal(null,myNewPos);
+    
+    // Новость об обгоне — только если currentUser попал в топ-3 или обогнал кого-то из топ-3
+    if(myOldPos&&myNewPos){
+      var shouldNotify = (myNewPos<=3);
+      if(!shouldNotify){
+        for(var j=0;j<sorted.length;j++){
+          var them=sorted[j];
+          if(them.id===currentUser.id)continue;
+          var theirOldPos=prevPositions[them.id];
+          var theirNewPos=newPositions[them.id];
+          if(!theirOldPos||!theirNewPos)continue;
+          if(myOldPos>theirOldPos&&myNewPos<=theirNewPos&&theirOldPos<=3){
+            shouldNotify=true;
+            createOvertakeNews(currentUser,them);
+            break;
+          }
+        }
+      } else {
+        // currentUser в топ-3 — ищем кого обогнал
+        for(var j=0;j<sorted.length;j++){
+          var them=sorted[j];
+          if(them.id===currentUser.id)continue;
+          var theirOldPos=prevPositions[them.id];
+          var theirNewPos=newPositions[them.id];
+          if(!theirOldPos||!theirNewPos)continue;
+          if(myOldPos>theirOldPos&&myNewPos<=theirNewPos){
+            createOvertakeNews(currentUser,them);
+            break;
+          }
+        }
+      }
+    }
   }
   prevPositions=newPositions;
 }
