@@ -285,6 +285,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 .rating-full-pts{color:var(--ac2);font-weight:700;font-size:.95rem}
 .poll-btn{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:12px 24px;background:linear-gradient(135deg,#ff6b35,#f7931e);color:#fff;border:none;border-radius:30px;font-family:inherit;font-size:.95rem;font-weight:700;cursor:pointer;z-index:9997;box-shadow:0 6px 20px rgba(255,107,53,.4);transition:all .3s}
 .poll-btn:hover{transform:translateX(-50%) translateY(-2px);box-shadow:0 8px 25px rgba(255,107,53,.6)}  
+.poll-participant{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:6px;font-size:.85rem}
+.poll-participant.me{background:rgba(255,45,123,.15);border:1px solid rgba(255,45,123,.3)}
+.poll-participant-name{flex:1;color:var(--t);font-weight:500}
+.poll-participant-vote{font-size:1.1rem}
 </style>
 </head>
 <body>
@@ -528,9 +532,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
       <button class="bsubmit" style="width:auto;padding:12px 32px" onclick="votePoll('yes')">✅ Да</button>
       <button class="bsubmit" style="width:auto;padding:12px 32px;background:linear-gradient(135deg,#666,#444)" onclick="votePoll('buddha')">🧘 Суд будды</button>
     </div>
-    <div id="pollStats" style="margin-top:20px;padding:14px;background:rgba(255,255,255,.05);border-radius:12px;text-align:center">
-      <div style="font-size:.85rem;color:var(--td);margin-bottom:8px">Текущие результаты:</div>
-      <div id="pollResults" style="font-size:1.1rem;font-weight:700">Загрузка...</div>
+    <div id="pollStats" style="margin-top:20px;padding:14px;background:rgba(255,255,255,.05);border-radius:12px">
+      <div style="font-size:.85rem;color:var(--td);margin-bottom:8px;text-align:center">Текущие результаты:</div>
+      <div id="pollResults" style="font-size:1.1rem;font-weight:700;text-align:center">Загрузка...</div>
+      <div id="pollParticipants" style="margin-top:12px;max-height:200px;overflow-y:auto"></div>
     </div>
   </div>
 </div>
@@ -1158,13 +1163,52 @@ function openPollModal(){
 function loadPollStats(){
   supaFetch('polls?poll_name=eq.похмельный_бег&select=*').then(function(d){
     pollData = d || [];
-    var yes = pollData.filter(function(p){return p.vote==='yes';}).length;
-    var buddha = pollData.filter(function(p){return p.vote==='buddha';}).length;
-    var total = yes + buddha;
+    var yes = pollData.filter(function(p){return p.vote==='yes';});
+    var buddha = pollData.filter(function(p){return p.vote==='buddha';});
     
     var resultsEl = document.getElementById('pollResults');
     if(resultsEl){
-      resultsEl.innerHTML = '✅ Да: <span style="color:#7CFC7C">'+yes+'</span> · 🧘 Суд будды: <span style="color:#ffd700">'+buddha+'</span><br><span style="font-size:.8rem;color:var(--td)">Всего голосов: '+total+'</span>';
+      resultsEl.innerHTML = '✅ Да: <span style="color:#7CFC7C">'+yes.length+'</span> · 🧘 Суд будды: <span style="color:#ffd700">'+buddha.length+'</span><br><span style="font-size:.8rem;color:var(--td)">Всего голосов: '+(yes.length+buddha.length)+'</span>';
+    }
+    
+    // Рендерим список участников
+    var participantsEl = document.getElementById('pollParticipants');
+    if(participantsEl){
+      var html = '<div style="font-size:.75rem;color:var(--td);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Участники:</div>';
+      
+      if(yes.length > 0){
+        html += '<div style="font-size:.8rem;color:#7CFC7C;font-weight:600;margin-bottom:4px">✅ Пойдут на пробежку:</div>';
+        for(var i=0;i<yes.length;i++){
+          var u = getUserById(yes[i].user_id);
+          if(u){
+            var isMe = currentUser && u.id === currentUser.id;
+            html += '<div class="poll-participant'+(isMe?' me':'')+'">';
+            html += '<span class="poll-participant-vote">✅</span>';
+            html += '<span class="poll-participant-name">'+getFullName(u)+'</span>';
+            html += '</div>';
+          }
+        }
+      }
+      
+      if(buddha.length > 0){
+        html += '<div style="font-size:.8rem;color:#ffd700;font-weight:600;margin-top:10px;margin-bottom:4px">🧘 Суд будды:</div>';
+        for(var i=0;i<buddha.length;i++){
+          var u = getUserById(buddha[i].user_id);
+          if(u){
+            var isMe = currentUser && u.id === currentUser.id;
+            html += '<div class="poll-participant'+(isMe?' me':'')+'">';
+            html += '<span class="poll-participant-vote">🧘</span>';
+            html += '<span class="poll-participant-name">'+getFullName(u)+'</span>';
+            html += '</div>';
+          }
+        }
+      }
+      
+      if(yes.length === 0 && buddha.length === 0){
+        html += '<div style="text-align:center;color:var(--td);font-size:.85rem;padding:10px">Пока никто не голосовал</div>';
+      }
+      
+      participantsEl.innerHTML = html;
     }
   }).catch(function(){});
 }
