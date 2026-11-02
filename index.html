@@ -289,6 +289,44 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 .poll-participant.me{background:rgba(255,45,123,.15);border:1px solid rgba(255,45,123,.3)}
 .poll-participant-name{flex:1;color:var(--t);font-weight:500}
 .poll-participant-vote{font-size:1.1rem}
+.h-chip-pts{position:relative}
+.h-chip-pts.hint::after{
+  content:'Рейтинг';
+  position:absolute;
+  top:calc(100% + 8px);
+  left:50%;
+  transform:translateX(-50%);
+  background:linear-gradient(135deg,var(--ac),var(--ac2));
+  color:#fff;
+  font-size:.7rem;
+  font-weight:700;
+  padding:4px 10px;
+  border-radius:12px;
+  white-space:nowrap;
+  animation:hintBounce 2s ease-in-out infinite;
+  pointer-events:none;
+  z-index:100;
+}
+.h-chip-pts.hint::before{
+  content:'';
+  position:absolute;
+  top:-8px;
+  left:-8px;
+  right:-8px;
+  bottom:-8px;
+  border:2px solid var(--ac);
+  border-radius:50%;
+  animation:hintPulse 1.5s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes hintPulse{
+  0%,100%{opacity:.3;transform:scale(1)}
+  50%{opacity:1;transform:scale(1.15)}
+}
+@keyframes hintBounce{
+  0%,100%{transform:translateX(-50%) translateY(0)}
+  50%{transform:translateX(-50%) translateY(-4px)}
+}
 </style>
 </head>
 <body>
@@ -1526,6 +1564,31 @@ function updateHeader(){
   updatePollButton();
 }
 
+var hintTimer = null;
+function showRatingHint(){
+  var pts = document.getElementById('pts-counter');
+  if(!pts || !currentUser) return;
+  
+  pts.classList.add('hint');
+  
+  if(hintTimer) clearTimeout(hintTimer);
+  hintTimer = setTimeout(function(){
+    pts.classList.remove('hint');
+  }, 5000);
+}
+
+// Показываем подсказку периодически
+setInterval(function(){
+  if(currentUser && !document.querySelector('.moverlay.active')){
+    showRatingHint();
+  }
+}, 30000); // Каждые 30 секунд
+
+// Показываем сразу после входа
+setTimeout(function(){
+  if(currentUser) showRatingHint();
+}, 2000);
+  
 function renderRating(){
   var el=document.getElementById('hRating');
   if(!el)return;
@@ -1773,6 +1836,13 @@ function openProfile(){
 }
 
 function showFullRating(){
+  // Убираем подсказку при первом клике
+  var pts = document.getElementById('pts-counter');
+  if(pts) pts.classList.remove('hint');
+  if(hintTimer){
+    clearTimeout(hintTimer);
+    hintTimer = null;
+  }
   var list=document.getElementById('ratingFullList');
   if(!list)return;
   var sorted=allUsers.slice().sort(function(a,b){return (b.points||0)-(a.points||0);});
