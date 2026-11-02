@@ -513,9 +513,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 <button class="debug-toggle" id="debugToggle" onclick="toggleDebug()">🐛</button>
 
 <script>
+var urlParams = new URLSearchParams(location.search);
 var isDebugMode = urlParams.has('debug');
 var debugChanges = [];
-var urlParams = new URLSearchParams(location.search);
+
 
 var debugActive = false;
 function toggleDebug(){
