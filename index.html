@@ -278,6 +278,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
   80%{opacity:1}
   100%{bottom:55%;opacity:0}
 }
+.rating-full-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;margin-bottom:8px;font-size:.9rem;transition:all .3s}
+.rating-full-item.me{background:rgba(255,45,123,.15);border-color:rgba(255,45,123,.5)}
+.rating-full-pos{flex-shrink:0;width:32px;text-align:center;font-weight:700;font-size:1rem}
+.rating-full-name{flex:1;color:var(--t);font-weight:500}
+.rating-full-pts{color:var(--ac2);font-weight:700;font-size:.95rem}
 </style>
 </head>
 <body>
@@ -417,7 +422,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
     </div>
   </div>
 </div>
-
+<div class="moverlay" id="m-rating">
+  <div class="mbox">
+    <button class="mclose" onclick="closeM('m-rating')">✕</button>
+    <div class="mtitle">🏆 Рейтинг по ягодам</div>
+    <div id="ratingFullList" style="max-height:60vh;overflow-y:auto"></div>
+  </div>
+</div>
 <div class="moverlay" id="m-profile">
   <div class="mbox">
     <button class="mclose" onclick="closeM('m-profile')">✕</button>
@@ -1073,10 +1084,10 @@ function updateHeader(){
   if(currentUser){
     prevRank=getRank(currentUser.points||0);
     // Блок с именем, прозвищем, статусом и очками (всегда виден при входе)
-    userSlot.innerHTML='<div class="h-chip" onclick="openProfile()">'+
-      '<span class="h-chip-name">'+getFullName(currentUser)+'</span>'+
-      '<span class="h-chip-rank">'+getRank(currentUser.points||0)+'</span>'+
-      '<span class="h-chip-pts" id="pts-counter">🍓 '+(currentUser.points||0)+'</span></div>';
+    userSlot.innerHTML='<div class="h-chip">'+
+      '<span class="h-chip-name" onclick="openProfile()">'+getFullName(currentUser)+'</span>'+
+      '<span class="h-chip-rank" onclick="openProfile()">'+getRank(currentUser.points||0)+'</span>'+
+      '<span class="h-chip-pts" id="pts-counter" onclick="showFullRating()">🍓 '+(currentUser.points||0)+'</span></div>';
     navSlot.innerHTML='<button class="h-btn h-btn-wish" onclick="openWish()">🎁 Wish-лист</button>'+
       '<a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
     // Кнопка "Профиль" открывает анкету, "Выйти" убрана из угла
@@ -1119,18 +1130,6 @@ function checkRatingChange(){
     var myNewPos=newPositions[currentUser.id];
     if(myOldPos&&myNewPos&&myNewPos<myOldPos)showRankUpModal(myOldPos,myNewPos);
     if(!myOldPos&&myNewPos&&myNewPos<=5)showRankUpModal(null,myNewPos);
-    if(myOldPos&&myNewPos){
-      for(var j=0;j<sorted.length;j++){
-        var them=sorted[j];
-        if(them.id===currentUser.id)continue;
-        var theirOldPos=prevPositions[them.id];
-        var theirNewPos=newPositions[them.id];
-        if(!theirOldPos||!theirNewPos)continue;
-        if(myOldPos>theirOldPos&&myNewPos<=theirNewPos){
-          createOvertakeNews(currentUser,them);break;
-        }
-      }
-    }
   }
   prevPositions=newPositions;
 }
@@ -1337,6 +1336,31 @@ function openProfile(){
   }
   renderProfile();
   openM('m-profile');
+}
+
+function showFullRating(){
+  var list=document.getElementById('ratingFullList');
+  if(!list)return;
+  var sorted=allUsers.slice().sort(function(a,b){return (b.points||0)-(a.points||0);});
+  if(sorted.length===0){
+    list.innerHTML='<div style="text-align:center;color:var(--td);padding:20px">Пока никто не ловил ягоды 🫐</div>';
+    openM('m-rating');
+    return;
+  }
+  var html='';
+  var medals=['🥇','🥈','🥉'];
+  for(var i=0;i<sorted.length;i++){
+    var u=sorted[i];
+    var isMe=currentUser&&u.id===currentUser.id;
+    var pos=i<3?medals[i]:(i+1);
+    html+='<div class="rating-full-item'+(isMe?' me':'')+'">';
+    html+='<span class="rating-full-pos">'+pos+'</span>';
+    html+='<span class="rating-full-name">'+getFullName(u)+'</span>';
+    html+='<span class="rating-full-pts">🍓 '+(u.points||0)+'</span>';
+    html+='</div>';
+  }
+  list.innerHTML=html;
+  openM('m-rating');
 }
 
 function fillFormFromUser(user){
@@ -1581,10 +1605,8 @@ function doRegister(){
       closeM('m-auth');updateHeader();
       editingUserId=null;resetForm();
       if(isNotComing){
-        if(oldProb!=='Меня не будет')createNotComingNews(currentUser);
         openM('m-sorry');
       } else if(oldProb==='Меня не будет'){
-        createWelcomeNews(currentUser);
         if(newTrans==='car'||newTrans==='taxi')createTransportNews(currentUser,newFrom);
       } else if(oldTransport!==newTrans||(newTrans!=='none'&&oldFromPlace!==newFrom)){
         createTransportNews(currentUser,newFrom);
@@ -1606,9 +1628,7 @@ function doRegister(){
       localStorage.setItem('sasha_cur',JSON.stringify(newUserData));
       setRegBtnState(false);
       closeM('m-auth');updateHeader();
-      createWelcomeNews(newUserData);
       if(isNotComing){
-        createNotComingNews(newUserData);
         openM('m-sorry');
       }else{
         createTransportNews(newUserData,newFrom);
