@@ -1134,10 +1134,14 @@ function loadAllData(cb){
 var pollData = [];
 
 function loadPollData(){
-  supaFetch('polls?poll_name=eq.похмельный_бег&select=*').then(function(d){
+  return supaFetch('polls?poll_name=eq.похмельный_бег&select=*').then(function(d){
     pollData = d || [];
     updatePollButton();
-  }).catch(function(){pollData=[];});
+    return pollData;
+  }).catch(function(){
+    pollData=[];
+    return pollData;
+  });
 }
 
 function updatePollButton(){
@@ -1186,6 +1190,12 @@ function loadPollStats(){
             html += '<span class="poll-participant-vote">✅</span>';
             html += '<span class="poll-participant-name">'+getFullName(u)+'</span>';
             html += '</div>';
+          } else {
+            // Если пользователь не найден, показываем ID
+            html += '<div class="poll-participant">';
+            html += '<span class="poll-participant-vote">✅</span>';
+            html += '<span class="poll-participant-name" style="color:var(--td);font-style:italic">Пользователь '+yes[i].user_id.substring(0,8)+'...</span>';
+            html += '</div>';
           }
         }
       }
@@ -1200,6 +1210,11 @@ function loadPollStats(){
             html += '<span class="poll-participant-vote">🧘</span>';
             html += '<span class="poll-participant-name">'+getFullName(u)+'</span>';
             html += '</div>';
+          } else {
+            html += '<div class="poll-participant">';
+            html += '<span class="poll-participant-vote">🧘</span>';
+            html += '<span class="poll-participant-name" style="color:var(--td);font-style:italic">Пользователь '+buddha[i].user_id.substring(0,8)+'...</span>';
+            html += '</div>';
           }
         }
       }
@@ -1210,7 +1225,9 @@ function loadPollStats(){
       
       participantsEl.innerHTML = html;
     }
-  }).catch(function(){});
+  }).catch(function(e){
+    console.error('Ошибка загрузки статистики опроса:', e);
+  });
 }
 
 function votePoll(vote){
@@ -1223,7 +1240,10 @@ function votePoll(vote){
     // Обновляем голос
     supaFetch('polls?id=eq.'+existing.id,'PATCH',{vote:vote}).then(function(){
       showToast('✅ Голос обновлён!');
-      loadPollStats();
+      // Перезагружаем данные опроса
+      loadPollData().then(function(){
+        loadPollStats();
+      });
     }).catch(function(e){
       showToast('❌ Ошибка: '+e.message);
     });
@@ -1235,7 +1255,10 @@ function votePoll(vote){
       vote: vote
     }).then(function(){
       showToast('✅ Голос принят!');
-      loadPollStats();
+      // Перезагружаем данные опроса
+      loadPollData().then(function(){
+        loadPollStats();
+      });
     }).catch(function(e){
       showToast('❌ Ошибка: '+e.message);
     });
