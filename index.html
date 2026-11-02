@@ -1574,7 +1574,7 @@ function showRatingHint(){
   if(hintTimer) clearTimeout(hintTimer);
   hintTimer = setTimeout(function(){
     pts.classList.remove('hint');
-  }, 5000);
+  }, 10000);
 }
 
 // Показываем подсказку периодически
@@ -1582,7 +1582,7 @@ setInterval(function(){
   if(currentUser && !document.querySelector('.moverlay.active')){
     showRatingHint();
   }
-}, 30000); // Каждые 30 секунд
+}, 10000); // Каждые 10 секунд
 
 // Показываем сразу после входа
 setTimeout(function(){
