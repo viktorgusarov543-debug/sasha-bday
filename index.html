@@ -434,13 +434,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
     <button class="mclose" onclick="closeM('m-profile')">✕</button>
     <div class="mtitle">👤 Моя анкета</div>
     
-    <!-- Кнопки действий сверху, выровнены по правому краю -->
     <div style="display:flex; gap:10px; justify-content:flex-end; margin-bottom:16px;">
       <button class="bback" style="margin:0; padding:8px 16px; font-size:.85rem;" onclick="openEditProfile()">✏️ Редактировать</button>
       <button class="bback" style="margin:0; padding:8px 16px; font-size:.85rem; border-color:#ff4444; color:#ff8888;" onclick="logout()">🚪 Выйти</button>
     </div>
 
-    <!-- Сетка с данными анкеты теперь идет ниже кнопок -->
     <div class="profile-grid" id="profileGrid"></div>
   </div>
 </div>
@@ -599,9 +597,9 @@ function supaFetch(endpoint,method,body){
   var tableName = endpoint.split('?')[0];
   var idMatch = endpoint.match(/id=eq\.([^&]+)/);
   
-  // Для DELETE и PATCH в debug-режиме сначала получаем старые данные
   if(isDebugMode && idMatch && (method === 'DELETE' || method === 'PATCH')){
-    return fetch(SUPA_URL+'/rest/v1/'+endpoint.replace(method+'?','select=*'), {
+    var getEndpoint = tableName + '?select=*&id=eq.' + idMatch[1];
+    return fetch(SUPA_URL+'/rest/v1/'+getEndpoint, {
       method:'GET',
       headers:{
         'apikey':SUPA_KEY,
@@ -612,7 +610,6 @@ function supaFetch(endpoint,method,body){
     .then(function(text){
       var oldData = text ? JSON.parse(text) : null;
       
-      // Теперь выполняем реальную операцию
       return fetch(SUPA_URL+'/rest/v1/'+endpoint, opts)
         .then(function(r){
           if(!r.ok)throw new Error('HTTP '+r.status);
@@ -621,7 +618,6 @@ function supaFetch(endpoint,method,body){
         .then(function(text){
           var result = text ? JSON.parse(text) : null;
           
-          // Запоминаем изменение
           if(method === 'DELETE' && oldData && oldData[0]){
             debugChanges.push({
               action: 'delete',
@@ -647,13 +643,11 @@ function supaFetch(endpoint,method,body){
     .catch(function(e){dlog('❌ Supabase: '+e.message);throw e;});
   }
   
-  // Для GET и POST — обычная логика
   var result = fetch(SUPA_URL+'/rest/v1/'+endpoint,opts)
     .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text();})
     .then(function(text){return text?JSON.parse(text):null;})
     .catch(function(e){dlog('❌ Supabase: '+e.message);throw e;});
   
-  // Для POST в debug-режиме запоминаем созданную запись
   if(isDebugMode && method === 'POST'){
     result.then(function(data){
       if(data && data[0] && data[0].id){
@@ -685,12 +679,10 @@ function rollbackDebugChanges(){
   
   var promises = [];
   
-  // Обрабатываем в обратном порядке (LIFO)
   for(var i = debugChanges.length - 1; i >= 0; i--){
     var change = debugChanges[i];
     
     if(change.action === 'create'){
-      // Откат CREATE → DELETE
       dlog('🧪 Откат: DELETE ' + change.table + ' id=' + change.id);
       promises.push(
         fetch(SUPA_URL+'/rest/v1/'+change.table+'?id=eq.'+change.id, {
@@ -705,7 +697,6 @@ function rollbackDebugChanges(){
         })
       );
     } else if(change.action === 'delete'){
-      // Откат DELETE → POST с сохранёнными данными
       dlog('🧪 Откат: POST ' + change.table + ' (восстановление)');
       promises.push(
         fetch(SUPA_URL+'/rest/v1/'+change.table, {
@@ -723,7 +714,6 @@ function rollbackDebugChanges(){
         })
       );
     } else if(change.action === 'update'){
-      // Откат UPDATE → PATCH с старыми данными
       dlog('🧪 Откат: PATCH ' + change.table + ' id=' + change.id + ' (восстановление)');
       promises.push(
         fetch(SUPA_URL+'/rest/v1/'+change.table+'?id=eq.'+change.id, {
@@ -748,7 +738,6 @@ function rollbackDebugChanges(){
     showToast('✅ Откат завершён (' + promises.length + ' операций)');
     dlog('✅ Откат завершён, изменений: 0');
     
-    // Перезагружаем данные
     loadAllData(function(){
       if(currentUser){
         var found = false;
@@ -1260,20 +1249,17 @@ function updateHeader(){
   
   if(currentUser){
     prevRank=getRank(currentUser.points||0);
-    // Блок с именем, прозвищем, статусом и очками (всегда виден при входе)
     userSlot.innerHTML='<div class="h-chip">'+
       '<span class="h-chip-name" onclick="openProfile()">'+getFullName(currentUser)+'</span>'+
       '<span class="h-chip-rank" onclick="openProfile()">'+getRank(currentUser.points||0)+'</span>'+
       '<span class="h-chip-pts" id="pts-counter" onclick="showFullRating()">🍓 '+(currentUser.points||0)+'</span></div>';
     navSlot.innerHTML='<button class="h-btn h-btn-wish" onclick="openWish()">🎁 Wish-лист</button>'+
       '<a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
-    // Кнопка "Профиль" открывает анкету, "Выйти" убрана из угла
     cornerSlot.innerHTML=newsBtnHtml+'<button class="h-corner-btn" onclick="openProfile()">Профиль</button>';
   }else{
     userSlot.innerHTML='';
     navSlot.innerHTML='<button class="h-btn h-btn-wish" disabled>🎁 Wish-лист</button>'+
       '<a class="h-btn h-btn-tg" href="https://t.me/+jtdQiNaZl3BiNTYy" target="_blank" rel="noopener">💬 Телеграм</a>';
-    // Кнопка "Профиль" для неавторизованного открывает регистрацию
     cornerSlot.innerHTML=newsBtnHtml+'<button class="h-corner-btn" onclick="openAuth()">Профиль</button>';
   }
   renderRating();
@@ -1302,38 +1288,30 @@ function checkRatingChange(){
   var sorted=allUsers.slice().sort(function(a,b){return (b.points||0)-(a.points||0);});
   var newPositions={};
   for(var i=0;i<sorted.length;i++){newPositions[sorted[i].id]=i+1;}
+  
   if(currentUser){
     var myOldPos=prevPositions[currentUser.id];
     var myNewPos=newPositions[currentUser.id];
-    if(myOldPos&&myNewPos&&myNewPos<myOldPos)showRankUpModal(myOldPos,myNewPos);
-    if(!myOldPos&&myNewPos&&myNewPos<=3)showRankUpModal(null,myNewPos);
     
-    // Новость об обгоне — только если currentUser попал в топ-3 или обогнал кого-то из топ-3
-    if(myOldPos&&myNewPos){
-      var shouldNotify = (myNewPos<=3);
-      if(!shouldNotify){
-        for(var j=0;j<sorted.length;j++){
-          var them=sorted[j];
-          if(them.id===currentUser.id)continue;
-          var theirOldPos=prevPositions[them.id];
-          var theirNewPos=newPositions[them.id];
-          if(!theirOldPos||!theirNewPos)continue;
-          if(myOldPos>theirOldPos&&myNewPos<=theirNewPos&&theirOldPos<=3){
-            shouldNotify=true;
-            createOvertakeNews(currentUser,them);
-            break;
-          }
-        }
-      } else {
-        // currentUser в топ-3 — ищем кого обогнал
-        for(var j=0;j<sorted.length;j++){
-          var them=sorted[j];
-          if(them.id===currentUser.id)continue;
-          var theirOldPos=prevPositions[them.id];
-          var theirNewPos=newPositions[them.id];
-          if(!theirOldPos||!theirNewPos)continue;
-          if(myOldPos>theirOldPos&&myNewPos<=theirNewPos){
-            createOvertakeNews(currentUser,them);
+    if(myOldPos && myNewPos && myNewPos < myOldPos){
+      showRankUpModal(myOldPos, myNewPos);
+    } else if(!myOldPos && myNewPos && myNewPos <= 3){
+      showRankUpModal(null, myNewPos);
+    }
+    
+    if(myOldPos && myNewPos){
+      for(var j=0; j<sorted.length; j++){
+        var them=sorted[j];
+        if(them.id===currentUser.id) continue;
+        
+        var theirOldPos=prevPositions[them.id];
+        var theirNewPos=newPositions[them.id];
+        
+        if(!theirOldPos || !theirNewPos) continue;
+        
+        if(myOldPos > theirOldPos && myNewPos < theirNewPos){
+          if(myNewPos <= 3 || theirOldPos <= 3){
+            createOvertakeNews(currentUser, them);
             break;
           }
         }
@@ -1385,35 +1363,6 @@ function createTransportNews(user,fromPlace){
     if(fromPlace&&fromPlace.trim())tg+='\n📍 Стартует от: '+escapeTelegram(fromPlace);
     sendToTelegram(tg);
   }).catch(function(){});
-}
-
-function createNotComingNews(user){
-  if(!user)return;
-  var dateStr=getDateStr();
-  var title='🥲 Не приедет';
-  var fullName=getFullName(user);
-  var text=fullName+' не сможет приехать на праздник. Жаль!';
-  dlog('📨 createNotComingNews: '+fullName);
-  supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
-    allNews.unshift({date:dateStr,title:title,text:text});
-    updateHeader();
-    sendToTelegram('<b>🍓 Ягодный ноябрь</b>\n\n🥲 <i>'+escapeTelegram(fullName)+'</i> не сможет приехать на праздник. Жаль!');
-  }).catch(function(e){dlog('❌ NotComing: '+e.message);});
-}
-
-function createWelcomeNews(user){
-  if(!user)return;
-  var dateStr=getDateStr();
-  var title='🍓 Новый гость';
-  var fullName=getFullName(user);
-  var prob=user.probability||'';
-  var text=fullName+' заполнил(а) анкету: '+prob;
-  dlog('📨 createWelcomeNews: '+fullName);
-  supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
-    allNews.unshift({date:dateStr,title:title,text:text});
-    updateHeader();
-    sendToTelegram('<b>🍓 Ягодный ноябрь</b>\n\n🍓 <i>'+escapeTelegram(fullName)+'</i> заполнил(а) анкету!\n'+escapeTelegram(prob));
-  }).catch(function(e){dlog('❌ Welcome: '+e.message);});
 }
 
 function openNews(){
@@ -1537,7 +1486,6 @@ function openWish(){
   renderWish();openM('m-wish');
 }
 
-// ИЗМЕНЕНИЕ: Если не авторизован, открываем окно входа/регистрации
 function openProfile(){
   if(!currentUser){
     openAuth();
@@ -1693,7 +1641,7 @@ function logout(){
   currentUser=null;
   localStorage.removeItem('sasha_cur');
   updateHeader();
-  closeM('m-profile'); // Закрываем модалку профиля при выходе
+  closeM('m-profile');
 }
 
 function editUser(id){
