@@ -1139,7 +1139,7 @@ function updatePollButton(){
   var btn = document.getElementById('pollBtn');
   if(!btn) return;
   
-  if(isDebugMode && currentUser){
+  if(currentUser){
     btn.style.display = 'block';
   } else {
     btn.style.display = 'none';
