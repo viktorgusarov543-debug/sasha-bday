@@ -283,6 +283,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 .rating-full-pos{flex-shrink:0;width:32px;text-align:center;font-weight:700;font-size:1rem}
 .rating-full-name{flex:1;color:var(--t);font-weight:500}
 .rating-full-pts{color:var(--ac2);font-weight:700;font-size:.95rem}
+.poll-btn{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:12px 24px;background:linear-gradient(135deg,#ff6b35,#f7931e);color:#fff;border:none;border-radius:30px;font-family:inherit;font-size:.95rem;font-weight:700;cursor:pointer;z-index:9997;box-shadow:0 6px 20px rgba(255,107,53,.4);transition:all .3s}
+.poll-btn:hover{transform:translateX(-50%) translateY(-2px);box-shadow:0 8px 25px rgba(255,107,53,.6)}  
 </style>
 </head>
 <body>
@@ -511,7 +513,27 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
   <div id="debugLines"></div>
 </div>
 <button class="debug-toggle" id="debugToggle" onclick="toggleDebug()">🐛</button>
+<!-- Кнопка опроса (только в debug) -->
+<button id="pollBtn" class="poll-btn" onclick="openPollModal()" style="display:none">🏃 Похмельный бег</button>
 
+<!-- Модалка опроса -->
+<div class="moverlay" id="m-poll">
+  <div class="mbox">
+    <button class="mclose" onclick="closeM('m-poll')">✕</button>
+    <div class="mtitle">🏃 Похмельный бег</div>
+    <p style="color:var(--t);font-size:.95rem;line-height:1.6;margin-bottom:20px">
+      Витька предлагает с утра в воскресенье сделать совместную пробежку. Витька точно бежет. Если да - жми <b>ДА</b>, если нет, то будда тебе судья.
+    </p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="bsubmit" style="width:auto;padding:12px 32px" onclick="votePoll('yes')">✅ Да</button>
+      <button class="bsubmit" style="width:auto;padding:12px 32px;background:linear-gradient(135deg,#666,#444)" onclick="votePoll('buddha')">🧘 Суд будды</button>
+    </div>
+    <div id="pollStats" style="margin-top:20px;padding:14px;background:rgba(255,255,255,.05);border-radius:12px;text-align:center">
+      <div style="font-size:.85rem;color:var(--td);margin-bottom:8px">Текущие результаты:</div>
+      <div id="pollResults" style="font-size:1.1rem;font-weight:700">Загрузка...</div>
+    </div>
+  </div>
+</div>
 <script>
 var urlParams = new URLSearchParams(location.search);
 var isDebugMode = urlParams.has('debug');
@@ -1103,6 +1125,79 @@ function loadAllData(cb){
   supaFetch('reserves?select=*').then(function(d){allReserves=d||[];done();}).catch(function(){allReserves=[];done();});
 }
 
+// ===== ОПРОС "ПОХМЕЛЬНЫЙ БЕГ" =====
+var pollData = [];
+
+function loadPollData(){
+  supaFetch('polls?poll_name=eq.похмельный_бег&select=*').then(function(d){
+    pollData = d || [];
+    updatePollButton();
+  }).catch(function(){pollData=[];});
+}
+
+function updatePollButton(){
+  var btn = document.getElementById('pollBtn');
+  if(!btn) return;
+  
+  if(isDebugMode && currentUser){
+    btn.style.display = 'block';
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+function openPollModal(){
+  if(!currentUser){
+    showToast('Сначала авторизуйтесь!');
+    return;
+  }
+  loadPollStats();
+  openM('m-poll');
+}
+
+function loadPollStats(){
+  supaFetch('polls?poll_name=eq.похмельный_бег&select=*').then(function(d){
+    pollData = d || [];
+    var yes = pollData.filter(function(p){return p.vote==='yes';}).length;
+    var buddha = pollData.filter(function(p){return p.vote==='buddha';}).length;
+    var total = yes + buddha;
+    
+    var resultsEl = document.getElementById('pollResults');
+    if(resultsEl){
+      resultsEl.innerHTML = '✅ Да: <span style="color:#7CFC7C">'+yes+'</span> · 🧘 Суд будды: <span style="color:#ffd700">'+buddha+'</span><br><span style="font-size:.8rem;color:var(--td)">Всего голосов: '+total+'</span>';
+    }
+  }).catch(function(){});
+}
+
+function votePoll(vote){
+  if(!currentUser) return;
+  
+  // Проверяем, голосовал ли уже
+  var existing = pollData.find(function(p){return p.user_id===currentUser.id;});
+  
+  if(existing){
+    // Обновляем голос
+    supaFetch('polls?id=eq.'+existing.id,'PATCH',{vote:vote}).then(function(){
+      showToast('✅ Голос обновлён!');
+      loadPollStats();
+    }).catch(function(e){
+      showToast('❌ Ошибка: '+e.message);
+    });
+  } else {
+    // Создаём новый голос
+    supaFetch('polls','POST',{
+      user_id: currentUser.id,
+      poll_name: 'похмельный_бег',
+      vote: vote
+    }).then(function(){
+      showToast('✅ Голос принят!');
+      loadPollStats();
+    }).catch(function(e){
+      showToast('❌ Ошибка: '+e.message);
+    });
+  }
+}
+  
 function refreshUsers(){
   supaFetch('users?select=*').then(function(d){
     if(!d)return;
@@ -1445,6 +1540,22 @@ function generateReport(){
     }
     text+='• '+w.title+': '+(takers.length?takers.join(', '):'пока никто')+'\n';
   }
+
+    // ===== ОПРОС "ПОХМЕЛЬНЫЙ БЕГ" =====
+  text+='\n--- ОПРОС: ПОХМЕЛЬНЫЙ БЕГ ---\n';
+  var pollYes = pollData.filter(function(p){return p.vote==='yes';});
+  var pollBuddha = pollData.filter(function(p){return p.vote==='buddha';});
+  text+='✅ Пойдут на пробежку: '+pollYes.length+'\n';
+  for(var i=0;i<pollYes.length;i++){
+    var u = getUserById(pollYes[i].user_id);
+    if(u) text+='  • '+getFullName(u)+'\n';
+  }
+  text+='🧘 Суд будды: '+pollBuddha.length+'\n';
+  for(var i=0;i<pollBuddha.length;i++){
+    var u = getUserById(pollBuddha[i].user_id);
+    if(u) text+='  • '+getFullName(u)+'\n';
+  }
+  text+='Всего голосов: '+(pollYes.length+pollBuddha.length)+'\n';
   return text;
 }
 function showReport(){
@@ -2003,7 +2114,7 @@ startGameLoop();
 maybeShowIntro();
 maybeShowGameHint();
 if(urlParams.get('report')==='ягодный')showReport();
-
+loadPollData();
 loadAllData(function(){
   if(currentUser){
     var found=false;
