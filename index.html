@@ -835,6 +835,8 @@ function sendToTelegram(text){
 }
 
 function getRank(p){
+  if(p>4000)return'Необузданный ректификатор 🐎';
+  if(p>2500)return'Дикий спирт 💀';
   if(p>1000)return'Спирт 126% 🔥';
   if(p>=900)return'Ректификат ⚗️';
   if(p>=750)return'Самогонный 🌾';
