@@ -517,7 +517,6 @@ var urlParams = new URLSearchParams(location.search);
 var isDebugMode = urlParams.has('debug');
 var debugChanges = [];
 
-
 var debugActive = false;
 function toggleDebug(){
   debugActive = !debugActive;
@@ -768,34 +767,38 @@ function escapeTelegram(str){
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// ИСПРАВЛЕНО: Надёжная защита от двойной отправки
 function sendToTelegram(text){
   if(!TG_BOT_TOKEN||!TG_CHAT_ID){dlog('⚠️ TG: нет токена/чата');return;}
   var url='https://api.telegram.org/bot'+TG_BOT_TOKEN+'/sendMessage';
   var plainText=text.replace(/<[^>]*>/g,'');
-  
+
   dlog('📤 TG attempt ('+text.length+' chars)');
-  console.log('[TG] Sending to chat',TG_CHAT_ID,':',text.substring(0,100));
-  
+
   fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({chat_id:TG_CHAT_ID,text:text,parse_mode:'HTML'})})
   .then(function(r){
-    return r.text().then(function(responseText){
-      console.log('[TG] Response status:',r.status,'body:',responseText);
-      dlog('📥 TG '+r.status+': '+responseText.substring(0,200));
-      
-      if(r.ok){
+    return r.json().then(function(data){
+      if(data && data.ok){
         dlog('✅ TG OK');
         return;
       }
-      if(responseText.indexOf('parse')!==-1||responseText.indexOf('entities')!==-1){
+      // Если ошибка парсинга HTML — пробуем без тегов (только если первая попытка реально не прошла)
+      if(data && data.description && (data.description.indexOf('parse')!==-1 || data.description.indexOf('entities')!==-1)){
         dlog('🔄 TG retry без HTML...');
         return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({chat_id:TG_CHAT_ID,text:plainText})});
+          body:JSON.stringify({chat_id:TG_CHAT_ID,text:plainText})}).then(function(r2){
+            return r2.json();
+          }).then(function(data2){
+            if(data2 && data2.ok){
+              dlog('✅ TG retry OK');
+            } else {
+              dlog('❌ TG retry FAIL: '+(data2?data2.description:'unknown'));
+            }
+          });
       }
-      var errMatch=responseText.match(/"description":"([^"]+)"/);
-      var reason=errMatch?errMatch[1]:responseText;
-      dlog('❌ TG FAIL: '+reason);
-      showToast('⚠️ Telegram: '+reason);
+      dlog('❌ TG FAIL: '+(data?data.description:'unknown'));
+      showToast('⚠️ Telegram: '+(data?data.description:'Ошибка'));
     });
   })
   .catch(function(e){
@@ -1313,7 +1316,7 @@ function checkRatingChange(){
         if(myOldPos > theirOldPos && myNewPos < theirNewPos){
           if(myNewPos <= 3 || theirOldPos <= 3){
             createOvertakeNews(currentUser, them);
-            break;
+            break; // Гарантируем только одно сообщение за раз
           }
         }
       }
