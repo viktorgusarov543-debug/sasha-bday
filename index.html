@@ -508,6 +508,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
   <div class="log-head">
     <b>🐛 DEBUG LOG</b>
     <div>
+      <button class="log-clear" onclick="reassignAllNicknames()" style="background:#c850c0;color:#fff;border-color:#c850c0">🎭 Прозвища</button>
       <button class="log-clear" onclick="rollbackDebugChanges()" style="background:#ff4444;color:#fff;border-color:#ff4444">🔄 Откат</button>
       <button class="log-clear" onclick="copyDebug()">📋 Копировать</button>
       <button class="log-clear" onclick="clearDebug()">Очистить</button>
@@ -1355,12 +1356,103 @@ var nicknames=[
   {base:'Клюквенный морс'},
   {base:'Виноградная лоза'}
 ];
-function generateNickname(gender){
-  var n=nicknames[Math.floor(Math.random()*nicknames.length)];
-  if(gender==='female'&&n.female)return n.female;
-  return n.base;
+function pickNicknameForGender(gender, taken){
+  // Собираем все подходящие варианты по полу
+  var candidates = [];
+  for(var i=0;i<nicknames.length;i++){
+    var n = nicknames[i];
+    // Базовое прозвище — для male и any
+    if((gender === 'male' || gender === 'any' || !gender) && !taken[n.base]){
+      candidates.push(n.base);
+    }
+    // Женская форма — для female и any
+    if(n.female && (gender === 'female' || gender === 'any' || !gender) && !taken[n.female]){
+      candidates.push(n.female);
+    }
+  }
+  
+  if(candidates.length > 0){
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
+  
+  // Все базовые прозвища заняты — добавляем "младший"/"младшая"
+  var suffix = 'младший';
+  if(gender === 'female') suffix = 'младшая';
+  else if(!gender || gender === 'any'){
+    suffix = Math.random() < 0.5 ? 'младший' : 'младшая';
+  }
+  
+  var num = 2;
+  while(taken[suffix + ' ' + num]) num++;
+  return suffix + ' ' + num;
 }
 
+function generateNickname(gender){
+  var taken = {};
+  for(var i=0;i<allUsers.length;i++){
+    if(allUsers[i].nickname) taken[allUsers[i].nickname] = true;
+  }
+  return pickNicknameForGender(gender, taken);
+}
+
+function reassignAllNicknames(){
+  if(!isDebugMode){
+    showToast('⚠️ Только в debug-режиме');
+    return;
+  }
+  if(allUsers.length === 0){
+    showToast('Нет пользователей');
+    return;
+  }
+  if(!confirm('Переназначить прозвища всем '+allUsers.length+' пользователям?\n\nЭто изменит их прозвища в БД. Действие можно откатить через кнопку "Откат".')){
+    return;
+  }
+  
+  dlog('🎭 Переназначение прозвищ для '+allUsers.length+' пользователей...');
+  
+  // Сортируем по id для детерминированности
+  var users = allUsers.slice().sort(function(a,b){ return a.id.localeCompare(b.id); });
+  
+  // Локальный список занятых прозвищ
+  var taken = {};
+  var promises = [];
+  
+  for(var i=0;i<users.length;i++){
+    var u = users[i];
+    var oldNick = u.nickname;
+    var newNick = pickNicknameForGender(u.gender, taken);
+    taken[newNick] = true;
+    
+    dlog('🎭 '+oldNick+' → '+newNick);
+    
+    // Обновляем в памяти сразу
+    u.nickname = newNick;
+    
+    promises.push(
+      supaFetch('users?id=eq.'+u.id, 'PATCH', {nickname: newNick})
+    );
+  }
+  
+  Promise.all(promises).then(function(){
+    // Обновляем currentUser если он в списке
+    if(currentUser){
+      for(var i=0;i<allUsers.length;i++){
+        if(allUsers[i].id === currentUser.id){
+          currentUser = allUsers[i];
+          localStorage.setItem('sasha_cur', JSON.stringify(currentUser));
+          break;
+        }
+      }
+    }
+    showToast('✅ Прозвища обновлены для '+users.length+' пользователей');
+    dlog('✅ Переназначение завершено');
+    updateHeader();
+  }).catch(function(e){
+    showToast('❌ Ошибка: '+e.message);
+    dlog('❌ Ошибка переназначения: '+e.message);
+  });
+}
+  
 function renderDriversList(){
   var list=document.getElementById('driversList');
   if(!list)return;
