@@ -504,6 +504,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
   <div class="log-head">
     <b>🐛 DEBUG LOG</b>
     <div>
+      <button class="log-clear" onclick="rollbackDebugChanges()" style="background:#ff4444;color:#fff;border-color:#ff4444">🔄 Откат</button>
       <button class="log-clear" onclick="copyDebug()">📋 Копировать</button>
       <button class="log-clear" onclick="clearDebug()">Очистить</button>
       <button class="log-clear" onclick="toggleDebug()">✕</button>
@@ -514,6 +515,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 <button class="debug-toggle" id="debugToggle" onclick="toggleDebug()">🐛</button>
 
 <script>
+var isDebugMode = urlParams.has('debug');
+var debugChanges = [];
 var urlParams = new URLSearchParams(location.search);
 
 var debugActive = false;
@@ -566,11 +569,13 @@ function dlog(msg){
   log.scrollTop=log.scrollHeight;
   try{console.log('[DEBUG] '+msg);}catch(e){}
 }
-if(urlParams.has('debug')){
+if(isDebugMode){
   setTimeout(function(){
     var b=document.getElementById('debugToggle');
     if(b)b.classList.add('active');
-    dlog('✅ Отладка активна');
+    dlog('✅ DEBUG MODE активен');
+    dlog('🧪 Тестовые функции включены');
+    dlog('📊 Изменений в БД: ' + debugChanges.length);
   },500);
 }
 
@@ -590,10 +595,182 @@ function supaFetch(endpoint,method,body){
     }
   };
   if(body)opts.body=JSON.stringify(body);
-  return fetch(SUPA_URL+'/rest/v1/'+endpoint,opts)
+  
+  var tableName = endpoint.split('?')[0];
+  var idMatch = endpoint.match(/id=eq\.([^&]+)/);
+  
+  // Для DELETE и PATCH в debug-режиме сначала получаем старые данные
+  if(isDebugMode && idMatch && (method === 'DELETE' || method === 'PATCH')){
+    return fetch(SUPA_URL+'/rest/v1/'+endpoint.replace(method+'?','select=*'), {
+      method:'GET',
+      headers:{
+        'apikey':SUPA_KEY,
+        'Authorization':'Bearer '+SUPA_KEY
+      }
+    })
+    .then(function(r){return r.text();})
+    .then(function(text){
+      var oldData = text ? JSON.parse(text) : null;
+      
+      // Теперь выполняем реальную операцию
+      return fetch(SUPA_URL+'/rest/v1/'+endpoint, opts)
+        .then(function(r){
+          if(!r.ok)throw new Error('HTTP '+r.status);
+          return r.text();
+        })
+        .then(function(text){
+          var result = text ? JSON.parse(text) : null;
+          
+          // Запоминаем изменение
+          if(method === 'DELETE' && oldData && oldData[0]){
+            debugChanges.push({
+              action: 'delete',
+              table: tableName,
+              id: idMatch[1],
+              oldData: oldData[0]
+            });
+            dlog('🧪 Записано: DELETE ' + tableName + ' id=' + idMatch[1]);
+          } else if(method === 'PATCH' && oldData && oldData[0]){
+            debugChanges.push({
+              action: 'update',
+              table: tableName,
+              id: idMatch[1],
+              oldData: oldData[0],
+              newData: body
+            });
+            dlog('🧪 Записано: UPDATE ' + tableName + ' id=' + idMatch[1]);
+          }
+          
+          return result;
+        });
+    })
+    .catch(function(e){dlog('❌ Supabase: '+e.message);throw e;});
+  }
+  
+  // Для GET и POST — обычная логика
+  var result = fetch(SUPA_URL+'/rest/v1/'+endpoint,opts)
     .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text();})
     .then(function(text){return text?JSON.parse(text):null;})
     .catch(function(e){dlog('❌ Supabase: '+e.message);throw e;});
+  
+  // Для POST в debug-режиме запоминаем созданную запись
+  if(isDebugMode && method === 'POST'){
+    result.then(function(data){
+      if(data && data[0] && data[0].id){
+        debugChanges.push({
+          action: 'create',
+          table: tableName,
+          id: data[0].id,
+          data: data[0]
+        });
+        dlog('🧪 Записано: CREATE ' + tableName + ' id=' + data[0].id);
+      }
+    });
+  }
+  
+  return result;
+}
+
+function rollbackDebugChanges(){
+  if(debugChanges.length === 0){
+    showToast('Нет изменений для отката');
+    return;
+  }
+  
+  if(!confirm('Откатить ' + debugChanges.length + ' изменений?\n\nЭто:\n• Удалит созданные записи\n• Восстановит удалённые записи\n• Отменит обновления\n\nПродолжить?')){
+    return;
+  }
+  
+  dlog('🧪 Откат ' + debugChanges.length + ' изменений...');
+  
+  var promises = [];
+  
+  // Обрабатываем в обратном порядке (LIFO)
+  for(var i = debugChanges.length - 1; i >= 0; i--){
+    var change = debugChanges[i];
+    
+    if(change.action === 'create'){
+      // Откат CREATE → DELETE
+      dlog('🧪 Откат: DELETE ' + change.table + ' id=' + change.id);
+      promises.push(
+        fetch(SUPA_URL+'/rest/v1/'+change.table+'?id=eq.'+change.id, {
+          method:'DELETE',
+          headers:{
+            'apikey':SUPA_KEY,
+            'Authorization':'Bearer '+SUPA_KEY
+          }
+        }).then(function(r){
+          if(!r.ok)throw new Error('HTTP '+r.status);
+          return r.text();
+        })
+      );
+    } else if(change.action === 'delete'){
+      // Откат DELETE → POST с сохранёнными данными
+      dlog('🧪 Откат: POST ' + change.table + ' (восстановление)');
+      promises.push(
+        fetch(SUPA_URL+'/rest/v1/'+change.table, {
+          method:'POST',
+          headers:{
+            'apikey':SUPA_KEY,
+            'Authorization':'Bearer '+SUPA_KEY,
+            'Content-Type':'application/json',
+            'Prefer':'return=representation'
+          },
+          body:JSON.stringify(change.oldData)
+        }).then(function(r){
+          if(!r.ok)throw new Error('HTTP '+r.status);
+          return r.text();
+        })
+      );
+    } else if(change.action === 'update'){
+      // Откат UPDATE → PATCH с старыми данными
+      dlog('🧪 Откат: PATCH ' + change.table + ' id=' + change.id + ' (восстановление)');
+      promises.push(
+        fetch(SUPA_URL+'/rest/v1/'+change.table+'?id=eq.'+change.id, {
+          method:'PATCH',
+          headers:{
+            'apikey':SUPA_KEY,
+            'Authorization':'Bearer '+SUPA_KEY,
+            'Content-Type':'application/json',
+            'Prefer':'return=representation'
+          },
+          body:JSON.stringify(change.oldData)
+        }).then(function(r){
+          if(!r.ok)throw new Error('HTTP '+r.status);
+          return r.text();
+        })
+      );
+    }
+  }
+  
+  Promise.all(promises).then(function(){
+    debugChanges = [];
+    showToast('✅ Откат завершён (' + promises.length + ' операций)');
+    dlog('✅ Откат завершён, изменений: 0');
+    
+    // Перезагружаем данные
+    loadAllData(function(){
+      if(currentUser){
+        var found = false;
+        for(var i=0;i<allUsers.length;i++){
+          if(allUsers[i].id===currentUser.id){
+            currentUser=allUsers[i];
+            localStorage.setItem('sasha_cur',JSON.stringify(currentUser));
+            found=true;
+            break;
+          }
+        }
+        if(!found){
+          currentUser=null;
+          localStorage.removeItem('sasha_cur');
+        }
+      }
+      updateHeader();
+    });
+  }).catch(function(e){
+    dlog('❌ Ошибка отката: ' + e.message);
+    showToast('❌ Ошибка отката: ' + e.message);
+  });
 }
 
 function escapeTelegram(str){
