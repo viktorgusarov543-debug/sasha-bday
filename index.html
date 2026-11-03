@@ -539,7 +539,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
     </div>
   </div>
 </div>
-
+<div class="moverlay" id="m-nickname">
+  <div class="mbox">
+    <button class="mclose" onclick="closeM('m-nickname')">✕</button>
+    <div class="mtitle">🎭 Выбери своё прозвище</div>
+    <p style="color:var(--td);font-size:.9rem;margin-bottom:16px;line-height:1.5">
+      Самые редкие прозвища находятся вверху списка. Выбери то, что откликается именно тебе!
+    </p>
+    <div id="nicknameList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;max-height:50vh;overflow-y:auto"></div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <div class="debug-log" id="debugLog">
@@ -1436,12 +1445,95 @@ function pickNicknameForGender(gender, taken){
   return suffix + ' ' + num;
 }
 
+var pendingRegData = null;
+
+function showNicknamePicker(regData){
+  pendingRegData = regData;
+  setRegBtnState(true, 'Загружаем прозвища...');
+  
+  supaFetch('users?select=nickname', 'GET').then(function(users){
+    var counts = {};
+    if(users){
+      for(var i=0;i<users.length;i++){
+        if(users[i].nickname) counts[users[i].nickname] = (counts[users[i].nickname]||0) + 1;
+      }
+    }
+    
+    var available = [];
+    for(var i=0;i<nicknames.length;i++){
+      var n = nicknames[i];
+      if(!counts[n.base]) available.push({name: n.base, count: 0});
+      if(n.female && !counts[n.female]) available.push({name: n.female, count: 0});
+    }
+    
+    // Сортируем от самых редких (count: 0) к более частым
+    available.sort(function(a, b){ return a.count - b.count; });
+    
+    var list = document.getElementById('nicknameList');
+    list.innerHTML = '';
+    
+    if(available.length === 0){
+      list.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--td);padding:20px">Все прозвища заняты 😢</div>';
+    } else {
+      for(var i=0;i<available.length;i++){
+        var item = available[i];
+        var btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.style.padding = '10px';
+        btn.style.fontSize = '.85rem';
+        btn.textContent = item.name + (item.count > 0 ? ' ('+item.count+')' : ' ✨ Свободно');
+        btn.onclick = (function(chosenName){
+          return function(){
+            pendingRegData.nickname = chosenName;
+            closeM('m-nickname');
+            finalizeRegistration(pendingRegData);
+          };
+        })(item.name);
+        list.appendChild(btn);
+      }
+    }
+    
+    setRegBtnState(false, '🍓 Зарегистрироваться');
+    openM('m-nickname');
+  }).catch(function(e){
+    setRegBtnState(false, '🍓 Зарегистрироваться');
+    showToast('❌ Ошибка загрузки: '+e.message);
+  });
+}
+
+function finalizeRegistration(regData){
+  supaFetch('users','POST',regData).then(function(){
+    allUsers.push(regData);
+    currentUser=regData;
+    localStorage.setItem('sasha_cur',JSON.stringify(regData));
+    setRegBtnState(false);
+    closeM('m-auth');
+    updateHeader();
+    
+    if(regData.probability === 'Меня не будет'){
+      openM('m-sorry');
+    } else {
+      createTransportNews(regData, regData.from_place);
+    }
+    resetForm();
+  }).catch(function(e){
+    setRegBtnState(false);
+    showToast('Ошибка: '+e.message);
+  });
+}
+
 function generateNickname(gender){
+  // Эта функция теперь используется только как фолбэк, если что-то пошло не так
   var taken = {};
   for(var i=0;i<allUsers.length;i++){
     if(allUsers[i].nickname) taken[allUsers[i].nickname] = true;
   }
-  return pickNicknameForGender(gender, taken);
+  for(var i=0;i<nicknames.length;i++){
+    var n = nicknames[i];
+    if((gender==='female' && n.female && !taken[n.female])) return n.female;
+    if(!taken[n.base]) return n.base;
+  }
+  return 'Ягода-малинка';
 }
 
 function reassignAllNicknames(){
@@ -1727,76 +1819,110 @@ function openNews(){
 }
 
 function generateReport(){
-  var text='=== ОТЧЁТ ПО ГОСТЯМ ===\nВсего зарегистрировано: '+allUsers.length+'\n\n';
-  text+='--- КТО ПРИЕДЕТ ---\n';
-  var probs=['Да, я буду','Скорее буду, но не точно','Скорее не смогу','Меня не будет'];
-  for(var i=0;i<probs.length;i++){
-    var g=allUsers.filter(function(u){return u.probability===probs[i];});
-    text+=probs[i]+': '+g.length+'\n';
-    for(var j=0;j<g.length;j++)text+='  • '+getFullName(g[j])+'\n';
-  }
-  text+='\n--- НОЧЁВКА ---\n';
-  var nights=['Да, хотел бы','Как получится','Нет, я уеду в субботу'];
-  for(var i=0;i<nights.length;i++){
-    var g=allUsers.filter(function(u){return u.overnight===nights[i];});
-    text+=nights[i]+': '+g.length+'\n';
-    for(var j=0;j<g.length;j++)text+='  • '+getFullName(g[j])+'\n';
-  }
-  text+='\n--- ШАШЛЫК ---\n';
-  var types=['Свинина','Курица','Овощи'];
-  for(var i=0;i<types.length;i++){
-    var cnt=allUsers.filter(function(u){return (u.shashlik||[]).indexOf(types[i])!==-1;}).length;
-    text+=types[i]+': '+cnt+' чел.\n';
-  }
-  text+='\n--- ПОМОЩЬ В 15:00 ---\n';
-  var helpers=allUsers.filter(function(u){return u.help;});
-  text+='Готовы помочь: '+helpers.length+'\n';
-  for(var i=0;i<helpers.length;i++)text+='  • '+getFullName(helpers[i])+'\n';
-  text+='\n--- ТРАНСПОРТ ---\n';
-  var cars=allUsers.filter(function(u){return u.transport==='car';});
-  var taxis=allUsers.filter(function(u){return u.transport==='taxi';});
-  var nones=allUsers.filter(function(u){return u.transport==='none';});
-  text+='🚗 На авто (возьмут на хвост): '+cars.length+'\n';
-  for(var j=0;j<cars.length;j++){
-    var from=cars[j].from_place||'';
-    text+='  • '+getFullName(cars[j])+(from?' (старт: '+from+')':'')+'\n';
-  }
-  text+='🚕 Объединятся на такси: '+taxis.length+'\n';
-  for(var j=0;j<taxis.length;j++){
-    var from2=taxis[j].from_place||'';
-    text+='  • '+getFullName(taxis[j])+(from2?' (старт: '+from2+')':'')+'\n';
-  }
-  text+='🚫 Ничего из вышеперечисленного: '+nones.length+'\n';
-  for(var j=0;j<nones.length;j++)text+='  • '+getFullName(nones[j])+'\n';
-  text+='\n--- РОЛИ (кто за что отвечает) ---\n';
-  for(var i=0;i<wishData.length;i++){
-    var w=wishData[i];
-    if(!w.role)continue;
-    var takers=[];
-    for(var j=0;j<allReserves.length;j++){
-      if(allReserves[j].gift_id===w.id){
-        var u=getUserById(allReserves[j].user_id);
-        if(u)takers.push(getFullName(u));
-      }
+  var text = '=== ОТЧЁТ ПО ГОСТЯМ ===\nВсего зарегистрировано: ' + allUsers.length + '\n\n';
+  
+  text += '--- КТО ПРИЕДЕТ ---\n';
+  var probs = ['Да, я буду', 'Скорее буду, но не точно', 'Скорее не смогу', 'Меня не будет'];
+  for(var i = 0; i < probs.length; i++){
+    var g = allUsers.filter(function(u){ return u.probability === probs[i]; });
+    text += probs[i] + ': ' + g.length + '\n';
+    for(var j = 0; j < g.length; j++){
+      var realName = g[j].real_name || '—';
+      text += '  • ' + getFullName(g[j]) + ' (Наст. имя: ' + realName + ')\n';
     }
-    text+='• '+w.title+': '+(takers.length?takers.join(', '):'пока никто')+'\n';
   }
 
-    // ===== ОПРОС "ПОХМЕЛЬНЫЙ БЕГ" =====
-  text+='\n--- ОПРОС: ПОХМЕЛЬНЫЙ БЕГ ---\n';
-  var pollYes = pollData.filter(function(p){return p.vote==='yes';});
-  var pollBuddha = pollData.filter(function(p){return p.vote==='buddha';});
-  text+='✅ Пойдут на пробежку: '+pollYes.length+'\n';
-  for(var i=0;i<pollYes.length;i++){
+  text += '\n--- НОЧЁВКА ---\n';
+  var nights = ['Да, хотел бы', 'Как получится', 'Нет, я уеду в субботу'];
+  for(var i = 0; i < nights.length; i++){
+    var g = allUsers.filter(function(u){ return u.overnight === nights[i]; });
+    text += nights[i] + ': ' + g.length + '\n';
+    for(var j = 0; j < g.length; j++){
+      var realName = g[j].real_name || '—';
+      text += '  • ' + getFullName(g[j]) + ' (Наст. имя: ' + realName + ')\n';
+    }
+  }
+  
+  text += '\n--- ШАШЛЫК ---\n';
+  var types = ['Свинина', 'Курица', 'Овощи'];
+  for(var i = 0; i < types.length; i++){
+    var cnt = allUsers.filter(function(u){ return (u.shashlik || []).indexOf(types[i]) !== -1; }).length;
+    text += types[i] + ': ' + cnt + ' чел.\n';
+  }
+  
+  text += '\n--- ПОМОЩЬ В 15:00 ---\n';
+  var helpers = allUsers.filter(function(u){ return u.help; });
+  text += 'Готовы помочь: ' + helpers.length + '\n';
+  for(var i = 0; i < helpers.length; i++){
+    var realName = helpers[i].real_name || '—';
+    text += '  • ' + getFullName(helpers[i]) + ' (Наст. имя: ' + realName + ')\n';
+  }
+  
+  text += '\n--- ТРАНСПОРТ ---\n';
+  var cars = allUsers.filter(function(u){ return u.transport === 'car'; });
+  var taxis = allUsers.filter(function(u){ return u.transport === 'taxi'; });
+  var nones = allUsers.filter(function(u){ return u.transport === 'none'; });
+  
+  text += '🚗 На авто (возьмут на хвост): ' + cars.length + '\n';
+  for(var j = 0; j < cars.length; j++){
+    var from = cars[j].from_place || '';
+    var realName = cars[j].real_name || '—';
+    text += '  • ' + getFullName(cars[j]) + ' (Наст. имя: ' + realName + ')' + (from ? ' (старт: ' + from + ')' : '') + '\n';
+  }
+  
+  text += '🚕 Объединятся на такси: ' + taxis.length + '\n';
+  for(var j = 0; j < taxis.length; j++){
+    var from2 = taxis[j].from_place || '';
+    var realName = taxis[j].real_name || '—';
+    text += '  • ' + getFullName(taxis[j]) + ' (Наст. имя: ' + realName + ')' + (from2 ? ' (старт: ' + from2 + ')' : '') + '\n';
+  }
+  
+  text += '🚫 Ничего из вышеперечисленного: ' + nones.length + '\n';
+  for(var j = 0; j < nones.length; j++){
+    var realName = nones[j].real_name || '—';
+    text += '  • ' + getFullName(nones[j]) + ' (Наст. имя: ' + realName + ')\n';
+  }
+  
+  text += '\n--- РОЛИ (кто за что отвечает) ---\n';
+  for(var i = 0; i < wishData.length; i++){
+    var w = wishData[i];
+    if(!w.role) continue;
+    var takers = [];
+    for(var j = 0; j < allReserves.length; j++){
+      if(allReserves[j].gift_id === w.id){
+        var u = getUserById(allReserves[j].user_id);
+        if(u){
+          var realName = u.real_name || '—';
+          takers.push(getFullName(u) + ' (Наст. имя: ' + realName + ')');
+        }
+      }
+    }
+    text += '• ' + w.title + ': ' + (takers.length ? takers.join(', ') : 'пока никто') + '\n';
+  }
+
+  text += '\n--- ОПРОС: ПОХМЕЛЬНЫЙ БЕГ ---\n';
+  var pollYes = pollData.filter(function(p){ return p.vote === 'yes'; });
+  var pollBuddha = pollData.filter(function(p){ return p.vote === 'buddha'; });
+  
+  text += '✅ Пойдут на пробежку: ' + pollYes.length + '\n';
+  for(var i = 0; i < pollYes.length; i++){
     var u = getUserById(pollYes[i].user_id);
-    if(u) text+='  • '+getFullName(u)+'\n';
+    if(u){
+      var realName = u.real_name || '—';
+      text += '  • ' + getFullName(u) + ' (Наст. имя: ' + realName + ')\n';
+    }
   }
-  text+='🧘 Суд будды: '+pollBuddha.length+'\n';
-  for(var i=0;i<pollBuddha.length;i++){
+  
+  text += '🧘 Суд будды: ' + pollBuddha.length + '\n';
+  for(var i = 0; i < pollBuddha.length; i++){
     var u = getUserById(pollBuddha[i].user_id);
-    if(u) text+='  • '+getFullName(u)+'\n';
+    if(u){
+      var realName = u.real_name || '—';
+      text += '  • ' + getFullName(u) + ' (Наст. имя: ' + realName + ')\n';
+    }
   }
-  text+='Всего голосов: '+(pollYes.length+pollBuddha.length)+'\n';
+  text += 'Всего голосов: ' + (pollYes.length + pollBuddha.length) + '\n';
+  
   return text;
 }
 function showReport(){
@@ -2132,29 +2258,24 @@ function doRegister(){
         createTransportNews(currentUser,newFrom);
       }
     }).catch(function(e){setRegBtnState(false);showToast('Ошибка: '+e.message);});
-  }else{
-    var newId='user_'+Date.now();
-    var nickname=generateNickname(gender);
-    var newUserData={id:newId,identifier:id,pwd:pwd,nickname:nickname,gender:gender,
-      probability:formData.prob,
-      transport:newTrans,from_place:newFrom,
-      shashlik:isNotComing?[]:formData.shash,
-      help:isNotComing?false:formData.help,
-      overnight:isNotComing?null:formData.night,
-      points:0};
-    supaFetch('users','POST',newUserData).then(function(){
-      allUsers.push(newUserData);
-      currentUser=newUserData;
-      localStorage.setItem('sasha_cur',JSON.stringify(newUserData));
-      setRegBtnState(false);
-      closeM('m-auth');updateHeader();
-      if(isNotComing){
-        openM('m-sorry');
-      }else{
-        createTransportNews(newUserData,newFrom);
-      }
-      resetForm();
-    }).catch(function(e){setRegBtnState(false);showToast('Ошибка: '+e.message);});
+  } else {
+    // Вместо мгновенной регистрации, собираем данные и показываем выбор прозвища
+    var newId = 'user_' + Date.now();
+    var regData = {
+      id: newId,
+      identifier: id,
+      pwd: pwd,
+      gender: gender,
+      probability: formData.prob,
+      transport: newTrans,
+      from_place: newFrom,
+      shashlik: formData.shash,
+      help: formData.help,
+      overnight: formData.night,
+      points: 0
+      // nickname будет добавлен внутри showNicknamePicker
+    };
+    showNicknamePicker(regData);
   }
 }
 
