@@ -895,7 +895,13 @@ function getRank(p){
 
 function getFullName(user){
   if(!user)return'';
-  if(user.nickname)return user.nickname+' '+user.identifier;
+  if(user.nickname){
+    var suffixNicks = ['ибн-арбуз', 'фон-кизил'];
+    if(suffixNicks.indexOf(user.nickname) !== -1){
+      return user.identifier+' '+user.nickname;
+    }
+    return user.nickname+' '+user.identifier;
+  }
   return user.identifier;
 }
 
@@ -923,19 +929,24 @@ function updateCountdown(){
 }
 
 var berryEmojis=['🍉','🍓','🫐','🍒','🍇'];
+var badEmojis=['🤡 ','😈','🧛','👺','👁️‍🗨️'];
 var flyImages=[
   {src:'loza.png',pts:5},
-  {src:'petrosyan.png',pts:-3},
-  {src:'bomb.png',pts:-3},
-  {src:'face4.png',pts:-3}
+  {src:'petrosyan.png',pts:-10},
+  {src:'bomb.png',pts:-5},
+  {src:'face4.png',pts:-15}
 ];
-var IMG_CHANCE=0.08;
+var IMG_CHANCE=0.1;
+var BAD_EMOJI_CHANCE=0.35;
 var activeFlyObjs=[];
 
 function pickFlyItem(){
   if(Math.random()<IMG_CHANCE){
     var img=flyImages[Math.floor(Math.random()*flyImages.length)];
     return {kind:'img',src:img.src,pts:img.pts};
+  }
+  if(Math.random()<BAD_EMOJI_CHANCE){
+    return {kind:'emoji',c:badEmojis[Math.floor(Math.random()*badEmojis.length)],pts:-1};
   }
   return {kind:'emoji',c:berryEmojis[Math.floor(Math.random()*berryEmojis.length)],pts:1};
 }
@@ -1609,31 +1620,37 @@ function renderRating(){
 }
 
 function checkRatingChange(){
-  var sorted=allUsers.slice().sort(function(a,b){return (b.points||0)-(a.points||0);});
-  var newPositions={};
-  for(var i=0;i<sorted.length;i++){newPositions[sorted[i].id]=i+1;}
+  var sorted = allUsers.slice().sort(function(a,b){return (b.points||0)-(a.points||0);});
+  var newPositions = {};
+  for(var i=0; i<sorted.length; i++){ newPositions[sorted[i].id] = i+1; }
   
   if(currentUser){
-    var myOldPos=prevPositions[currentUser.id];
-    var myNewPos=newPositions[currentUser.id];
+    var myOldPos = prevPositions[currentUser.id];
+    var myNewPos = newPositions[currentUser.id];
     
+    // Показываем модалку подъема
     if(myOldPos && myNewPos && myNewPos < myOldPos){
       showRankUpModal(myOldPos, myNewPos);
     } else if(!myOldPos && myNewPos && myNewPos <= 3){
       showRankUpModal(null, myNewPos);
     }
     
+    // Проверка на обгон конкретного человека
     if(myOldPos && myNewPos){
       for(var j=0; j<sorted.length; j++){
-        var them=sorted[j];
-        if(them.id===currentUser.id) continue;
+        var them = sorted[j];
+        if(them.id === currentUser.id) continue;
         
-        var theirOldPos=prevPositions[them.id];
-        var theirNewPos=newPositions[them.id];
+        var theirOldPos = prevPositions[them.id];
+        var theirNewPos = newPositions[them.id];
         
         if(!theirOldPos || !theirNewPos) continue;
         
-        if(myOldPos > theirOldPos && myNewPos < theirNewPos){
+        // УСЛОВИЕ ОБГОНА:
+        // 1. Мы были позади или наравне (по старой позиции)
+        // 2. Мы впереди по новой позиции
+        // 3. ВАЖНО: Наши очки СТРОГО БОЛЬШЕ очков соперника (защита от багов сортировки при равенстве)
+        if(myOldPos > theirOldPos && myNewPos < theirNewPos && currentUser.points > them.points){
           if(myNewPos <= 3 || theirOldPos <= 3){
             createOvertakeNews(currentUser, them);
             break; // Гарантируем только одно сообщение за раз
@@ -1642,9 +1659,8 @@ function checkRatingChange(){
       }
     }
   }
-  prevPositions=newPositions;
+  prevPositions = newPositions;
 }
-
 function getVerb(gender){
   if(gender==='female')return'обогнала';
   if(gender==='male')return'обошёл';
