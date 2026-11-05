@@ -327,6 +327,31 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
   0%,100%{transform:translateX(-50%) translateY(0)}
   50%{transform:translateX(-50%) translateY(-4px)}
 }
+  .sticky-address{
+  position:sticky; top:0; z-index:10;
+  background:linear-gradient(160deg,rgba(30,15,40,.98),rgba(15,5,20,.99));
+  padding:0 0 16px 0;
+  border-bottom:1px solid rgba(255,255,255,.1);
+  margin:0 -30px 16px -30px; /* Компенсация padding у .mbox */
+  padding:16px 30px;
+}
+.address-text{font-size:.9rem;color:var(--t);margin-bottom:10px;line-height:1.4}
+.copy-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 14px;background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);border-radius:10px;
+  color:var(--ac2);font-size:.85rem;font-weight:600;cursor:pointer;
+  transition:all .2s;font-family:inherit;
+}
+.copy-btn:hover{background:rgba(255,255,255,.15);transform:translateY(-1px)}
+.copy-btn svg{width:16px;height:16px;fill:currentColor}
+.report-text{white-space:pre-wrap;font-family:'Inter',sans-serif;font-size:.9rem;line-height:1.6}
+.report-header{
+  font-size:1.15rem;font-weight:800;color:var(--ac2);
+  display:block;margin:24px 0 12px 0;
+  border-bottom:2px solid rgba(255,45,123,.3);
+  padding-bottom:6px;letter-spacing:.5px;
+}
 </style>
 </head>
 <body>
@@ -391,7 +416,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 
 <div class="report-page" id="reportPage">
   <a class="report-back" onclick="closeReport()">← Назад к сайту</a>
-  <div class="report-block"><h3>📊 Отчёт по гостям</h3><pre id="reportText">Загрузка...</pre></div>
+  <div class="report-block">
+    <h3>📊 Отчёт по гостям</h3>
+    <div id="reportText" class="report-text">Загрузка...</div>
+  </div>
 </div>
 
 <div class="bg-blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
@@ -509,6 +537,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
   <div class="mbox">
     <button class="mclose" onclick="closeM('m-details')">✕</button>
     <div class="mtitle">🚗 Как добраться до Зелёного Бора</div>
+    
+    <!-- Липкий блок с адресом -->
+    <div class="sticky-address">
+      <div class="address-text">Адрес для такси яндекс GO:<br><b>дачное некоммерческое товарищество пенсионеров Бор-1, 49</b></div>
+      <button class="copy-btn" onclick="copyTaxiAddress()">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        Копировать адрес
+      </button>
+    </div>
+
+    <!-- Прокручиваемый контент -->
+    <div class="details-item">
+      <video src="5330.mp4" controls playsinline style="width:100%;border-radius:12px;margin-bottom:8px;background:#000;"></video>
+      <p>Путь до ворот</p>
+    </div>
     <div class="details-item">
       <img class="details-img" src="route1.jpg" alt="Деталь 1">
       <p>Приезжаете на машине к этим воротам.</p>
@@ -1182,7 +1225,18 @@ var prevPositions={};
 
 function openMap(){window.open('https://yandex.ru/maps/?pt=49.025928,55.647778&z=16&l=map','_blank','noopener,noreferrer');}
 function openDetails(){openM('m-details');}
-
+function copyTaxiAddress(){
+  var address = "дачное некоммерческое товарищество пенсионеров Бор-1, 49";
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(address).then(function(){
+      showToast('📋 Адрес скопирован!');
+    }).catch(function(){
+      fallbackCopy(address);
+    });
+  } else {
+    fallbackCopy(address);
+  }
+}
 function loadAllData(cb){
   var loaded=0;
   function done(){loaded++;if(loaded>=3&&cb)cb();}
@@ -1818,71 +1872,71 @@ function openNews(){
 }
 
 function generateReport(){
-  var text = '=== ОТЧЁТ ПО ГОСТЯМ ===\nВсего зарегистрировано: ' + allUsers.length + '\n\n';
+  var text = '<span class="report-header">📊 ВСЕГО ЗАРЕГИСТРИРОВАНО: ' + allUsers.length + '</span>\n';
   
-  text += '--- КТО ПРИЕДЕТ ---\n';
+  text += '<span class="report-header">👥 КТО ПРИЕДЕТ</span>\n';
   var probs = ['Да, я буду', 'Скорее буду, но не точно', 'Скорее не смогу', 'Меня не будет'];
   for(var i = 0; i < probs.length; i++){
     var g = allUsers.filter(function(u){ return u.probability === probs[i]; });
-    text += probs[i] + ': ' + g.length + '\n';
+    text += '<b>' + probs[i] + ':</b> ' + g.length + '\n';
     for(var j = 0; j < g.length; j++){
       var realName = g[j].real_name || '—';
-      text += '  • ' + getFullName(g[j]) + ' (Наст. имя: ' + realName + ')\n';
+      text += '  • ' + getFullName(g[j]) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>\n';
     }
   }
 
-  text += '\n--- НОЧЁВКА ---\n';
+  text += '<span class="report-header">🌙 НОЧЁВКА</span>\n';
   var nights = ['Да, хотел бы', 'Как получится', 'Нет, я уеду в субботу'];
   for(var i = 0; i < nights.length; i++){
     var g = allUsers.filter(function(u){ return u.overnight === nights[i]; });
-    text += nights[i] + ': ' + g.length + '\n';
+    text += '<b>' + nights[i] + ':</b> ' + g.length + '\n';
     for(var j = 0; j < g.length; j++){
       var realName = g[j].real_name || '—';
-      text += '  • ' + getFullName(g[j]) + ' (Наст. имя: ' + realName + ')\n';
+      text += '  • ' + getFullName(g[j]) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>\n';
     }
   }
   
-  text += '\n--- ШАШЛЫК ---\n';
+  text += '<span class="report-header">🍖 ШАШЛЫК</span>\n';
   var types = ['Свинина', 'Курица', 'Овощи'];
   for(var i = 0; i < types.length; i++){
     var cnt = allUsers.filter(function(u){ return (u.shashlik || []).indexOf(types[i]) !== -1; }).length;
-    text += types[i] + ': ' + cnt + ' чел.\n';
+    text += '<b>' + types[i] + ':</b> ' + cnt + ' чел.\n';
   }
   
-  text += '\n--- ПОМОЩЬ В 15:00 ---\n';
+  text += '<span class="report-header">🛠️ ПОМОЩЬ В 15:00</span>\n';
   var helpers = allUsers.filter(function(u){ return u.help; });
-  text += 'Готовы помочь: ' + helpers.length + '\n';
+  text += '<b>Готовы помочь:</b> ' + helpers.length + '\n';
   for(var i = 0; i < helpers.length; i++){
     var realName = helpers[i].real_name || '—';
-    text += '  • ' + getFullName(helpers[i]) + ' (Наст. имя: ' + realName + ')\n';
+    text += '  • ' + getFullName(helpers[i]) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>\n';
   }
   
-  text += '\n--- ТРАНСПОРТ ---\n';
+  text += '<span class="report-header">🚗 ТРАНСПОРТ</span>\n';
   var cars = allUsers.filter(function(u){ return u.transport === 'car'; });
   var taxis = allUsers.filter(function(u){ return u.transport === 'taxi'; });
   var nones = allUsers.filter(function(u){ return u.transport === 'none'; });
   
-  text += '🚗 На авто (возьмут на хвост): ' + cars.length + '\n';
+  text += '<b>🚗 На авто (возьмут на хвост):</b> ' + cars.length + '\n';
   for(var j = 0; j < cars.length; j++){
     var from = cars[j].from_place || '';
     var realName = cars[j].real_name || '—';
-    text += '  • ' + getFullName(cars[j]) + ' (Наст. имя: ' + realName + ')' + (from ? ' (старт: ' + from + ')' : '') + '\n';
+    text += '  • ' + getFullName(cars[j]) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>' + (from ? ' <span style="color:var(--ac2)">(старт: ' + from + ')</span>' : '') + '\n';
   }
   
-  text += '🚕 Объединятся на такси: ' + taxis.length + '\n';
+  text += '<b>🚕 Объединятся на такси:</b> ' + taxis.length + '\n';
   for(var j = 0; j < taxis.length; j++){
     var from2 = taxis[j].from_place || '';
     var realName = taxis[j].real_name || '—';
-    text += '  • ' + getFullName(taxis[j]) + ' (Наст. имя: ' + realName + ')' + (from2 ? ' (старт: ' + from2 + ')' : '') + '\n';
+    text += '  • ' + getFullName(taxis[j]) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>' + (from2 ? ' <span style="color:var(--ac2)">(старт: ' + from2 + ')</span>' : '') + '\n';
   }
   
-  text += '🚫 Ничего из вышеперечисленного: ' + nones.length + '\n';
+  text += '<b>🚫 Ничего из вышеперечисленного:</b> ' + nones.length + '\n';
   for(var j = 0; j < nones.length; j++){
     var realName = nones[j].real_name || '—';
-    text += '  • ' + getFullName(nones[j]) + ' (Наст. имя: ' + realName + ')\n';
+    text += '  • ' + getFullName(nones[j]) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>\n';
   }
   
-  text += '\n--- РОЛИ (кто за что отвечает) ---\n';
+  text += '<span class="report-header">🎭 РОЛИ (кто за что отвечает)</span>\n';
   for(var i = 0; i < wishData.length; i++){
     var w = wishData[i];
     if(!w.role) continue;
@@ -1892,35 +1946,35 @@ function generateReport(){
         var u = getUserById(allReserves[j].user_id);
         if(u){
           var realName = u.real_name || '—';
-          takers.push(getFullName(u) + ' (Наст. имя: ' + realName + ')');
+          takers.push(getFullName(u) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>');
         }
       }
     }
-    text += '• ' + w.title + ': ' + (takers.length ? takers.join(', ') : 'пока никто') + '\n';
+    text += '<b>• ' + w.title + ':</b> ' + (takers.length ? takers.join(', ') : 'пока никто') + '\n';
   }
 
-  text += '\n--- ОПРОС: ПОХМЕЛЬНЫЙ БЕГ ---\n';
+  text += '<span class="report-header">🏃 ОПРОС: ПОХМЕЛЬНЫЙ БЕГ</span>\n';
   var pollYes = pollData.filter(function(p){ return p.vote === 'yes'; });
   var pollBuddha = pollData.filter(function(p){ return p.vote === 'buddha'; });
   
-  text += '✅ Пойдут на пробежку: ' + pollYes.length + '\n';
+  text += '<b>✅ Пойдут на пробежку:</b> ' + pollYes.length + '\n';
   for(var i = 0; i < pollYes.length; i++){
     var u = getUserById(pollYes[i].user_id);
     if(u){
       var realName = u.real_name || '—';
-      text += '  • ' + getFullName(u) + ' (Наст. имя: ' + realName + ')\n';
+      text += '  • ' + getFullName(u) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>\n';
     }
   }
   
-  text += '🧘 Суд будды: ' + pollBuddha.length + '\n';
+  text += '<b>🧘 Суд будды:</b> ' + pollBuddha.length + '\n';
   for(var i = 0; i < pollBuddha.length; i++){
     var u = getUserById(pollBuddha[i].user_id);
     if(u){
       var realName = u.real_name || '—';
-      text += '  • ' + getFullName(u) + ' (Наст. имя: ' + realName + ')\n';
+      text += '  • ' + getFullName(u) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>\n';
     }
   }
-  text += 'Всего голосов: ' + (pollYes.length + pollBuddha.length) + '\n';
+  text += '<b>Всего голосов:</b> ' + (pollYes.length + pollBuddha.length) + '\n';
   
   return text;
 }
