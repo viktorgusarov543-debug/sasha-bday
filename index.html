@@ -2049,8 +2049,17 @@ function showReport(){
   document.getElementById('mainHeader').style.display='none';
   document.getElementById('mainContent').style.display='none';
   document.getElementById('reportPage').classList.add('active');
-  // ИСПРАВЛЕНО: используем innerHTML вместо textContent для рендеринга HTML-тегов
-  document.getElementById('reportText').innerHTML = generateReport();
+  
+  // Показываем индикатор загрузки
+  document.getElementById('reportText').innerHTML = '<div style="text-align:center;padding:40px;color:var(--td)">Загрузка данных опроса...</div>';
+  
+  // Гарантируем, что данные опроса загружены перед генерацией отчета
+  loadPollData().then(function(){
+    document.getElementById('reportText').innerHTML = generateReport();
+  }).catch(function(){
+    // На случай ошибки все равно пытаемся сгенерировать отчет с тем, что есть
+    document.getElementById('reportText').innerHTML = generateReport();
+  });
 }
 function closeReport(){
   document.getElementById('mainHeader').style.display='';
