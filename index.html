@@ -1982,7 +1982,8 @@ function showReport(){
   document.getElementById('mainHeader').style.display='none';
   document.getElementById('mainContent').style.display='none';
   document.getElementById('reportPage').classList.add('active');
-  document.getElementById('reportText').textContent=generateReport();
+  // ИСПРАВЛЕНО: используем innerHTML вместо textContent для рендеринга HTML-тегов
+  document.getElementById('reportText').innerHTML = generateReport();
 }
 function closeReport(){
   document.getElementById('mainHeader').style.display='';
