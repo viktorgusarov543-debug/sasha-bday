@@ -352,6 +352,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
   border-bottom:2px solid rgba(255,45,123,.3);
   padding-bottom:6px;letter-spacing:.5px;
 }
+
+.report-container { font-size: 0.95rem; }
+.report-summary { font-size: 1.1rem; font-weight: 700; color: var(--t); margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid rgba(255,45,123,.3); }
+.report-section { margin-bottom: 28px; }
+.report-header { font-size: 1.15rem; font-weight: 800; color: var(--ac2); margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px; }
+.report-subsection { margin-left: 20px; margin-bottom: 16px; border-left: 2px solid rgba(255,255,255,.1); padding-left: 12px; }
+.report-subsection h4 { font-size: 0.95rem; font-weight: 600; color: var(--t); margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px; }
+.report-list { list-style: none; padding: 0; margin: 0; }
+.report-list li { position: relative; padding-left: 16px; margin-bottom: 6px; color: var(--td); line-height: 1.5; }
+.report-list li::before { content: '•'; position: absolute; left: 0; color: var(--ac2); font-weight: bold; font-size: 1.2rem; line-height: 1.2; }
+.report-list li b { color: var(--t); font-weight: 500; }
+.real-name { font-size: 0.85rem; color: var(--td); opacity: 0.7; font-style: italic; }
+.report-stat { font-size: 0.8rem; color: var(--ac2); font-weight: 600; background: rgba(255,45,123,.1); padding: 2px 8px; border-radius: 10px; }
+
 </style>
 </head>
 <body>
@@ -536,7 +550,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 <div class="moverlay" id="m-details">
   <div class="mbox">
     <button class="mclose" onclick="closeM('m-details')">✕</button>
-    <div class="mtitle">🚗 Как добраться до Зелёного Бора</div>
+    <div class="mtitle">🚗 Как добраться до дома</div>
     
     <!-- Липкий блок с адресом -->
     <div class="sticky-address">
@@ -1872,71 +1886,104 @@ function openNews(){
 }
 
 function generateReport(){
-  var text = '<span class="report-header">📊 ВСЕГО ЗАРЕГИСТРИРОВАНО: ' + allUsers.length + '</span>\n';
-  
-  text += '<span class="report-header">👥 КТО ПРИЕДЕТ</span>\n';
+  var html = '<div class="report-container">';
+  html += '<div class="report-summary">📊 Всего зарегистрировано: <b>' + allUsers.length + '</b></div>';
+
+  // 1. КТО ПРИЕДЕТ
+  html += '<div class="report-section"><h3 class="report-header">👥 Кто приедет</h3>';
   var probs = ['Да, я буду', 'Скорее буду, но не точно', 'Скорее не смогу', 'Меня не будет'];
   for(var i = 0; i < probs.length; i++){
     var g = allUsers.filter(function(u){ return u.probability === probs[i]; });
-    text += '<b>' + probs[i] + ':</b> ' + g.length + '\n';
-    for(var j = 0; j < g.length; j++){
-      var realName = g[j].real_name || '—';
-      text += '  • ' + getFullName(g[j]) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>\n';
+    if(g.length > 0) {
+      html += '<div class="report-subsection"><h4>' + probs[i] + ' <span class="report-stat">' + g.length + '</span></h4><ul class="report-list">';
+      for(var j = 0; j < g.length; j++){
+        var realName = g[j].real_name || '—';
+        html += '<li><b>' + getFullName(g[j]) + '</b> <span class="real-name">(Наст. имя: ' + realName + ')</span></li>';
+      }
+      html += '</ul></div>';
     }
   }
+  html += '</div>';
 
-  text += '<span class="report-header">🌙 НОЧЁВКА</span>\n';
+  // 2. НОЧЁВКА
+  html += '<div class="report-section"><h3 class="report-header">🌙 Ночёвка</h3>';
   var nights = ['Да, хотел бы', 'Как получится', 'Нет, я уеду в субботу'];
   for(var i = 0; i < nights.length; i++){
     var g = allUsers.filter(function(u){ return u.overnight === nights[i]; });
-    text += '<b>' + nights[i] + ':</b> ' + g.length + '\n';
-    for(var j = 0; j < g.length; j++){
-      var realName = g[j].real_name || '—';
-      text += '  • ' + getFullName(g[j]) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>\n';
+    if(g.length > 0) {
+      html += '<div class="report-subsection"><h4>' + nights[i] + ' <span class="report-stat">' + g.length + '</span></h4><ul class="report-list">';
+      for(var j = 0; j < g.length; j++){
+        var realName = g[j].real_name || '—';
+        html += '<li><b>' + getFullName(g[j]) + '</b> <span class="real-name">(Наст. имя: ' + realName + ')</span></li>';
+      }
+      html += '</ul></div>';
     }
   }
+  html += '</div>';
   
-  text += '<span class="report-header">🍖 ШАШЛЫК</span>\n';
+  // 3. ШАШЛЫК
+  html += '<div class="report-section"><h3 class="report-header">🍖 Шашлык</h3><ul class="report-list">';
   var types = ['Свинина', 'Курица', 'Овощи'];
   for(var i = 0; i < types.length; i++){
     var cnt = allUsers.filter(function(u){ return (u.shashlik || []).indexOf(types[i]) !== -1; }).length;
-    text += '<b>' + types[i] + ':</b> ' + cnt + ' чел.\n';
+    html += '<li><b>' + types[i] + ':</b> ' + cnt + ' чел.</li>';
   }
+  html += '</ul></div>';
   
-  text += '<span class="report-header">🛠️ ПОМОЩЬ В 15:00</span>\n';
+  // 4. ПОМОЩЬ
+  html += '<div class="report-section"><h3 class="report-header">🛠️ Помощь в 15:00</h3>';
   var helpers = allUsers.filter(function(u){ return u.help; });
-  text += '<b>Готовы помочь:</b> ' + helpers.length + '\n';
-  for(var i = 0; i < helpers.length; i++){
-    var realName = helpers[i].real_name || '—';
-    text += '  • ' + getFullName(helpers[i]) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>\n';
+  if(helpers.length > 0) {
+    html += '<div class="report-subsection"><h4>Готовы помочь <span class="report-stat">' + helpers.length + '</span></h4><ul class="report-list">';
+    for(var i = 0; i < helpers.length; i++){
+      var realName = helpers[i].real_name || '—';
+      html += '<li><b>' + getFullName(helpers[i]) + '</b> <span class="real-name">(Наст. имя: ' + realName + ')</span></li>';
+    }
+    html += '</ul></div>';
+  } else {
+    html += '<div style="margin-left:20px; color:var(--td); font-style:italic;">Пока никто не вызвался</div>';
   }
+  html += '</div>';
   
-  text += '<span class="report-header">🚗 ТРАНСПОРТ</span>\n';
+  // 5. ТРАНСПОРТ
+  html += '<div class="report-section"><h3 class="report-header">🚗 Транспорт</h3>';
   var cars = allUsers.filter(function(u){ return u.transport === 'car'; });
   var taxis = allUsers.filter(function(u){ return u.transport === 'taxi'; });
   var nones = allUsers.filter(function(u){ return u.transport === 'none'; });
   
-  text += '<b>🚗 На авто (возьмут на хвост):</b> ' + cars.length + '\n';
-  for(var j = 0; j < cars.length; j++){
-    var from = cars[j].from_place || '';
-    var realName = cars[j].real_name || '—';
-    text += '  • ' + getFullName(cars[j]) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>' + (from ? ' <span style="color:var(--ac2)">(старт: ' + from + ')</span>' : '') + '\n';
+  if(cars.length > 0) {
+    html += '<div class="report-subsection"><h4>🚗 На авто (возьмут на хвост) <span class="report-stat">' + cars.length + '</span></h4><ul class="report-list">';
+    for(var j = 0; j < cars.length; j++){
+      var from = cars[j].from_place || '';
+      var realName = cars[j].real_name || '—';
+      html += '<li><b>' + getFullName(cars[j]) + '</b> <span class="real-name">(Наст. имя: ' + realName + ')</span>' + (from ? ' <span style="color:var(--ac2)">[Старт: ' + from + ']</span>' : '') + '</li>';
+    }
+    html += '</ul></div>';
   }
   
-  text += '<b>🚕 Объединятся на такси:</b> ' + taxis.length + '\n';
-  for(var j = 0; j < taxis.length; j++){
-    var from2 = taxis[j].from_place || '';
-    var realName = taxis[j].real_name || '—';
-    text += '  • ' + getFullName(taxis[j]) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>' + (from2 ? ' <span style="color:var(--ac2)">(старт: ' + from2 + ')</span>' : '') + '\n';
+  if(taxis.length > 0) {
+    html += '<div class="report-subsection"><h4>🚕 Объединятся на такси <span class="report-stat">' + taxis.length + '</span></h4><ul class="report-list">';
+    for(var j = 0; j < taxis.length; j++){
+      var from2 = taxis[j].from_place || '';
+      var realName = taxis[j].real_name || '—';
+      html += '<li><b>' + getFullName(taxis[j]) + '</b> <span class="real-name">(Наст. имя: ' + realName + ')</span>' + (from2 ? ' <span style="color:var(--ac2)">[Старт: ' + from2 + ']</span>' : '') + '</li>';
+    }
+    html += '</ul></div>';
   }
   
-  text += '<b>🚫 Ничего из вышеперечисленного:</b> ' + nones.length + '\n';
-  for(var j = 0; j < nones.length; j++){
-    var realName = nones[j].real_name || '—';
-    text += '  • ' + getFullName(nones[j]) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>\n';
+  if(nones.length > 0) {
+    html += '<div class="report-subsection"><h4>🚫 Ничего из вышеперечисленного <span class="report-stat">' + nones.length + '</span></h4><ul class="report-list">';
+    for(var j = 0; j < nones.length; j++){
+      var realName = nones[j].real_name || '—';
+      html += '<li><b>' + getFullName(nones[j]) + '</b> <span class="real-name">(Наст. имя: ' + realName + ')</span></li>';
+    }
+    html += '</ul></div>';
   }
+  html += '</div>';
   
-  text += '<span class="report-header">🎭 РОЛИ (кто за что отвечает)</span>\n';
+  // 6. РОЛИ
+  html += '<div class="report-section"><h3 class="report-header">🎭 Роли (кто за что отвечает)</h3><ul class="report-list">';
+  var hasRoles = false;
   for(var i = 0; i < wishData.length; i++){
     var w = wishData[i];
     if(!w.role) continue;
@@ -1946,38 +1993,58 @@ function generateReport(){
         var u = getUserById(allReserves[j].user_id);
         if(u){
           var realName = u.real_name || '—';
-          takers.push(getFullName(u) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>');
+          takers.push('<b>' + getFullName(u) + '</b> <span class="real-name">(Наст. имя: ' + realName + ')</span>');
         }
       }
     }
-    text += '<b>• ' + w.title + ':</b> ' + (takers.length ? takers.join(', ') : 'пока никто') + '\n';
+    if(takers.length > 0) {
+      hasRoles = true;
+      html += '<li><b>' + w.title + ':</b> ' + takers.join(', ') + '</li>';
+    }
   }
+  if(!hasRoles) html += '<li style="color:var(--td); font-style:italic;">Пока никто не взял роли</li>';
+  html += '</ul></div>';
 
-  text += '<span class="report-header">🏃 ОПРОС: ПОХМЕЛЬНЫЙ БЕГ</span>\n';
+  // 7. ОПРОС
+  html += '<div class="report-section"><h3 class="report-header">🏃 Опрос: Похмельный бег</h3>';
   var pollYes = pollData.filter(function(p){ return p.vote === 'yes'; });
   var pollBuddha = pollData.filter(function(p){ return p.vote === 'buddha'; });
   
-  text += '<b>✅ Пойдут на пробежку:</b> ' + pollYes.length + '\n';
-  for(var i = 0; i < pollYes.length; i++){
-    var u = getUserById(pollYes[i].user_id);
-    if(u){
-      var realName = u.real_name || '—';
-      text += '  • ' + getFullName(u) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>\n';
+  if(pollYes.length > 0) {
+    html += '<div class="report-subsection"><h4>✅ Пойдут на пробежку <span class="report-stat">' + pollYes.length + '</span></h4><ul class="report-list">';
+    for(var i = 0; i < pollYes.length; i++){
+      var u = getUserById(pollYes[i].user_id);
+      if(u){
+        var realName = u.real_name || '—';
+        html += '<li><b>' + getFullName(u) + '</b> <span class="real-name">(Наст. имя: ' + realName + ')</span></li>';
+      }
     }
+    html += '</ul></div>';
   }
   
-  text += '<b>🧘 Суд будды:</b> ' + pollBuddha.length + '\n';
-  for(var i = 0; i < pollBuddha.length; i++){
-    var u = getUserById(pollBuddha[i].user_id);
-    if(u){
-      var realName = u.real_name || '—';
-      text += '  • ' + getFullName(u) + ' <span style="color:var(--td)">(Наст. имя: ' + realName + ')</span>\n';
+  if(pollBuddha.length > 0) {
+    html += '<div class="report-subsection"><h4>🧘 Суд будды <span class="report-stat">' + pollBuddha.length + '</span></h4><ul class="report-list">';
+    for(var i = 0; i < pollBuddha.length; i++){
+      var u = getUserById(pollBuddha[i].user_id);
+      if(u){
+        var realName = u.real_name || '—';
+        html += '<li><b>' + getFullName(u) + '</b> <span class="real-name">(Наст. имя: ' + realName + ')</span></li>';
+      }
     }
+    html += '</ul></div>';
   }
-  text += '<b>Всего голосов:</b> ' + (pollYes.length + pollBuddha.length) + '\n';
   
-  return text;
+  if(pollYes.length === 0 && pollBuddha.length === 0) {
+    html += '<div style="margin-left:20px; color:var(--td); font-style:italic;">Пока никто не голосовал</div>';
+  } else {
+    html += '<div style="margin-top:12px; margin-left:20px; font-size:0.9rem; color:var(--td);">Всего голосов: <b style="color:var(--t)">' + (pollYes.length + pollBuddha.length) + '</b></div>';
+  }
+  html += '</div>';
+
+  html += '</div>'; // end container
+  return html;
 }
+  
 function showReport(){
   document.getElementById('mainHeader').style.display='none';
   document.getElementById('mainContent').style.display='none';
