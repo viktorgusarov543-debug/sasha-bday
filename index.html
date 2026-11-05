@@ -1787,14 +1787,19 @@ function checkRatingChange(){
     var myOldPos = prevPositions[currentUser.id];
     var myNewPos = newPositions[currentUser.id];
     
-    // Показываем модалку подъема
+    // 1. Показываем модалку подъема
     if(myOldPos && myNewPos && myNewPos < myOldPos){
       showRankUpModal(myOldPos, myNewPos);
-    } else if(!myOldPos && myNewPos && myNewPos <= 3){
+    } else if(!myOldPos && myNewPos && myNewPos <= 5){
       showRankUpModal(null, myNewPos);
     }
     
-    // Проверка на обгон конкретного человека
+    // 2. Проверка на падение рейтинга (НОВОЕ)
+    if(myOldPos && myNewPos && myNewPos > myOldPos){
+      createRankDownNews(currentUser, myOldPos, myNewPos);
+    }
+    
+    // 3. Проверка на обгон конкретного человека
     if(myOldPos && myNewPos){
       for(var j=0; j<sorted.length; j++){
         var them = sorted[j];
@@ -1806,11 +1811,9 @@ function checkRatingChange(){
         if(!theirOldPos || !theirNewPos) continue;
         
         // УСЛОВИЕ ОБГОНА:
-        // 1. Мы были позади или наравне (по старой позиции)
-        // 2. Мы впереди по новой позиции
-        // 3. ВАЖНО: Наши очки СТРОГО БОЛЬШЕ очков соперника (защита от багов сортировки при равенстве)
         if(myOldPos > theirOldPos && myNewPos < theirNewPos && currentUser.points > them.points){
-          if(myNewPos <= 3 || theirOldPos <= 3){
+          // Расширили условие до топ-5, чтобы новости приходили и за пределами топ-3
+          if(myNewPos <= 5 || theirOldPos <= 5){
             createOvertakeNews(currentUser, them);
             break; // Гарантируем только одно сообщение за раз
           }
@@ -1838,7 +1841,18 @@ function createOvertakeNews(who,whom){
     sendToTelegram('<b>🏆 Обгон в рейтинге!</b>\n\n<i>'+whoT+'</i> '+verb+' <i>'+whomT+'</i> в ягодном рейтинге! 🍓');
   }).catch(function(){});
 }
-
+function createRankDownNews(who, oldPos, newPos){
+  var dateStr = getDateStr();
+  var title = '📉 Падение в рейтинге!';
+  var whoT = escapeTelegram(getFullName(who));
+  var text = '<i>' + whoT + '</i> опустился с ' + oldPos + ' на ' + newPos + ' место в ягодном рейтинге! 📉';
+  
+  supaFetch('news','POST',{date:dateStr, title:title, text:text}).then(function(){
+    allNews.unshift({date:dateStr, title:title, text:text});
+    updateHeader();
+    sendToTelegram('<b>📉 Падение в рейтинге!</b>\n\n<i>' + whoT + '</i> опустился с ' + oldPos + ' на ' + newPos + ' место! 📉');
+  }).catch(function(){});
+}
 function createTransportNews(user,fromPlace){
   if(!user)return;
   var t=user.transport;
