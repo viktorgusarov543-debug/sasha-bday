@@ -1784,39 +1784,40 @@ function checkRatingChange(){
   for(var i=0; i<sorted.length; i++){ newPositions[sorted[i].id] = i+1; }
   
   if(currentUser){
-    var myOldPos = prevPositions[currentUser.id];
-    var myNewPos = newPositions[currentUser.id];
+    var myOldPos = prevPositions[currentUser.id] || 999;
+    var myNewPos = newPositions[currentUser.id] || 999;
     
-    // 1. Показываем модалку подъема
-    if(myOldPos && myNewPos && myNewPos < myOldPos){
+    // 1. Показываем модалку подъема (только если я сам поднялся)
+    if(myOldPos !== 999 && myNewPos < myOldPos){
       showRankUpModal(myOldPos, myNewPos);
-    } else if(!myOldPos && myNewPos && myNewPos <= 5){
+    } else if(myOldPos === 999 && myNewPos <= 5){
       showRankUpModal(null, myNewPos);
     }
     
-    // 2. Проверка на падение рейтинга (НОВОЕ)
-    if(myOldPos && myNewPos && myNewPos > myOldPos){
-      createRankDownNews(currentUser, myOldPos, myNewPos);
-    }
-    
-    // 3. Проверка на обгон конкретного человека
-    if(myOldPos && myNewPos){
+    // 2. Универсальная проверка обгона в Топ-5 для новости
+    // Нас интересует только если новая или старая позиция затрагивает Топ-5
+    if(myNewPos <= 5 || myOldPos <= 5){
+      var overtakeFound = false;
+      
       for(var j=0; j<sorted.length; j++){
         var them = sorted[j];
         if(them.id === currentUser.id) continue;
         
-        var theirOldPos = prevPositions[them.id];
-        var theirNewPos = newPositions[them.id];
+        var theirOldPos = prevPositions[them.id] || 999;
+        var theirNewPos = newPositions[them.id] || 999;
         
-        if(!theirOldPos || !theirNewPos) continue;
+        // Сценарий А: Я обогнал их (был позади, стал впереди, и у меня строго больше очков)
+        if(myOldPos > theirOldPos && myNewPos <= theirNewPos && currentUser.points > them.points){
+          createOvertakeNews(currentUser, them);
+          overtakeFound = true;
+          break;
+        }
         
-        // УСЛОВИЕ ОБГОНА:
-        if(myOldPos > theirOldPos && myNewPos < theirNewPos && currentUser.points > them.points){
-          // Расширили условие до топ-5, чтобы новости приходили и за пределами топ-3
-          if(myNewPos <= 5 || theirOldPos <= 5){
-            createOvertakeNews(currentUser, them);
-            break; // Гарантируем только одно сообщение за раз
-          }
+        // Сценарий Б: Они обогнали меня (были позади, стали впереди, и у них строго больше очков)
+        if(theirOldPos > myOldPos && theirNewPos <= myNewPos && them.points > currentUser.points){
+          createOvertakeNews(them, currentUser);
+          overtakeFound = true;
+          break;
         }
       }
     }
