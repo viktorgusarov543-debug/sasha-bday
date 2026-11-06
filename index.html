@@ -365,7 +365,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);height:1
 .report-list li b { color: var(--t); font-weight: 500; }
 .real-name { font-size: 0.85rem; color: var(--td); opacity: 0.7; font-style: italic; }
 .report-stat { font-size: 0.8rem; color: var(--ac2); font-weight: 600; background: rgba(255,45,123,.1); padding: 2px 8px; border-radius: 10px; }
-
+.rating-tabs{display:flex;gap:8px;margin-bottom:16px}
+.rating-tab{flex:1;padding:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:var(--td);font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .3s;text-align:center}
+.rating-tab.active{background:linear-gradient(135deg,rgba(255,45,123,.2),rgba(200,80,192,.2));border-color:var(--ac);color:var(--ac2)}
+.rating-tab:hover:not(.active){background:rgba(255,255,255,.1)}
 </style>
 </head>
 <body>
@@ -1114,7 +1117,7 @@ function hitFly(o,tapX,tapY){
   dlog('🎯 hit '+(pts>0?'+':'')+pts);
   if(!currentUser)return;
   try{
-    currentUser.points=Math.max(0,(currentUser.points||0)+pts);
+    currentUser.points=(currentUser.points||0)+pts;
     supaFetch('users?id=eq.'+currentUser.id,'PATCH',{points:currentUser.points}).catch(function(){});
     for(var k=0;k<allUsers.length;k++){
       if(allUsers[k].id===currentUser.id){allUsers[k].points=currentUser.points;break;}
@@ -1239,7 +1242,8 @@ var prevRank=null;
 var allUsers=[];
 var allNews=[];
 var allReserves=[];
-var prevPositions={};
+var prevPositionsBerry={};
+var prevPositionsLoza={};
 
 function openMap(){window.open('https://yandex.ru/maps/?pt=49.025928,55.647778&z=16&l=map','_blank','noopener,noreferrer');}
 function openDetails(){openM('m-details');}
@@ -1783,50 +1787,76 @@ function renderRating(){
 }
 
 function checkRatingChange(){
-  var sorted = allUsers.slice().sort(function(a,b){return (b.points||0)-(a.points||0);});
-  var newPositions = {};
-  for(var i=0; i<sorted.length; i++){ newPositions[sorted[i].id] = i+1; }
+  // Сортировка для Лиги ягод (по убыванию)
+  var sortedBerry = allUsers.slice().sort(function(a,b){return (b.points||0)-(a.points||0);});
+  var newPositionsBerry = {};
+  for(var i=0; i<sortedBerry.length; i++){ newPositionsBerry[sortedBerry[i].id] = i+1; }
+  
+  // Сортировка для Лиги лозы (по возрастанию)
+  var sortedLoza = allUsers.slice().sort(function(a,b){return (a.points||0)-(b.points||0);});
+  var newPositionsLoza = {};
+  for(var i=0; i<sortedLoza.length; i++){ newPositionsLoza[sortedLoza[i].id] = i+1; }
   
   if(currentUser){
-    var myOldPos = prevPositions[currentUser.id] || 999;
-    var myNewPos = newPositions[currentUser.id] || 999;
+    var myOldPosBerry = prevPositionsBerry[currentUser.id];
+    var myNewPosBerry = newPositionsBerry[currentUser.id];
+    var myOldPosLoza = prevPositionsLoza[currentUser.id];
+    var myNewPosLoza = newPositionsLoza[currentUser.id];
     
-    // 1. Показываем модалку подъема (только если я сам поднялся)
-    if(myOldPos !== 999 && myNewPos < myOldPos){
-      showRankUpModal(myOldPos, myNewPos);
-    } else if(myOldPos === 999 && myNewPos <= 5){
-      showRankUpModal(null, myNewPos);
+    // 1. Модалка подъёма в лиге ягод
+    if(myOldPosBerry && myNewPosBerry && myNewPosBerry < myOldPosBerry){
+      showRankUpModal(myOldPosBerry, myNewPosBerry);
+    } else if(!myOldPosBerry && myNewPosBerry && myNewPosBerry <= 5){
+      showRankUpModal(null, myNewPosBerry);
     }
     
-    // 2. Универсальная проверка обгона в Топ-5 для новости
-    // Нас интересует только если новая или старая позиция затрагивает Топ-5
-    if(myNewPos <= 5 || myOldPos <= 5){
-      var overtakeFound = false;
-      
-      for(var j=0; j<sorted.length; j++){
-        var them = sorted[j];
+    // 2. Обгон в Лиге ягод (топ-5)
+    if(myOldPosBerry && myNewPosBerry && (myNewPosBerry <= 5 || myOldPosBerry <= 5)){
+      for(var j=0; j<sortedBerry.length; j++){
+        var them = sortedBerry[j];
         if(them.id === currentUser.id) continue;
+        var theirOldPosBerry = prevPositionsBerry[them.id];
+        var theirNewPosBerry = newPositionsBerry[them.id];
+        if(!theirOldPosBerry || !theirNewPosBerry) continue;
         
-        var theirOldPos = prevPositions[them.id] || 999;
-        var theirNewPos = newPositions[them.id] || 999;
-        
-        // Сценарий А: Я обогнал их (был позади, стал впереди, и у меня строго больше очков)
-        if(myOldPos > theirOldPos && myNewPos <= theirNewPos && currentUser.points > them.points){
+        // Я обогнал их
+        if(myOldPosBerry > theirOldPosBerry && myNewPosBerry < theirNewPosBerry && currentUser.points > them.points){
           createOvertakeNews(currentUser, them);
-          overtakeFound = true;
           break;
         }
-        
-        // Сценарий Б: Они обогнали меня (были позади, стали впереди, и у них строго больше очков)
-        if(theirOldPos > myOldPos && theirNewPos <= myNewPos && them.points > currentUser.points){
+        // Они обогнали меня
+        if(theirOldPosBerry > myOldPosBerry && theirNewPosBerry < myNewPosBerry && them.points > currentUser.points){
           createOvertakeNews(them, currentUser);
-          overtakeFound = true;
+          break;
+        }
+      }
+    }
+    
+    // 3. Обгон в Лиге лозы (топ-5)
+    if(myOldPosLoza && myNewPosLoza && (myNewPosLoza <= 5 || myOldPosLoza <= 5)){
+      for(var j=0; j<sortedLoza.length; j++){
+        var them = sortedLoza[j];
+        if(them.id === currentUser.id) continue;
+        var theirOldPosLoza = prevPositionsLoza[them.id];
+        var theirNewPosLoza = newPositionsLoza[them.id];
+        if(!theirOldPosLoza || !theirNewPosLoza) continue;
+        
+        // Я обогнал их в лиге лозы (поднялся выше, т.е. у меня меньше очков относительно них)
+        if(myOldPosLoza > theirOldPosLoza && myNewPosLoza < theirNewPosLoza && currentUser.points < them.points){
+          createLozaOvertakeNews(currentUser, them);
+          break;
+        }
+        // Они обогнали меня в лиге лозы
+        if(theirOldPosLoza > myOldPosLoza && theirNewPosLoza < myNewPosLoza && them.points < currentUser.points){
+          createLozaOvertakeNews(them, currentUser);
           break;
         }
       }
     }
   }
-  prevPositions = newPositions;
+  
+  prevPositionsBerry = newPositionsBerry;
+  prevPositionsLoza = newPositionsLoza;
 }
 function getVerb(gender){
   if(gender==='female')return'обогнала';
@@ -1844,6 +1874,20 @@ function createOvertakeNews(who,whom){
   supaFetch('news','POST',{date:dateStr,title:title,text:text}).then(function(){
     allNews.unshift({date:dateStr,title:title,text:text});updateHeader();
     sendToTelegram('<b>🏆 Обгон в рейтинге!</b>\n\n<i>'+whoT+'</i> '+verb+' <i>'+whomT+'</i> в ягодном рейтинге! 🍓');
+  }).catch(function(){});
+}
+function createLozaOvertakeNews(who, whom){
+  var dateStr = getDateStr();
+  var title = '🌿 Обгон в Лиге Лозы!';
+  var whoT = escapeTelegram(getFullName(who));
+  var whomT = escapeTelegram(getFullName(whom));
+  var verb = getVerb(who.gender);
+  var text = getFullName(who) + ' ' + verb + ' ' + getFullName(whom) + ' в Лиге Лозы (у кого меньше ягод — тот первый)!';
+  
+  supaFetch('news','POST',{date:dateStr, title:title, text:text}).then(function(){
+    allNews.unshift({date:dateStr, title:title, text:text});
+    updateHeader();
+    sendToTelegram('<b>🌿 Обгон в Лиге Лозы!</b>\n\n<i>' + whoT + '</i> ' + verb + ' <i>' + whomT + '</i>! 🌿\n(У кого меньше ягод — тот выше)');
   }).catch(function(){});
 }
 function createRankDownNews(who, oldPos, newPos){
@@ -2126,38 +2170,74 @@ function openProfile(){
   openM('m-profile');
 }
 
+var currentRatingTab = 'berry'; // 'berry' или 'loza'
+
 function showFullRating(){
-  // Убираем подсказку при первом клике
   var pts = document.getElementById('pts-counter');
   if(pts) pts.classList.remove('hint');
   if(hintTimer){
     clearTimeout(hintTimer);
     hintTimer = null;
   }
-  var list=document.getElementById('ratingFullList');
-  if(!list)return;
-  var sorted=allUsers.slice().sort(function(a,b){return (b.points||0)-(a.points||0);});
-  if(sorted.length===0){
-    list.innerHTML='<div style="text-align:center;color:var(--td);padding:20px">Пока никто не ловил ягоды 🫐</div>';
-    openM('m-rating');
-    return;
-  }
-  var html='';
-  var medals=['🥇','🥈','🥉'];
-  for(var i=0;i<sorted.length;i++){
-    var u=sorted[i];
-    var isMe=currentUser&&u.id===currentUser.id;
-    var pos=i<3?medals[i]:(i+1);
-    html+='<div class="rating-full-item'+(isMe?' me':'')+'">';
-    html+='<span class="rating-full-pos">'+pos+'</span>';
-    html+='<span class="rating-full-name">'+getFullName(u)+'</span>';
-    html+='<span class="rating-full-pts">🍓 '+(u.points||0)+'</span>';
-    html+='</div>';
-  }
-  list.innerHTML=html;
+  renderRatingTab();
   openM('m-rating');
 }
 
+function renderRatingTab(){
+  var list = document.getElementById('ratingFullList');
+  if(!list) return;
+  
+  var tabsHtml = '<div class="rating-tabs">' +
+    '<button class="rating-tab' + (currentRatingTab==='berry' ? ' active' : '') + '" onclick="switchRatingTab(\'berry\')">🍓 Лига ягод</button>' +
+    '<button class="rating-tab' + (currentRatingTab==='loza' ? ' active' : '') + '" onclick="switchRatingTab(\'loza\')">🌿 Лига лозы</button>' +
+    '</div>';
+  
+  var sorted = allUsers.slice().sort(function(a,b){return (b.points||0)-(a.points||0);});
+  
+  if(sorted.length === 0){
+    list.innerHTML = tabsHtml + '<div style="text-align:center;color:var(--td);padding:20px">Пока никто не ловил ягоды 🫐</div>';
+    return;
+  }
+  
+  var html = tabsHtml;
+  
+  if(currentRatingTab === 'berry'){
+    // Лига ягод: по убыванию (как было)
+    var medals = ['🥇','🥈','🥉'];
+    for(var i=0; i<sorted.length; i++){
+      var u = sorted[i];
+      var isMe = currentUser && u.id === currentUser.id;
+      var pos = i<3 ? medals[i] : (i+1);
+      html += '<div class="rating-full-item' + (isMe ? ' me' : '') + '">';
+      html += '<span class="rating-full-pos">' + pos + '</span>';
+      html += '<span class="rating-full-name">' + getFullName(u) + '</span>';
+      html += '<span class="rating-full-pts">🍓 ' + (u.points||0) + '</span>';
+      html += '</div>';
+    }
+  } else {
+    // Лига лозы: по возрастанию (кто меньше набрал — тот первый)
+    var sortedLoza = allUsers.slice().sort(function(a,b){return (a.points||0)-(b.points||0);});
+    var medalsLoza = ['🌿','🥈','🥉'];
+    for(var i=0; i<sortedLoza.length; i++){
+      var u = sortedLoza[i];
+      var isMe = currentUser && u.id === currentUser.id;
+      var pos = i===0 ? '🌿' : (i<3 ? medalsLoza[i] : (i+1));
+      var ptsColor = (u.points||0) < 0 ? '#ff5c5c' : 'var(--ac2)';
+      html += '<div class="rating-full-item' + (isMe ? ' me' : '') + '">';
+      html += '<span class="rating-full-pos">' + pos + '</span>';
+      html += '<span class="rating-full-name">' + getFullName(u) + '</span>';
+      html += '<span class="rating-full-pts" style="color:' + ptsColor + '">🌿 ' + (u.points||0) + '</span>';
+      html += '</div>';
+    }
+  }
+  
+  list.innerHTML = html;
+}
+
+function switchRatingTab(tab){
+  currentRatingTab = tab;
+  renderRatingTab();
+}
 function fillFormFromUser(user){
   document.getElementById('f-id').value=user.identifier;
   document.getElementById('f-pwd').value=user.pwd||'';
@@ -2654,8 +2734,12 @@ loadAllData(function(){
     }
   }
   var sorted=allUsers.slice().sort(function(a,b){return (b.points||0)-(a.points||0);});
-  prevPositions={};
-  for(var i=0;i<sorted.length;i++)prevPositions[sorted[i].id]=i+1;
+  prevPositionsBerry={};
+  prevPositionsLoza={};
+  var sortedBerryInit=allUsers.slice().sort(function(a,b){return (b.points||0)-(a.points||0);});
+  var sortedLozaInit=allUsers.slice().sort(function(a,b){return (a.points||0)-(b.points||0);});
+  for(var i=0;i<sortedBerryInit.length;i++)prevPositionsBerry[sortedBerryInit[i].id]=i+1;
+  for(var i=0;i<sortedLozaInit.length;i++)prevPositionsLoza[sortedLozaInit[i].id]=i+1;
   updateHeader();
   if(urlParams.get('report')==='ягодный')showReport();
 });
